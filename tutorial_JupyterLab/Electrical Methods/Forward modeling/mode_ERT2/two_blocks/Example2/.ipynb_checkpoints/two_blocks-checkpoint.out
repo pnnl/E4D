@@ -1,0 +1,6 @@
+1		dp_flag = 1 to print simulated data
+two_blocks.dpd	name of simulated data file
+1		number of potential distributions to construct
+1449		index of potential distribution to print
+0
+'ASCII'

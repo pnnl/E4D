@@ -1,0 +1,11 @@
+1
+tst.cfg
+
+
+2			run mode
+two_blocks.1.node    	mesh configuration file name
+two_blocks.srv	  	survey file
+two_blocks.sig  	conductivity file
+two_blocks.out		output options file
+
+	

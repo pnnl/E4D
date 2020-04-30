@@ -1,0 +1,48 @@
+3                       # of constraint blocks, this file implements 
+
+1                       zone # this block constrains              
+2  1.0 1.0 1.0          s_met wx wy wz 
+1  10.0 .01             fw mn sd     
+1 2               	n_links l1
+0.0                     v_ref
+1.0                     w_rel
+
+2                       zone #              
+2  1.0 1.0 1.0          s_met wx wy wz 
+1 10 0.01               fw mn sd 
+0                	n_links l1
+0.0                   	v_ref
+1.0                     w_rel	
+
+1                       zone #              
+3  1.0 1.0 1.0          s_met wx wy wz
+1 0 .1                  fw mn sd
+0 2                     n_links l1
+-6.22                   v_ref
+2                       w_rel
+
+100 0.25 0.5		beta min_red beta_red
+1.0 	 		chi_targ
+30 50			miniter maxiter
+0.00001 1.0		minsig maxsig
+2			up_opt
+1 3.0                   cflag cdev
+
+
+Notes: This inversion options file implements and Occam's type inversion 
+by specifying similarity constraints between neighboring elements 
+(structural metric 2) that are not removed unless the difference 
+between neighbors is extreme. That is, the weight on the similarity
+constraints will not be reduced unless the absoluted difference
+in log conductivity between neighbors exceeds 10, as specified 
+by the weighting function. Zone 1 is linked to zone 2, which specifies
+that similarity constraints should be applied between at the zone 1/zone 2
+boundary. Since zone 1 is linked to zone 2, it is not necessary to link
+zone 2 to zone 1. Hence zone 2 is not linked to another zone.  
+
+The third constraint block implements a minimum conductivity constraint. 
+Weighting function 1 turns the constraint on if the value of the 
+structural metric drops below zeros, which occurs if the conductivity
+drops below the reference value of -6.22 (i.e. log(.002)). When
+the constriant is turned on the inversion minimizes the structural
+metric by moving the conductivity toward the reference value.   

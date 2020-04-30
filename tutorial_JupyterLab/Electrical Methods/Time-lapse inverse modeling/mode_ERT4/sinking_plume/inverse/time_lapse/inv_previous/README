@@ -1,0 +1,8 @@
+To the view these results in ViSiT through script.py,
+first the file tl_sp.h5 and tl_sp.xmf need to be created.
+
+To do this, type at the command line:
+
+> px -f ../../mesh/sp tl_fileList.txt tl_sp
+
+

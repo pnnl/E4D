@@ -1,0 +1,41 @@
+ ************************ WELCOME TO E4D ************************
+ Copyright © 2014, Battelle Memorial Institute
+ All rights reserved.
+ Current date:  April 28, 2020
+ Current time:  16:05:13
+ Running on 0000020 processing cores
+ ****************************************************************
+
+ ***************** RUNNING IN ERT FORWARD MODE ******************
+  Mode:                             002
+  Mesh file:                        sp.1.ele
+  Survey configuration file:        sp.srv
+  Conductivity file:                sig_9.0.sig
+  Output options file:              sp.out
+
+  SURVEY FILE SUMMARY
+  Number of electrodes:             0000048
+  Number of measurements:           0002070
+
+  CONDUCTIVITY FILE SUMMARY 
+  Number of conductivity values:    0000517718
+
+  MESH SUMMARY
+  Number of nodes:                  0000084073
+  Number of metallic boundaries:    0000000000
+  Number of elements:               0000517718
+  Number of zones:                  0000000002
+
+  LOAD SUMMARY
+  Max # of pole soln's per core:    0000000003
+  Max # of data rows per core:      0000000109
+  Min # of pole soln's per core:    0000000002
+  Min # of data rows per core:      0000000108
+
+  WRITING POTENTIAL FILES
+  There was a problem Jacobian matrix output option:            0  in: sp.out
+  Not printing the Jacobian matrix.
+
+  WRITING SIMULATED SURVEY FILE: sig_9.0.sig.srv
+
+  Forward run complete.

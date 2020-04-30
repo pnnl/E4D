@@ -1,0 +1,7 @@
+3			run mode
+mbsl_inv.1.node		mesh node file name
+mbsl_dipping_plane.srv	survey file name
+0.001 		conductivity file name
+mbsl.out         	output file name
+mbsl_1.inv
+none

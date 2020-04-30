@@ -1,0 +1,22 @@
+2                       # of constraint blocks, this file implements nn reg
+
+1                       zone #              
+8  1.0 1.0 1.0          Structural metric, x,y,z weight, spatial difference of temporal differences
+1  10.0 .15             Weighting function mean spread, large mean to impose smoothness constraints
+1 2                     # zone links, zone links 
+'ref'                   use reference model specified in e4d.inp as reference
+1                     	relative weight
+
+2                       zone #              
+8  1.0 1.0 1.0          Structural metric, x,y,z weight
+1 10 .15              	Weighting function mean spread     
+0                	# zone links, zone links (already linked to zone 1)
+'ref'                   use reference model specified in e4d.inp as reference
+1                    	relative weight
+
+50 0.05 0.5		start beta at 50, decreate of obj. func. changes by less than 5%, decrease by 50%
+1.0			target chi_squared value
+30 50			min, max number of inner iterations
+0.00001 1.0		min, max allowable conductivity
+2			up_opt, no line search on beta, reduce as needed
+1 3.0			use data culling, if the weighted residual >=3.0 deviations from the mean

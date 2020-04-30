@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="2.0">
+<Domain>
+<Grid Name="TimeSeries" GridType="Collection" CollectionType="Temporal">
+  <Time TimeType="Single" Value="0"/>
+  <Grid Name = "1">
+    <Topology TopologyType="Tetrahedron" NumberOfElements="51422">
+      <DataItem Dimensions="51422 4" Format="HDF">
+      tank.h5:/Mesh/Time 0 Zone 1
+      </DataItem>
+    </Topology>
+
+  <Geometry GeometryType="XYZ">
+    <DataItem Dimensions= "11952 3" Format="HDF">
+    tank.h5:/Mesh/Nodes
+    </DataItem>
+  </Geometry>
+
+    <Attribute Name="Real_conductivity" Center="Cell">
+      <DataItem Dimensions="51422" Format="HDF">
+      tank.h5:/Mesh/Time 0 RealSig 1
+      </DataItem>
+    </Attribute>
+
+</Grid>
+</Grid>
+</Domain>
+</Xdmf>

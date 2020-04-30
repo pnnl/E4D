@@ -1,0 +1,141 @@
+ ************************ WELCOME TO E4D ************************
+ Copyright © 2014, Battelle Memorial Institute
+ All rights reserved.
+ Current date:  April 28, 2020
+ Current time:  10:44:17
+ Running on 0000020 processing cores
+ ****************************************************************
+
+ **************** RUNNING IN ERT INVERSION MODE *****************
+  Mode:                             003
+  Mesh file:                        sp.1.node
+  Survey configuration file:        baseline.sig.srv
+  Starting conductivity file:       0.002
+  Output options file:              sp.out
+  Inverse options file:             sp.inv
+  Reference model file:             none
+
+  SURVEY FILE SUMMARY
+  Number of electrodes:             0000048
+  Number of measurements:           0002070
+
+  MESH SUMMARY
+  Number of nodes:                  0000016686
+  Number of metallic boundaries:    0000000000
+  Number of elements:               0000094675
+  Number of zones:                  0000000002
+
+  LOAD SUMMARY
+  Max # of pole soln's per core:    0000000003
+  Max # of data rows per core:      0000000109
+  Min # of pole soln's per core:    0000000002
+  Min # of data rows per core:      0000000108
+
+  INVERSION OPTIONS 
+  Inversion options file:           sp.inv
+  Number of constraint blocks:      002
+
+            CONSTRAINT BLOCK:          1
+                 Zone Number:          1
+            Structure Metric:          2
+        Reweighting Function:          1
+   Reweighting Mean, St.Dev.:          10.00    0.1500E-01
+        Number of Zone Links:          1
+              Linked to Zone:          2
+             Relative Weight:          1.000    
+
+            CONSTRAINT BLOCK:          2
+                 Zone Number:          2
+            Structure Metric:          2
+        Reweighting Function:          1
+   Reweighting Mean, St.Dev.:          10.00    0.3000E-01
+        Number of Zone Links:          0
+             Relative Weight:          1.000    
+
+         Starting beta value:          500.0    
+ Minimum objective reduction:          0.2000    
+    Beta reduction parameter:          0.5000    
+    Target chi-squared value:          1.000    
+  Minimum # inner iterations:         30
+  Maximum # inner iterations:         50
+        Maximum conductivity:           1.000    
+        Minimum conductivity:          0.1000E-04
+               Update option:          No line search
+  Data culling st. deviation:          3.000    
+
+ ********** CONVERGENCE STATISTICS AT STARTING MODEL *******************
+    Phi_dat        Phi_Mod     Phi_Mod/Beta      Phi_Tot    
+    0.12866E+06     0.0000         0.0000        0.12866E+06
+
+ Total Number of Constraint Eqs: 0000366534
+ Block     # Constraints     % of Total Error     Error per Constraint
+     1            239174           0.0000                   0.0000    
+     2            127360           0.0000                   0.0000    
+
+ Chi2 is currently  62.15       Target value is 1.0000    
+ Mean error is -1.022    
+ RMS error is  7.884    
+ Number of data culled is 0000000
+ Prior to data culling ...
+    Chi2 is  62.15    
+    Mean error is -1.022    
+    RMS error is  7.884    
+ ***********************************************************************
+
+ ********** CONVERGENCE STATISTICS AFTER INVERSE UPDATE # 001 **********
+    Phi_dat        Phi_Mod     Phi_Mod/Beta      Phi_Tot    
+     5864.9         22161.         44.322         28026.    
+
+ Total Number of Constraint Eqs: 0000366534
+ Block     # Constraints     % of Total Error     Error per Constraint
+     1            239174           67.219                  0.85629E-02
+     2            127360           32.781                  0.78421E-02
+
+ Chi2 is currently  2.876       Target value is 1.0000    
+ Mean error is -.1872    
+ RMS error is  1.696    
+ Number of data culled is 0000031
+ Prior to data culling ...
+    Chi2 is  9.071    
+    Mean error is 0.9738E-01
+    RMS error is  3.012    
+ ***********************************************************************
+Decrease in objective function is: 0.7822    
+Decrease in objective function is sufficient to continue at beta =  500.0    
+
+ ********** CONVERGENCE STATISTICS AFTER INVERSE UPDATE # 002 **********
+    Phi_dat        Phi_Mod     Phi_Mod/Beta      Phi_Tot    
+     839.57         1126.6         2.2531         1966.1    
+
+ Total Number of Constraint Eqs: 0000366534
+ Block     # Constraints     % of Total Error     Error per Constraint
+     1            239174           59.503                  0.16460E-02
+     2            127360           40.497                  0.21037E-02
+
+ Chi2 is currently 0.4101       Target value is 1.0000    
+ Mean error is -.8696    
+ RMS error is 0.6404    
+ Number of data culled is 0000023
+ Prior to data culling ...
+    Chi2 is 0.4949    
+    Mean error is -.8632    
+    RMS error is 0.7035    
+ ***********************************************************************
+Decrease in objective function is: 0.9298    
+Decrease in objective function is sufficient to continue at beta =  500.0    
+ SOLUTION CONVERGED
+ _____________ADJUSTING FINAL SOLUTION FOR TIME_________________
+
+ ********** FINAL SOLUTION ADJUSTMENT **************
+        Phi_dat        Phi_Mod   Phi_Mod/Beta        Phi_Tot
+        896.778       2911.858          5.824       3808.636
+ Chi2 is currently  0.439812481     Target value is    1.00000000    
+ Mean error is  -0.710489750    
+ RMS error is    1.13077784    
+ Number of data culled is           31
+ PRIOR TO DATA CULLING
+ Phi_dat is    2061.93579    
+ Chi2 is   0.996104240    
+ Mean error is  -0.631703496    
+ RMS error is    1.12227869    
+ ********************************************************

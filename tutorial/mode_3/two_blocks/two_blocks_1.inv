@@ -1,0 +1,49 @@
+4                       # of constraint blocks, this file implements 
+
+1                       constraint zone 1              
+2  1.0 1.0 1.0          structural metric 2 (wx wy wz ignored) 
+1  10.0 .01             weight func. 1 with mean of 10 and small s.d.      
+1 2 3 4               	one link to zone 2
+0.0                     reference value (not used)
+1.0                     relative weight
+
+
+2                       constraint zone 1              
+2  1.0 1.0 1.0          structural metric 2 (wx wy wz ignored) 
+1  10.0 .01             weight func. 1 with mean of 10 and small s.d.      
+0 2               	one link to zone 2
+0.0                     reference value (not used)
+1.0                     relative weight
+
+3                       constraint zone 1              
+2  1.0 1.0 1.0          structural metric 2 (wx wy wz ignored) 
+1  10.0 .01             weight func. 1 with mean of 10 and small s.d.      
+0 2               	one link to zone 2
+0.0                     reference value (not used)
+1.0                     relative weight
+
+4
+2  1.0 1.0 1.0          structural metric 2 (wx wy wz ignored) 
+1  10.0 .01             weight func. 1 with mean of 10 and small s.d.      
+0 2               	one link to zone 2
+0.0                     reference value (not used)
+1.0                     relative weight
+
+100 0.25 0.5		beta min_red beta_red
+1.0 	 		chi_targ
+30 50			miniter maxiter
+0.00001 1.0		minsig maxsig
+2			up_opt
+1 3.0                   cflag cdev
+
+
+Notes: This inversion options file implements and Occam's type inversion 
+by specifying similarity constraints between neighboring elements 
+(structural metric 2) that are not removed unless the difference 
+between neighbors is extreme. That is, the weight on the similarity
+constraints will not be reduced unless the absoluted difference
+in log conductivity between neighbors exceeds 10, as specified 
+by the weighting function. Zone 1 is linked to zone 2, which specifies
+that similarity constraints should be applied between at the zone 1/zone 2
+boundary. Since zone 1 is linked to zone 2, it is not necessary to link
+zone 2 to zone 1. Hence zone 2 is not linked to another zone.  

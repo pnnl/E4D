@@ -1,0 +1,16 @@
+This tutorial compliments the online E4D user guide and presents the user with examples to begin working with E4D.  The online E4D user guide contains complete information regarding files, file structure and running the code.
+
+Subdirectories are organized by task:
+Mesh Generatation
+Forward Modeling
+Inverse Modeling
+Time-lapse Inverse Modeling
+Each subdirectory contains folders with examples associated with each run mode.  To review E4D run modes, see the document E4D Run Modes.odt
+
+Interactive jupyter lab notebook tutorials (.ipynb) can be found within each example directory.  These use the files within the directory to take the user through each example.
+
+Instruction for installing Jupyter Notebook / Lab can be found at:
+https://jupyter.org/install
+
+
+

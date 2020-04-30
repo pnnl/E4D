@@ -1,0 +1,7 @@
+ERT3			run mode
+sp.1.node		mesh node file
+baseline.sig.srv	baseline survey file
+0.002			starting conductivity file
+sp.out			output options file
+sp.inv			inversion options file
+none			reference model file (not used)

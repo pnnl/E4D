@@ -1,0 +1,31 @@
+This tutorial compliments the online E4D user guide and presents the user with examples to begin working with E4D.  The online E4D user guide contains complete information regarding files, file structure and running the code.
+
+Main subdirectories are organized by the geophysical Method(s)
+Electrical Methods (applicable for ERT and SIP)
+Travel-time tomography (applicable for GPR and Seismic)
+
+
+Subdirectories are organized by task:
+Mesh Generatation
+Forward Modeling
+Inverse Modeling
+Time-lapse Inverse Modeling
+Each subdirectory contains folders with examples associated with each run mode.  To review E4D run modes, see:
+1) Electrical Methods/E4D Electrical Run Modes.odt
+2) Travel-time Tomography/E4D TT Run Modes.odt
+
+Interactive jupyter lab notebook tutorials (.ipynb) can be found within each example directory.  
+These use the files within the directory to take the user through each example.
+
+If you wish to revert back to a state before the tutorial jupyter lab script was executed, a script named clear_files.ipynb is within each directory. Run this script to clear the generated files. 
+
+Instruction for installing Jupyter Notebook / Lab can be found at:
+https://jupyter.org/install
+
+
+Visualizations are provided through the visualization program, ViSit (https://wci.llnl.gov/simulation/computer-codes/visit/).  
+To run visualizations within the tutorial, the full pathname of ViSit must be entered in the file
+Visit_fullpathname.
+
+
+

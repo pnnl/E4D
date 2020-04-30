@@ -1,0 +1,43 @@
+                F3D TIMING LOG    
+
+  Setup time:   0.199074984      seconds
+
+ ____________________________________________________________________________
+ ITERATION:            0
+ Minimum A-matrix build time:   0.222473979      seconds on slave :           2
+ Maximum A-matrix build time:   0.322278023      seconds on slave :          16
+ Minimum forward run time   :   0.243586957      seconds on slave :           2
+ Maximum forward run time   :   0.740957975      seconds on slave :          19
+ ____________________________________________________________________________
+ ____________________________________________________________________________
+ ITERATION:            1
+ Minimum Jacobian build time:    2.10589385      seconds on slave :           2
+ Maximum Jacobian build time:    2.32625389      seconds on slave :          12
+ Parallel inversion time    :   1.12100899      seconds
+ Minimum A-matrix build time:   0.157691956      seconds on slave :           1
+ Maximum A-matrix build time:   0.337570190      seconds on slave :          16
+ Minimum forward run time   :   0.229885101      seconds on slave :           1
+ Maximum forward run time   :   0.416830063      seconds on slave :          19
+ Data assembly time         :   9.11688805E-03  seconds
+ ____________________________________________________________________________
+ ____________________________________________________________________________
+ ITERATION:            2
+ Minimum Jacobian build time:    2.07137871      seconds on slave :           1
+ Maximum Jacobian build time:    2.28813362      seconds on slave :           6
+ Parallel inversion time    :   1.40809298      seconds
+ Minimum A-matrix build time:   0.139030457      seconds on slave :          11
+ Maximum A-matrix build time:   0.331775665      seconds on slave :          12
+ Minimum forward run time   :   0.204208374      seconds on slave :           5
+ Maximum forward run time   :   0.472957611      seconds on slave :          17
+ Data assembly time         :   5.40542603E-03  seconds
+ ____________________________________________________________________________
+ Minimum A-matrix build time:   0.151409149      seconds on slave :          11
+ Maximum A-matrix build time:   0.356876373      seconds on slave :          13
+ Minimum KSP build time     :    3.43322754E-05  seconds on slave :          16
+ Maximum KSP build time     :    6.86645508E-05  seconds on slave :          15
+ Minimum forward run time   :   0.218814850      seconds on slave :           4
+ Maximum forward run time   :   0.504722595      seconds on slave :          10
+ Data assembly time         :   8.91017914E-03  seconds
+
+ ____________________________________________________________________________
+ TOTAL RUN TIME             :    4.28141212      seconds

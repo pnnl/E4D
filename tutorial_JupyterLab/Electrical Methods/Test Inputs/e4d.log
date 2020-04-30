@@ -1,0 +1,81 @@
+ ************************ WELCOME TO E4D ************************
+ Copyright © 2014, Battelle Memorial Institute
+ All rights reserved.
+ Current date:  October 01, 2019
+ Current time:  13:11:18
+ Running on 0000001 processing cores
+ ****************************************************************
+
+ ****************** RUNNING IN INPUT TEST MODE ******************
+  Mode:                             000
+  Mesh file:                        two_blocks.1.ele
+  Survey configuration file:        two_blocks.srv
+  Starting conductivity file:       two_blocks.sig
+  Output options file:              two_blocks.out
+  Inverse options file:             two_blocks_1.inv
+  Reference model file:             none
+ There was no time-lapse survey file name specified and/or 
+ reference model update option in e4d.inp.
+
+  SURVEY FILE SUMMARY
+  Number of electrodes:             0000048
+  Number of measurements:           0002070
+
+  CONDUCTIVITY FILE SUMMARY 
+  Number of conductivity values:    0000105040
+
+  INVERSION OPTIONS 
+  Inversion options file:           two_blocks_1.inv
+  Number of constraint blocks:      004
+
+            CONSTRAINT BLOCK:          1
+                 Zone Number:          1
+            Structure Metric:          2
+        Reweighting Function:          1
+   Reweighting Mean, St.Dev.:          10.00    0.1000E-01
+        Number of Zone Links:          1
+              Linked to Zone:          2
+             Relative Weight:          1.000    
+
+            CONSTRAINT BLOCK:          2
+                 Zone Number:          2
+            Structure Metric:          2
+        Reweighting Function:          1
+   Reweighting Mean, St.Dev.:          10.00    0.1000E-01
+        Number of Zone Links:          0
+             Relative Weight:          1.000    
+
+            CONSTRAINT BLOCK:          3
+                 Zone Number:          3
+            Structure Metric:          2
+        Reweighting Function:          1
+   Reweighting Mean, St.Dev.:          10.00    0.1000E-01
+        Number of Zone Links:          0
+             Relative Weight:          1.000    
+
+            CONSTRAINT BLOCK:          4
+                 Zone Number:          4
+            Structure Metric:          2
+        Reweighting Function:          1
+   Reweighting Mean, St.Dev.:          10.00    0.1000E-01
+        Number of Zone Links:          0
+             Relative Weight:          1.000    
+ Reference model not used in inversion options file.
+ The validity of this entry in e4d.inp was not checked.
+
+         Starting beta value:          100.0    
+ Minimum objective reduction:          0.2500    
+    Beta reduction parameter:          0.5000    
+    Target chi-squared value:          1.000    
+  Minimum # inner iterations:         30
+  Maximum # inner iterations:         50
+        Maximum conductivity:           1.000    
+        Minimum conductivity:          0.1000E-04
+               Update option:          No line search
+  Data culling st. deviation:          3.000    
+ 
+ ******************* TEST RUN RESULTS *******************
+ 
+   The files entered in e4d.inp passed validity checks.
+ 
+ ********************************************************

@@ -1,0 +1,12 @@
+ert0			run mode
+two_blocks.1.ele	mesh configuration file name
+two_blocks.srv	  	survey file
+two_blocks.sig 		   	conductivity file
+two_blocks.out		output options file
+two_blocks_1.inv	inverse options file
+none		        reference model
+
+
+
+
+	

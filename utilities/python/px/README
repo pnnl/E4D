@@ -1,0 +1,55 @@
+Creating visualization of e4d files to view in ViSit or ParaView
+
+INCLUDED PYTHON FILES
+px.py - this is the main module that creates xmf and h5 files  
+input_validation.py - input_validation related to command line input
+h5_outputs.py - initialization of the h5 file
+utils - determines files to be added and type of files in command line input
+xdmf_outputs - establishes the xdmf text for output
+
+
+INPUT VARIABLES
+px must be given four input variables
+	1) mode must be one of the following
+		-f : creates a new file
+		-af: updates an existing file
+	2) meshprefix:  The name of the mesh without any .1 afterwards
+	3) visualizationFiles:  
+		The commmand line input variable "visualization files" can contain:
+		1) a single e4d conductivity file 
+		2) a single e4d complex conductivity file
+		3) a single e4d potential file
+		4) a single e4d complex potential file
+
+		It can also contain a text file which contains a list and associated timestamps of all files to be added to the visualization:
+		5) conductivity files
+		6) complex conductivity files
+		7) potential files
+		8) complex potential files
+
+		The format of the text file is as follows:
+		numfiles
+		filename1	timestamp1
+		filename2	timestamp2
+
+		If a filename is not found in the list of text files, the visualization will proceed but leave out the non-existent file.
+	4) output file prefix: This is the beginning of the filename to have the extension of .h5 and .xmf
+	5) time stamp (Optional): a designation for the file in the visualization file, default=0
+
+HOW TO EXECUTE
+	1) If python is already installed, type the follwing at the command line:
+	
+	> python px -f or -af meshprefix visualizationFiles outputfileprefix timeStamp(optional)
+
+	2) **Recommended** If python is not installed, px will need to be compiled by typing the following at the command line:
+	
+	>sudo pip install pyinstaller
+	>pyinstaller -D -F -n px -c "px.py"
+
+	
+	Two subdirectories called 'build' and 'dist' will be created within the directory you did the compilation. The executable is contained in the 'dist' folder. Add this directory to your path or move the executable px to a directory within your path.
+	This can now be run at the command line with:
+
+	>px -f or -af meshprefix visualizationFiles outputfileprefix timeStamp (optional)
+
+

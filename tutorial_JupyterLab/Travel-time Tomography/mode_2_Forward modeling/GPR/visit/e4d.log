@@ -1,0 +1,14 @@
+ ************************ WELCOME TO E4D ************************
+ Copyright © 2014, Battelle Memorial Institute
+ All rights reserved.
+ Current date:  October 21, 2019
+ Current time:  14:59:50
+ Running on 0000001 processing cores
+ ****************************************************************
+
+ ************* RUNNING IN MESH GENERATION MODE (ERT) ************
+  Mode:                             001
+  Mesh configuration file:          bcd.cfg
+
+  Cannot find the mesh configuration file: bcd.cfg
+  Aborting ...

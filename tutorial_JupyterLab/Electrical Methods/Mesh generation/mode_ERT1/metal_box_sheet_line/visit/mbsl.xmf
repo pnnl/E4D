@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="2.0">
+<Domain>
+<Grid Name="TimeSeries" GridType="Collection" CollectionType="Temporal">
+<Grid Name = "mesh" GridType="Collection" CollectionType="Spatial">
+
+  <Time TimeType="Single" Value="0"/>
+  <Grid Name = "1">
+    <Topology TopologyType="Tetrahedron" NumberOfElements="62424">
+      <DataItem Dimensions="62424 4" Format="HDF">
+      mbsl.h5:/Mesh/Time 0 Zone 1
+      </DataItem>
+    </Topology>
+
+  <Geometry GeometryType="XYZ">
+    <DataItem Dimensions= "17012 3" Format="HDF">
+    mbsl.h5:/Mesh/Nodes
+    </DataItem>
+  </Geometry>
+
+    <Attribute Name="Real_conductivity" Center="Cell">
+      <DataItem Dimensions="62424" Format="HDF">
+      mbsl.h5:/Mesh/Time 0 RealSig 1
+      </DataItem>
+    </Attribute>
+
+</Grid>
+  <Grid Name = "2">
+    <Topology TopologyType="Tetrahedron" NumberOfElements="33845">
+      <DataItem Dimensions="33845 4" Format="HDF">
+      mbsl.h5:/Mesh/Time 0 Zone 2
+      </DataItem>
+    </Topology>
+
+  <Geometry GeometryType="XYZ">
+    <DataItem Dimensions= "17012 3" Format="HDF">
+    mbsl.h5:/Mesh/Nodes
+    </DataItem>
+  </Geometry>
+
+    <Attribute Name="Real_conductivity" Center="Cell">
+      <DataItem Dimensions="33845" Format="HDF">
+      mbsl.h5:/Mesh/Time 0 RealSig 2
+      </DataItem>
+    </Attribute>
+
+</Grid>
+</Grid>
+</Grid>
+</Domain>
+</Xdmf>

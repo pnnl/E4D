@@ -1,0 +1,22 @@
+2                       # of constraint blocks, this file implements nn reg
+
+1                       zone #              
+2  1.0 1.0 1.0          Structural metric, x,y,z weight
+1  5.0 .05              Weighting function mean spread     
+1 2               	# zone links, zone links 
+0                       reference value
+1                       relative weight
+
+2                       zone #              
+2  1.0 1.0 1.0          Structural metric, x,y,z weight
+1 5.0 .01               Weighting function mean spread     
+0 2                     # zone links, zone links 
+0                       reference value
+1                       relative weight
+
+100 0.25 0.5
+1.0
+30 50
+0.00001 1.0
+2
+1 3.0

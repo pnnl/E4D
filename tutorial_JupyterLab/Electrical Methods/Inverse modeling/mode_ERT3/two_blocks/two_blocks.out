@@ -1,0 +1,7 @@
+1			dp_flag = 1 to print simulated data file
+two_blocks.dpd		dp_file (name of simulated data file)
+0			number of potential distribution files to construct
+
+	   
+ 
+

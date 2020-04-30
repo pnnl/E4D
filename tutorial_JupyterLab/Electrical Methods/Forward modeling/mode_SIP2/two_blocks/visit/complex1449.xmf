@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="2.0">
+<Domain>
+<Grid Name="TimeSeries" GridType="Collection" CollectionType="Temporal">
+  <Time TimeType="Single" Value="0"/>
+<Grid Name = "mesh" GridType="Collection" CollectionType="Spatial">
+
+  <Time TimeType="Single" Value="0"/>
+  <Grid Name = "0">
+    <Topology TopologyType="Tetrahedron" NumberOfElements="105040">
+      <DataItem Dimensions="105040 4" Format="HDF">
+      complex1449.h5:/Mesh/Elements
+      </DataItem>
+    </Topology>
+
+  <Geometry GeometryType="XYZ">
+    <DataItem Dimensions= "18387 3" Format="HDF">
+    complex1449.h5:/Mesh/Nodes
+    </DataItem>
+  </Geometry>
+
+    <Attribute Name="Real_potential" Center="Node">
+      <DataItem Dimensions="18387" Format="HDF">
+      complex1449.h5:/Mesh/Time 0 RealPotentials
+      </DataItem>
+    </Attribute>
+
+    <Attribute Name="Imag_potential" Center="Node">
+      <DataItem Dimensions="18387" Format="HDF">
+      complex1449.h5:/Mesh/Time 0 ImagPotentials
+      </DataItem>
+    </Attribute>
+
+</Grid>
+</Grid>
+</Grid>
+</Domain>
+</Xdmf>

@@ -1,0 +1,7 @@
+1			dp_flag = 1 to print simulated data file
+mbsl.dpd		dp_file (name of simulated data file)
+1			number of potential distribution files to construct
+1415	                index of measurement (see survey file mbsl.srv)
+	   
+ 
+

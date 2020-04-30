@@ -1,0 +1,10 @@
+3
+two_blocks.1.node cfg run mode
+two_blocks.srv             survey file name
+'average'                  start with the average apparent conductivity 
+two_blocks.out             output options file
+two_blocks_1.inv           inverse options file
+none                       reference model file 
+
+Notes: The mesh files and survey file are created as described 
+in the Overview section. 

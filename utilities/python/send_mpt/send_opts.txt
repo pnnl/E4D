@@ -1,0 +1,3 @@
+2D_CELL_FAST
+dtn2.pnl.gov
+/pic/projects/geophys/lab_day/real_time

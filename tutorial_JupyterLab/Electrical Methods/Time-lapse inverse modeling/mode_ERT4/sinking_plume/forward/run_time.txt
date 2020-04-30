@@ -1,0 +1,13 @@
+                F3D TIMING LOG    
+
+  Setup time:    1.26021004      seconds
+
+ ____________________________________________________________________________
+ ITERATION:            0
+ Minimum A-matrix build time:    1.28469086      seconds on slave :          15
+ Maximum A-matrix build time:    2.19106388      seconds on slave :          12
+ Minimum forward run time   :    6.85721588      seconds on slave :           3
+ Maximum forward run time   :    12.3944569      seconds on slave :          13
+
+ ____________________________________________________________________________
+ TOTAL RUN TIME             :    1.27739501      seconds

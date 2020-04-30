@@ -1,0 +1,116 @@
+<?xml version="1.0" ?>
+<!DOCTYPE Xdmf SYSTEM "Xdmf.dtd" []>
+<Xdmf Version="2.0">
+<Domain>
+<Grid Name="TimeSeries" GridType="Collection" CollectionType="Temporal">
+<Grid Name = "mesh" GridType="Collection" CollectionType="Spatial">
+
+  <Time TimeType="Single" Value="0"/>
+  <Grid Name = "1">
+    <Topology TopologyType="Tetrahedron" NumberOfElements="66948">
+      <DataItem Dimensions="66948 4" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 Zone 1
+      </DataItem>
+    </Topology>
+
+  <Geometry GeometryType="XYZ">
+    <DataItem Dimensions= "18387 3" Format="HDF">
+    two_blocks.h5:/Mesh/Nodes
+    </DataItem>
+  </Geometry>
+
+    <Attribute Name="Real_conductivity" Center="Cell">
+      <DataItem Dimensions="66948" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 RealSig 1
+      </DataItem>
+    </Attribute>
+
+    <Attribute Name="Imag_conductivity" Center="Cell">
+      <DataItem Dimensions="66948" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 ImagSig 1
+      </DataItem>
+    </Attribute>
+
+</Grid>
+  <Grid Name = "2">
+    <Topology TopologyType="Tetrahedron" NumberOfElements="2011">
+      <DataItem Dimensions="2011 4" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 Zone 2
+      </DataItem>
+    </Topology>
+
+  <Geometry GeometryType="XYZ">
+    <DataItem Dimensions= "18387 3" Format="HDF">
+    two_blocks.h5:/Mesh/Nodes
+    </DataItem>
+  </Geometry>
+
+    <Attribute Name="Real_conductivity" Center="Cell">
+      <DataItem Dimensions="2011" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 RealSig 2
+      </DataItem>
+    </Attribute>
+
+    <Attribute Name="Imag_conductivity" Center="Cell">
+      <DataItem Dimensions="2011" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 ImagSig 2
+      </DataItem>
+    </Attribute>
+
+</Grid>
+  <Grid Name = "3">
+    <Topology TopologyType="Tetrahedron" NumberOfElements="2038">
+      <DataItem Dimensions="2038 4" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 Zone 3
+      </DataItem>
+    </Topology>
+
+  <Geometry GeometryType="XYZ">
+    <DataItem Dimensions= "18387 3" Format="HDF">
+    two_blocks.h5:/Mesh/Nodes
+    </DataItem>
+  </Geometry>
+
+    <Attribute Name="Real_conductivity" Center="Cell">
+      <DataItem Dimensions="2038" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 RealSig 3
+      </DataItem>
+    </Attribute>
+
+    <Attribute Name="Imag_conductivity" Center="Cell">
+      <DataItem Dimensions="2038" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 ImagSig 3
+      </DataItem>
+    </Attribute>
+
+</Grid>
+  <Grid Name = "4">
+    <Topology TopologyType="Tetrahedron" NumberOfElements="34043">
+      <DataItem Dimensions="34043 4" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 Zone 4
+      </DataItem>
+    </Topology>
+
+  <Geometry GeometryType="XYZ">
+    <DataItem Dimensions= "18387 3" Format="HDF">
+    two_blocks.h5:/Mesh/Nodes
+    </DataItem>
+  </Geometry>
+
+    <Attribute Name="Real_conductivity" Center="Cell">
+      <DataItem Dimensions="34043" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 RealSig 4
+      </DataItem>
+    </Attribute>
+
+    <Attribute Name="Imag_conductivity" Center="Cell">
+      <DataItem Dimensions="34043" Format="HDF">
+      two_blocks.h5:/Mesh/Time 0 ImagSig 4
+      </DataItem>
+    </Attribute>
+
+</Grid>
+</Grid>
+</Grid>
+</Domain>
+</Xdmf>

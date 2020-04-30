@@ -1,0 +1,13 @@
+A mesh file is provided in this directory and a python script has been provided to view the mesh and the imaginary conductivity within each cell.
+To view in ViSit, open a command line window and type 'visit'
+
+Once the visit window is open go to the menu item Controls -> Launch CLI
+
+Another Visit command line window will open. Type in the following:
+
+Source("script.py")
+
+
+
+
+

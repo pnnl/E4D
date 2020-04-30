@@ -1,0 +1,23 @@
+21
+tl_sig0.000 0
+tl_sig0.500 0.5
+tl_sig1.000 1.0
+tl_sig1.500 1.5
+tl_sig2.000 2.0
+tl_sig2.500 2.5
+tl_sig3.000 3.0 
+tl_sig3.500 3.5
+tl_sig4.000 4.0
+tl_sig4.500 4.5
+tl_sig5.000 5.0
+tl_sig5.500 5.5
+tl_sig6.000 6.0
+tl_sig6.500 6.5
+tl_sig7.000 7.0
+tl_sig7.500 7.5
+tl_sig8.000 8.0
+tl_sig8.500 8.5
+tl_sig9.000 9.0
+tl_sig9.500 9.5
+tl_sig10.000 10.0
+

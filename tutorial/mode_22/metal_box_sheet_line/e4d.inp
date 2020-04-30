@@ -1,0 +1,11 @@
+22		run in mode 2 ER forward mode
+mbsl.1.node	mesh configuration file
+mbsl.srv        survey file
+mbsl.sig        homogeneous conductivity       
+mbsl.out        output options file
+
+
+NOTE:
+1) run e4d to build the mesh 
+2) change the run mode to 2, and change mbsl.cfg to mbsl.1.node
+3) run e4d to execute the forward simulation
