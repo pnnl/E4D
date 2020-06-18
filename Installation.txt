@@ -112,16 +112,10 @@ ______________________Building Triangle____________________________
 
 ______________________Building Tetgen____________________________
 
-18) - Make the directory <e4d_dir>/third_party/triangle by typing:
-    mkdir  <e4d_dir>/third_party/tetgen
-    - Go to http://wias-berlin.de/software/tetgen/download2.jsp and
-    download tetgen into <e4d_dir>/third_party/tetgen . 
-    -Go to <e4d_dir>/third_party/tetgen
-    -untar tetgen by typing:	
-     tar -xvzf tetgen1.5.0.tar.gz
+18) - Tetgen 1.5.0 is within the repository in /tetgen1.5.0/
     
 
-19) Go to <e4d_dir>/third_party/tetgen/tetgen1.5.0 and compile tetgen by typing:
+19) Build the executable: go in /tetgen1.5.0 and type:
     make
     (You may see some warning messages during compilation)
 
