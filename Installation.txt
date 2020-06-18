@@ -6,13 +6,10 @@ e4d_dev directory.
 
 2) Make sure the m4 utility is installed (http://www.gnu.org/software/m4/m4.html)
 
-3) Download the latest stable version of petsc into the <e4d_dir>/third_party
-   (go to http://www.mcs.anl.gov/petsc/download/ and download petsc_lite-*.tar.gz)
-   
-4) Go to the <e4d_dir>/third_party and untar the petsc library
-   (i.e. tar -xvzf pets_lite-*.tar.gz)
+3) Clone petsc by entering: git clone -b maint https://gitlab.com/petsc/petsc.git petsc
 
-5) Go to the newly created petsc directory (petsc-*) and compile petsc. E4D needs
+
+4) Go to the newly created petsc directory (petsc-*) and compile petsc. E4D needs
    the f-blas-lapack and mpi libraries. The petsc installation script will
    download these for you.
    - To configure petsc, type at the command line
@@ -94,11 +91,8 @@ ________________INSTRUCTIONS FOR BUILDING bx____________________________________
 
 ______________________Building Triangle____________________________
 
-18) -Make the directory <e4d_dir>/third_party/triangle by typing:
-    mkdir  <e4d_dir>/third_party/triangle
-    Download triangle.zip from https://www.cs.cmu.edu/~quake/triangle.html
-    into <e4d_dir>/third_party/triangle .
-    - Go to <e4d_dir>/third_party/triangle and unzip triangle by typing:
+18) Triangle is within the repository in third_party/triangle/
+
     unzip triangle
      
 
@@ -112,7 +106,7 @@ ______________________Building Triangle____________________________
 
 ______________________Building Tetgen____________________________
 
-18) - Tetgen 1.5.0 is within the repository in /tetgen1.5.0/
+18) Tetgen 1.5.0 is within the repository in third_party/tetgen1.5.0/
     
 
 19) Build the executable: go in /tetgen1.5.0 and type:
