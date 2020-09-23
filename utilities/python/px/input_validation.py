@@ -7,30 +7,37 @@ import re
 
 
 def check_command_input(val):
-    if len(val)<5:
+    varName=''
+    if len(val)<6:
         print ("Not enough input variables entered\n")
-        print ("px mode[-af or f] meshprefix visfile(s) output[.h5 .xml] timestamp(optional)\n")
+        print ("px mode[-af or f] meshprefix visfile(s) output[.h5 .xml] timestamp variable_name (optional)\n")
         sys.exit(1)
 
     mode, grid, visF, outF, timeStamp =([] for i in range(5))
-    if len(val)<=6:
-        mode=val[1]
-        if not (re.search(mode, '-f')) and not (re.search(mode, '-af')):
-            print ("mode needs to be entered as -f or -af")
-            print ("px mode[-af or f] meshprefix visfile(s) output[.h5 .xml] timestamp(optional)\n")
-            sys.exit()
-        grid = val[2]
-        visF = val[3]
-        outF = val[4]
-            
-    
-    if len(val)==6:
+        
+    mode=val[1]
+    if not (re.search(mode, '-f')) and not (re.search(mode, '-af')):
+        print ("mode needs to be entered as -f or -af")
+        print ("px mode[-af or f] meshprefix visfile(s) output[.h5 .xml] timestamp(optional) variable_name (optional)\n")
+        sys.exit()
+    grid = val[2]
+    visF = val[3]
+    outF = val[4]
+      
+    if len(val)>=6: # user entered timestamp
         timeStamp=str(val[5])
     else:
         timeStamp='0'
 
-
-    return mode, grid, visF, outF, timeStamp
+    if len(val)>=7: # user entered variable name
+        varName=str(val[6])
+        if len(val)==8: # user entered two variable names
+                varName=varName+ ',' + (str(val[7]))
+        print ('Variable name entered:' + varName)
+    else:
+        varName=''         
+        
+    return mode, grid, visF, outF, timeStamp, varName
     
 def check_file_input(grid, visF):
     if not os.path.isfile(grid+".1.node"):
