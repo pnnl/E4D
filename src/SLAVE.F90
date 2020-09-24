@@ -860,9 +860,12 @@ module slave
        !!Jacobian transpose, then return the results
        implicit none
        integer :: n,i,j,tag,ierr,nrows,col
-       real :: dummy
+       real, dimension(1) :: dummy
+       integer, dimension(1) :: recvcnts, displs
        !real*8, dimension(:), allocatable :: x,sol
        integer :: COMM
+       recvcnts=0
+       displs=0
 
        if(im_fmm) then
           COMM = FMM_COMM
@@ -877,7 +880,7 @@ module slave
           sol1(i) = Jaco(i,col)
        end do
        
-       call MPI_GATHERV(sol1,nj_rows,MPI_REAL,dummy,0,0,MPI_REAL,0,COMM,ierr)
+       call MPI_GATHERV(sol1,nj_rows,MPI_REAL,dummy,recvcnts,displs,MPI_REAL,0,COMM,ierr)
        return
      end subroutine send_Jcol
     !__________________________________________________________________
@@ -889,9 +892,12 @@ module slave
        !!Jacobian transpose, then return the results
        implicit none
        integer :: n,i,j,tag,ierr,nrows
-       real :: dummy
+       real, dimension(1) :: dummy
+       integer, dimension(1) :: recvcnts, displs
        !real*8, dimension(:), allocatable :: x,sol
        integer :: COMM
+       recvcnts=0
+       displs=0
 
        if(im_fmm) then
           COMM = FMM_COMM
@@ -914,7 +920,7 @@ module slave
           sol1(i) = (dot_product((Jaco(i,:)),(X1)))
        end do
        
-       call MPI_GATHERV(sol1,nj_rows,MPI_REAL,dummy,0,0,MPI_REAL,0,COMM,ierr)
+       call MPI_GATHERV(sol1,nj_rows,MPI_REAL,dummy,recvcnts,displs,MPI_REAL,0,COMM,ierr)
        return
        
        !!Return the solution to master
@@ -929,7 +935,8 @@ module slave
        !!Jacobian transpose, then return the results
        implicit none
        integer :: n,i,j,tag,ierr,nrows
-       real :: dummy
+       real, dimension(1) :: dummy
+       integer, dimension(1) :: idummy=0
        real*8, dimension(nelem) :: X1d
        integer :: COMM
 
@@ -954,7 +961,7 @@ module slave
           sol1(i) = real(dot_product(dble(Jaco(i,:)),X1d))
        end do
       
-       call MPI_GATHERV(sol1,nj_rows,MPI_REAL,dummy,0,0,MPI_REAL,0,COMM,ierr)
+       call MPI_GATHERV(sol1,nj_rows,MPI_REAL,dummy,idummy,idummy,MPI_REAL,0,COMM,ierr)
       
        return
        
@@ -1006,7 +1013,8 @@ module slave
        !!Jacobian transpose, then return the results
        implicit none
        integer :: n,i,j,tag,ierr,nrows
-       real*8 :: dummy
+       real*8, dimension(1) :: dummy
+       integer, dimension(1) :: idummy=0
        !real*8, dimension(:), allocatable :: x,sol
        
        tag = 0
@@ -1023,7 +1031,7 @@ module slave
           sol1i(i) = dot_product(Jacoi(i,:),X1i)
        end do
        
-       call MPI_GATHERV(sol1i,nj_rows,MPI_DOUBLE_PRECISION,dummy,0,0,MPI_DOUBLE_PRECISION,0,E4D_COMM,ierr)
+       call MPI_GATHERV(sol1i,nj_rows,MPI_DOUBLE_PRECISION,dummy,idummy,idummy,MPI_DOUBLE_PRECISION,0,E4D_COMM,ierr)
        return
        
        !!Return the solution to master
