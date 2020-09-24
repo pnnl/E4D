@@ -767,9 +767,9 @@ contains
        if (index(trim(exocom),'px')>0) then
 	       write(*,*) "Build the xmf/h5 files using: ",trim(mshfile(1:npre))
 	       write(*,*) trim(exocom)//" -f "//trim(mshfile(1:npre-1))//" "//trim(mshfile(1:npre-1))//".sig "&
-		  //trim(mshfile(1:npre-1))
+		  //trim(mshfile(1:npre-1))//" 0" 
 	       call system(trim(exocom)//" -f "//trim(mshfile(1:npre-1))//" "//trim(mshfile(1:npre-1))//".sig "&
-		  //trim(mshfile(1:npre-1)))
+		  //trim(mshfile(1:npre-1))//" 0" )
        else
 	       write(*,*) "Build the exodus file ",trim(mshfile(1:npre))//"exo"
 	       write(*,*) trim(exocom)//" -f "//trim(mshfile(1:npre-1))//".1 "//trim(mshfile(1:npre-1))//".sig "&
