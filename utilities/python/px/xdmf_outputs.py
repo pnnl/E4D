@@ -11,7 +11,7 @@ def xmlStart(lines):
 
 
 
-def write_xdmf_conductivity (lines, zn, zn_size, nnods, outFilepre, dim, timeStamp):
+def write_xdmf_element (lines, zn, zn_size, nnods, outFilepre, dim, timeStamp,vn1,vn2):
     lines.append('  <Grid Name = "'+str(zn)+'">\n')
     lines.append('    <Topology TopologyType="Tetrahedron" NumberOfElements="'+str(zn_size)+'">\n')
     lines.append('      <DataItem Dimensions="'+str(zn_size)+' 4" Format="HDF">\n')    
@@ -26,17 +26,17 @@ def write_xdmf_conductivity (lines, zn, zn_size, nnods, outFilepre, dim, timeSta
     lines.append('    </DataItem>\n')
     lines.append('  </Geometry>\n\n')
     
-    lines.append('    <Attribute Name="Real_conductivity" Center="Cell">\n')
+    lines.append('    <Attribute Name="'+vn1+'" Center="Cell">\n')
     lines.append('      <DataItem Dimensions="'+str(zn_size)+'" Format="HDF">\n')    
-    lines.append('      '+outFilepre+'.h5:/Mesh/Time '+timeStamp+' RealSig '+str(zn)+'\n')
+    lines.append('      '+outFilepre+'.h5:/Mesh/Time '+timeStamp+' Real '+str(zn)+'\n')
         
     lines.append('      </DataItem>\n')
     lines.append('    </Attribute>\n\n')           
     
     if dim==2:
-        lines.append('    <Attribute Name="Imag_conductivity" Center="Cell">\n')
+        lines.append('    <Attribute Name="'+vn2+'" Center="Cell">\n')
         lines.append('      <DataItem Dimensions="'+str(zn_size)+'" Format="HDF">\n')        
-        lines.append('      '+outFilepre+'.h5:/Mesh/Time '+timeStamp+' ImagSig '+str(zn)+'\n')
+        lines.append('      '+outFilepre+'.h5:/Mesh/Time '+timeStamp+' Imag '+str(zn)+'\n')
         lines.append('      </DataItem>\n')
         lines.append('    </Attribute>\n\n')
     
@@ -44,7 +44,7 @@ def write_xdmf_conductivity (lines, zn, zn_size, nnods, outFilepre, dim, timeSta
     return lines
                 
                 
-def write_xdmf_potential(lines, nele, nnods, outFilepre, dim, timeStamp):    
+def write_xdmf_node(lines, nele, nnods, outFilepre, dim, timeStamp, vn1, vn2):    
     lines.append('<Grid Name = "mesh" GridType="Collection" CollectionType="Spatial">\n\n') # main grid
     lines.append('  <Time TimeType="Single" Value="'+timeStamp+'"/>\n')
     lines.append('  <Grid Name = "'+str(timeStamp)+'">\n')
@@ -61,16 +61,16 @@ def write_xdmf_potential(lines, nele, nnods, outFilepre, dim, timeStamp):
     lines.append('    </DataItem>\n')
     lines.append('  </Geometry>\n\n')
     
-    lines.append('    <Attribute Name="Real_potential" Center="Node">\n')
+    lines.append('    <Attribute Name="'+vn1+'" Center="Node">\n')
     lines.append('      <DataItem Dimensions="'+str(nnods)+'" Format="HDF">\n')
-    lines.append('      '+outFilepre+'.h5:/Mesh/'+ 'Time '+str(timeStamp)+' RealPotentials\n')
+    lines.append('      '+outFilepre+'.h5:/Mesh/'+ 'Time '+str(timeStamp)+' Real\n')
     lines.append('      </DataItem>\n')
     lines.append('    </Attribute>\n\n')           
     
     if dim==2:
-        lines.append('    <Attribute Name="Imag_potential" Center="Node">\n')
+        lines.append('    <Attribute Name="'+vn2+'" Center="Node">\n')
         lines.append('      <DataItem Dimensions="'+str(nnods)+'" Format="HDF">\n')
-        lines.append('      '+outFilepre+'.h5:/Mesh/Time ' + str(timeStamp)+' ImagPotentials\n')
+        lines.append('      '+outFilepre+'.h5:/Mesh/Time ' + str(timeStamp)+' Imag\n')
         lines.append('      </DataItem>\n')
         lines.append('    </Attribute>\n\n')
     

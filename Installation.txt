@@ -34,42 +34,58 @@ e4d_dev directory.
    (cp e4d ../bin)
 
 
+________________INSTRUCTIONS FOR COMPILING px_______________________________________
+
+1) Go to the <e4d_dir>/utilities/python/px directory where there should be a px.py python script.
+
+2) If pyinstaller is not installed type:
+	sudo pip install pyinstaller
+
+3) At the command line type:
+	pyinstaller -D -F -n px -c "px.py"
+
+4) The executable is created in the dist folder. Copy px to the bin executable folder
+
+   Note: px can also be run directly by typing:
+	python px.py [input variables]
+
+See the README file in <e4d_dir>/utilities/python/px for detailed usage information
 
 
 ________________INSTRUCTIONS FOR BUILDING bx_______________________________________
-6) Download the latest stable release of netcdf into <e4d_dir>/third_party
+1) Download the latest stable release of netcdf into <e4d_dir>/third_party
    (go to http://www.unidata.ucar.edu/downloads/netcdf/index.jsp and download netcdf*.tar.gz)
 
-7) Go to the <e4d_dir>/third_party and untar the netcdf library
+2) Go to the <e4d_dir>/third_party and untar the netcdf library
    (i.e. tar -xvzf netcdf*.tar.gz)
 
-8) Go to <e4d_dir>/third_party/netcdf*/ and configure netcdf by typing:
+3) Go to <e4d_dir>/third_party/netcdf*/ and configure netcdf by typing:
    ./configure --disable-netcdf-4 --disable-dap
 
-9) Now compile netcdf by typing:
+4) Now compile netcdf by typing:
    make
 
-10) Install netcdf by typing (this step requires su privelege):
+5) Install netcdf by typing (this step requires su privelege):
     make install
     or
     sudo make install
 
-11) Download the latest stable release of exodusII into <e4d_dir>/third_party
+6) Download the latest stable release of exodusII into <e4d_dir>/third_party
    (go to http://sourceforge.net/projects/exodusii/ and download exodusII_*.tar.gz)
 
-12) Go to the <e4d_dir>/third_party and untar the exodus library
+7) Go to the <e4d_dir>/third_party and untar the exodus library
    (i.e. tar -xvzf exodusII*.tar.gz)
 
-13) Go to <e4d_dir>/third_party/exodus-*/exodus and edit the file Makefile.standalone
+8) Go to <e4d_dir>/third_party/exodus-*/exodus and edit the file Makefile.standalone
     as follows:
 
     USING_NETCDF4 = "NO"
     NETCDF = <e4d_dir>/third_party/netcdf-*
     
-14) Compile exodus by typing:
+9) Compile exodus by typing:
     make -f Makefile.standalone
 
-15) Go to <e4d_dir>/utilities/bx and edit the first lines of
+10) Go to <e4d_dir>/utilities/bx and edit the first lines of
     the file Makefile as follows (note you should only have to change
     the second and third lines to your <e4d_dir>):
 
@@ -82,37 +98,37 @@ ________________INSTRUCTIONS FOR BUILDING bx____________________________________
     libs = -lm ${EXODUS}/libexoIIv2for.a ${EXODUS}/libexodus.a ${NETCDF_LIB}
     includes = ${NETCDF_INC} ${EXODUS_INC}
 
-16) Compile bx by typing:
+11) Compile bx by typing:
     make
 
-17) Copy bx to the e4d bin directory
+12) Copy bx to the e4d bin directory
     (cp bx ../../bin)
     
 
 ______________________Building Triangle____________________________
 
-18) Triangle is within the repository in third_party/triangle/
+1) Triangle is within the repository in third_party/triangle/
 
     unzip triangle
      
 
-19) Compile triangle by typing:
+2) Compile triangle by typing:
     make
     (Note the may show an error concerning a missing Xlib.h, even though 
     triangle compiled successfully)  
 
-20) Copy triangle to the e4d bin directory
+3) Copy triangle to the e4d bin directory
     (cp triangle ../../bin/)
 
 ______________________Building Tetgen____________________________
 
-18) Tetgen 1.5.0 is within the repository in third_party/tetgen1.5.0/
+1) Tetgen 1.5.0 is within the repository in third_party/tetgen1.5.0/
     
 
-19) Build the executable: go in /tetgen1.5.0 and type:
+2) Build the executable: go in /tetgen1.5.0 and type:
     make
     (You may see some warning messages during compilation)
 
-20) Copy tetgen to the e4d bin directory
+3) Copy tetgen to the e4d bin directory
     (cp tetgen ../../../bin/)
     

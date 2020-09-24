@@ -12,16 +12,16 @@ def file_num(visF, nele, nnods, time_tmp):
         listFirstLine=re.findall('\d+', str(firstLine))
         num=int(listFirstLine[0])
 
-    sigF=False
-    potF=False
+    eleF=False
+    nodeF=False
     file_list=[]
     file_list_tmp=[]
     timeStamp=[]
     if num==nele or num==nnods: # single file
        if num==nele:  # conductivity/complex conductivity file
-           sigF=True 
+           eleF=True 
        if num==nnods: # conductivity/complex potential file
-           potF=True
+           nodeF=True
        if time_tmp is None:
            timeStamp.append('0') 
        else:
@@ -67,17 +67,17 @@ def file_num(visF, nele, nnods, time_tmp):
     
             var = np.genfromtxt(file_list_tmp[i], skip_header=1,dtype='float')  
        
-            if len(var)==nnods: # potential file     
-                potF=True
+            if len(var)==nnods: # node file     
+                nodeF=True
                 file_list.append(file_list_tmp[i])
-            elif len(var)==nele: # conductivity file
-                sigF=True
+            elif len(var)==nele: # element file
+                eleF=True
                 file_list.append(file_list_tmp[i])
             else:
                 print ("The file: " + file_list_tmp[i] + ' does not have the correct number of values')
                 print ("Skipping over file: "+file_list_tmp[i])
                             
-    return (sigF, potF, file_list, timeStamp )
+    return (eleF, nodeF, file_list, timeStamp )
 
 
 def file_text_insert(f1, flines):
