@@ -394,7 +394,7 @@ contains
        end if
        
        if( (norms <= norms0*initer_conv) .or. (normx*initer_conv >= 1)) then
-          info = 1;
+          !info = 1;
        end if
        
        resNE_old = resNE
