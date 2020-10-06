@@ -1,5 +1,5 @@
-PETSC_DIR = ~/codes/petsc
-PETSC_ARCH= arch-linux2-c-opt
+PETSC_DIR = /Users/jays242/softwares/E4D_dev2/third_party/petsc-3.14.0/
+PETSC_ARCH= arch-darwin-c-debug
 
 #PETSC_DIR =/home/john775/codes/petsc_opt/petsc
 #PETSC_ARCH=arch-linux2-c-opt
@@ -129,3 +129,7 @@ MULTI_FORWARD.o : Multi_Forward.F90
 
 REORDER_MESH.o : REORDER_MESH.f90
 	$(f95) -c REORDER_MESH.f90 -o REORDER_MESH.o
+
+.PHONY: clean
+clean :
+	rm -f *.o *.mod e4d *~
