@@ -1867,11 +1867,96 @@ contains
      end if
 
      !if cgmin_flag(2) is true then the other group is doing a cross grad joint inversion
-     if(tflags(1)) cgmin_flag(2) = .true.
+     !if(tflags(1)) cgmin_flag(2) = .true.
+     cgmin_flag(2) = tflags(1)
      
    end subroutine sync_joint
    !____________________________________________________________________________
 
+   !____________________________________________________________________________
+   subroutine sync_zwts
+     implicit none
+     integer :: ierr,tag,i,j,cnt
+     integer :: status(MPI_STATUS_SIZE)
+     real, dimension(:,:), allocatable :: twts,tvals
+
+     cnt = 0
+     do i=1,nrz
+        if(smetric(i,2).eq.12 .or. smetric(i,2).eq.13) then
+           cnt = cnt+1
+        end if
+     end do
+
+     allocate(twts(cnt,6),tvals(cnt,6))
+     cnt = 0
+     do i=1,nrz
+        if(smetric(i,2).eq.12 .or. smetric(i,2).eq.13) then
+           cnt = cnt+1
+           twts(cnt,1) = smetric(i,1)
+           twts(cnt,2) = smetric(i,2)
+           twts(cnt,3) = zwts(i,1)
+           twts(cnt,4) = zwts(i,2)
+           twts(cnt,5) = zwts(i,3)
+           twts(cnt,6) = zwts(i,4)
+        end if
+     end do
+
+     tag = 0
+     if(im_fmm) then
+        call MPI_SEND(twts,cnt*6,MPI_REAL,0,tag,MPI_COMM_WORLD,ierr)
+        call MPI_RECV(tvals,cnt*6,MPI_REAL,0,tag,MPI_COMM_WORLD,status,ierr)
+     else
+        call MPI_RECV(tvals,cnt*6,MPI_REAL,master_proc_fmm,tag,MPI_COMM_WORLD,status,ierr)
+        call MPI_SEND(twts,cnt*6,MPI_REAL,master_proc_fmm,tag,MPI_COMM_WORLD,ierr)
+     end if
+
+     do i=1,nrz
+        if(smetric(i,2).eq.12 .or. smetric(i,2).eq.13) then
+           do j=1,cnt
+              if(tvals(j,1).eq.smetric(i,1) .and. tvals(j,2).eq.smetric(i,2)) then
+                 zwts(i,1) = sqrt(zwts(i,1)*tvals(j,3))
+                 zwts(i,2) = sqrt(zwts(i,2)*tvals(j,4))
+                 zwts(i,3) = sqrt(zwts(i,3)*tvals(j,5))
+                 zwts(i,4) = sqrt(zwts(i,4)*tvals(j,6))
+                 exit
+              end if
+           end do
+        end if
+     end do
+
+     deallocate(twts,tvals)
+   end subroutine sync_zwts
+   !____________________________________________________________________________
+
+   !____________________________________________________________________________
+   subroutine sync_beta
+     implicit none
+     integer :: ierr,tag
+     integer :: status(MPI_STATUS_SIZE)
+     real, dimension(10) :: tvals
+
+     betalist = 0
+     betalist(1) = beta
+     tag = 0
+     if(im_fmm) then
+        call MPI_SEND(betalist,10,MPI_REAL,0,tag,MPI_COMM_WORLD,ierr)
+        call MPI_RECV(tvals,10,MPI_REAL,0,tag,MPI_COMM_WORLD,status,ierr)
+     else
+        call MPI_RECV(tvals,10,MPI_REAL,master_proc_fmm,tag,MPI_COMM_WORLD,status,ierr)
+        call MPI_SEND(betalist,10,MPI_REAL,master_proc_fmm,tag,MPI_COMM_WORLD,ierr)
+     end if
+     !betalist(2) holds the regularization weight of the other group
+     betalist(2) = tvals(1)
+        
+   end subroutine sync_beta
+   !____________________________________________________________________________
+
+   !____________________________________________________________________________
+   subroutine sync_convergence
+     call MPI_ALLREDUCE(MPI_IN_PLACE,con_flag,1,MPI_LOGICAL,MPI_LAND,M_COMM,ierr)
+   end subroutine sync_convergence
+   !____________________________________________________________________________  
+   
    !____________________________________________________________________________
    subroutine get_other_dists
      !this subroutine gathers the element distributions from the other
@@ -1887,7 +1972,7 @@ contains
      end if
      if(cgmin_flag(2)) then
         call MPI_BCAST(sigma,nelem,MPI_REAL,0,M_COMM,ierr)
-        call MPI_BCAST(speed,nelem,MPI_REAL,0,M_COMM,ierr)
+        call MPI_BCAST(speed,nelem,MPI_REAL,1,M_COMM,ierr)
      end if
      return
      
@@ -1936,7 +2021,40 @@ contains
      
    end subroutine build_inv_dist
    !____________________________________________________________________________
-   
+   !____________________________________________________________________________
+   subroutine build_precond
+     implicit none
+     integer :: i,j,n_rank_comm
+     real, dimension(:), allocatable :: sens
+     integer :: COMM,status(MPI_STATUS_SIZE)
+
+     if(.not. allocated(Precond)) then
+        allocate(Precond(nelem))
+     end if
+
+     if(im_fmm) then
+        COMM = FMM_COMM
+        n_rank_comm = n_rank_fmm
+     else
+        COMM = E4D_COMM
+        n_rank_comm = n_rank
+     end if
+     allocate(sens(nelem))
+     sens = 0.
+
+     call send_command(24)
+     Precond = 0
+     do i=1,n_rank_comm-1
+        call MPI_RECV(sens,nelem,MPI_REAL,i,0,COMM,status,ierr)
+        !do j=1,nelem
+        !   Precond(j) = Precond(j)+sens(j)
+        !end do
+        Precond = Precond + sens
+     end do
+     
+     deallocate(sens)
+   end subroutine build_precond
+   !____________________________________________________________________________
    
    !____________________________________________________________________________
    subroutine check_meshfiles
@@ -1953,9 +2071,4 @@ contains
      
    end subroutine check_meshfiles
    !____________________________________________________________________________
-   
-
-		 
-   
-   
 end module master
