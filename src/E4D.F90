@@ -281,8 +281,12 @@ program main
      !send and/or get parmeters needed for cross gradient constraints
      
      if(cgmin_flag(1) .or. cgmin_flag(2)) then
-     	write(*,*) "E4D waiting to trade with FMM"
-     	call get_other_dists
+        write(*,*) "E4D waiting to trade with FMM"
+        call get_other_dists
+        call sync_zwts
+        call sync_beta
+     !!else
+     !!   betalist(1) = beta
      end if
      
      call nreport(2)                                  !see module: report
@@ -363,7 +367,7 @@ program main
         call beta_line_search
      else
         !do the inversion
-        if(cgmin_flag(2)) then
+        if(cgmin_flag(1)) then
            call joint_pcgls
         else
            call pcgls
@@ -389,11 +393,11 @@ program main
         call run_forward
     
         
-        !get or send the slowness update if this is a joint inversion
-        if(cgmin_flag(1) .or. cgmin_flag(2)) then
-	   write(*,*) "E4D waiting to trade with FMM"
-	   call get_other_dists
-     	end if
+        !get and send the slowness update if this is a joint inversion
+        if(cgmin_flag(1) .and. cgmin_flag(2)) then
+           write(*,*) "E4D waiting to trade with FMM"
+           call get_other_dists
+        end if
      	
         !build the new constraint equations
         call build_WmII
@@ -413,6 +417,16 @@ program main
         call nreport(1)
         !see if we need to reduce beta
         call check_beta
+
+        if(cgmin_flag(1) .and. cgmin_flag(2)) then
+           !call sync_convergence
+           cgmin_flag(1) = .not. con_flag
+           call sync_joint
+           call sync_beta
+        !!else
+        !!   betalist(1) = beta
+        !!   write(*,*) betalist
+        end if        
    
       end if
 

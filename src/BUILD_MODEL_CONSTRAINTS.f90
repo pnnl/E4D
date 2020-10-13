@@ -7,15 +7,15 @@ module mod_con
  
 
   implicit none
-  integer, dimension(:), allocatable :: wrows,wcols,par_map
+  integer, dimension(:), allocatable :: wrows,wcols,par_map,master_ranks
   real, dimension(:), allocatable :: Wm,sigma_par,rsigma_par,sigi,v,Wmw
-  real, dimension(:,:,:), allocatable :: WA
+  real*8, dimension(:), allocatable :: WA,BM,tnod,wts4cg
   real, dimension(3) :: CV,CK,CJ
-  integer :: ccount,npar,ji_count,cur_el,ncgrad,nnz_cgrad
-  integer, dimension(:,:), allocatable :: neighbors
+  integer :: ccount,npar,ji_count,cur_el,ncgrad,nnz_cgrad,nphys
+  integer, dimension(:,:), allocatable :: neighbors,block4cgrad
   logical :: itst=.true.
   logical :: iitst=.false.
-    logical, dimension(:),allocatable :: use4cgrad
+  logical, dimension(:),allocatable :: use4cgrad
 contains
 
   !_____________________________________________________________________
@@ -736,14 +736,237 @@ contains
   !_____________________________________________________________________
   subroutine build_BM
     implicit none
-    write(*,*) my_rank, 'Building BM'
+    integer :: i,j,nbr,iphys,incr_b,ind1,ind2
+    real*8, dimension(3) :: grad
+    !TEMP-DBG
+    !integer :: row
+    !integer, dimension(5) :: itemp
+
+    ! ! DBG
+    ! if (im_fmm) then
+    !    open(103,file='B2.txt',status='replace',action='write')
+    ! else
+    !    open(103,file='B1.txt',status='replace',action='write')
+    ! endif
+    ! row = 0
+    
+    
+    incr_b=0
+    do iphys=1,nphys-1
+       select case (block4cgrad(iphys,2))
+
+       case(1) ! B2
+          ncgrad=0
+          do i=1,nelem
+             if(use4cgrad(i)) then
+                ncgrad=ncgrad+1
+                grad(1)=WA(1+(ncgrad-1)*15)*dble(sigma(i))
+                grad(2)=WA(2+(ncgrad-1)*15)*dble(sigma(i))
+                grad(3)=WA(3+(ncgrad-1)*15)*dble(sigma(i))
+                ! DGB: Store col index
+                !itemp(1) = i
+                do j=1,4
+                   nbr=neighbors(i,j)
+                   ! DBG: store col index
+                   !itemp(j+1) = nbr
+                   
+                   grad(1)=grad(1)+WA(1+j*3+(ncgrad-1)*15)*&
+                       dble(sigma(nbr))
+                   grad(2)=grad(2)+WA(2+j*3+(ncgrad-1)*15)*&
+                        dble(sigma(nbr))
+                   grad(3)=grad(3)+WA(3+j*3+(ncgrad-1)*15)*&
+                        dble(sigma(nbr))
+                end do
+                
+!if (iter.eq.25.and.incr_b.eq.15*98990) print*,"ielem, grad_m1:",i,grad
+    
+                do j=0,4
+                   BM(1+j*3+incr_b)=grad(2)*WA(3+j*3+(ncgrad-1)*15)-&
+                                    grad(3)*WA(2+j*3+(ncgrad-1)*15)
+                   BM(2+j*3+incr_b)=grad(3)*WA(1+j*3+(ncgrad-1)*15)-&
+                                    grad(1)*WA(3+j*3+(ncgrad-1)*15)
+                   BM(3+j*3+incr_b)=grad(1)*WA(2+j*3+(ncgrad-1)*15)-&
+                                    grad(2)*WA(1+j*3+(ncgrad-1)*15)
+                end do
+
+                ! ! DBG: To write sparse B matrix
+                ! do j=1,3
+                !    row = row + 1
+                !    write(103,*) row,itemp(1),BM( 1+(j-1)+incr_b)
+                !    write(103,*) row,itemp(2),BM( 4+(j-1)+incr_b)
+                !    write(103,*) row,itemp(3),BM( 7+(j-1)+incr_b)
+                !    write(103,*) row,itemp(4),BM(10+(j-1)+incr_b)
+                !    write(103,*) row,itemp(5),BM(13+(j-1)+incr_b)                   
+                ! enddo
+                
+                incr_b=incr_b+15
+             end if
+          end do
+
+       case(2) ! B1
+          ncgrad=0
+          do i=1,nelem
+             if(use4cgrad(i)) then
+                ncgrad=ncgrad+1
+                grad(1)=WA(1+(ncgrad-1)*15)*dble(speed(i))
+                grad(2)=WA(2+(ncgrad-1)*15)*dble(speed(i))
+                grad(3)=WA(3+(ncgrad-1)*15)*dble(speed(i))
+                ! DGB: Store col index
+                !itemp(1) = i
+                do j=1,4
+                   nbr=neighbors(i,j)
+                   ! DBG: store col index
+                   !itemp(j+1) = nbr
+                   
+                   grad(1)=grad(1)+WA(1+j*3+(ncgrad-1)*15)*&
+                       dble(speed(nbr))
+                   grad(2)=grad(2)+WA(2+j*3+(ncgrad-1)*15)*&
+                        dble(speed(nbr))
+                   grad(3)=grad(3)+WA(3+j*3+(ncgrad-1)*15)*&
+                        dble(speed(nbr))
+                end do
+
+!if (iter.eq.25.and.incr_b.eq.15*98990) print*,"ielem, grad_m2:",i,grad                
+               
+                do j=0,4
+                   BM(1+j*3+incr_b)=grad(3)*WA(2+j*3+(ncgrad-1)*15)-&
+                                    grad(2)*WA(3+j*3+(ncgrad-1)*15)
+                   BM(2+j*3+incr_b)=grad(1)*WA(3+j*3+(ncgrad-1)*15)-&      ! CAN BE VECTORIZED
+                                    grad(3)*WA(1+j*3+(ncgrad-1)*15)
+                   BM(3+j*3+incr_b)=grad(2)*WA(1+j*3+(ncgrad-1)*15)-&
+                                    grad(1)*WA(2+j*3+(ncgrad-1)*15)
+                end do
+
+                ! ! DBG: To write sparse B matrix
+                ! do j=1,3
+                !    row = row + 1
+                !    write(103,*) row,itemp(1),BM( 1+(j-1)+incr_b)
+                !    write(103,*) row,itemp(2),BM( 4+(j-1)+incr_b)
+                !    write(103,*) row,itemp(3),BM( 7+(j-1)+incr_b)
+                !    write(103,*) row,itemp(4),BM(10+(j-1)+incr_b)
+                !    write(103,*) row,itemp(5),BM(13+(j-1)+incr_b)                   
+                ! enddo                
+                
+                incr_b=incr_b+15
+             end if
+          end do
+
+       end select
+
+       !if(block4cgrad(iphys,1)>block4cgrad(iphys,2)) then
+       !   ind1 = 1+(iphys-1)*nnz_cgrad
+       !   ind2 = iphys*nnz_cgrad
+       !   BM(ind1:ind2) = -BM(ind1:ind2)
+       !end if
+    end do
+
+    ! DBG
+    !print*,ncgrad,nelem
+    !close(103)    
+    
+    do iphys=1,nphys-1
+       do i=1,ncgrad
+          do j=1,15
+             BM(j+(i-1)*15+(iphys-1)*15*ncgrad) = &
+                  BM(j+(i-1)*15+(iphys-1)*15*ncgrad)*wts4cg(i)
+          end do
+       end do
+    end do
   end subroutine build_BM
   !_____________________________________________________________________
 
   !_____________________________________________________________________
   subroutine build_V
     implicit none
-    write(*,*) my_rank, 'Building V'
+    integer :: i,j,nbr,iphys,incr,incr_b
+
+    incr=0
+    incr_b=0
+    do iphys=1,nphys-1
+       select case (block4cgrad(iphys,1))
+
+       case(1)
+          do i=1,nelem
+             if(use4cgrad(i)) then
+                tnod(1+incr)=BM(1+incr_b)*dble(sigma(i))
+                tnod(2+incr)=BM(2+incr_b)*dble(sigma(i))
+                tnod(3+incr)=BM(3+incr_b)*dble(sigma(i))
+
+!if (iter.eq.25.and.incr.eq.3*98990) then
+!   print*,"Sigma Center:",sigma(i)                
+!   print*,'i:',0.25*dble(sum(nodes(elements(i,1:4),1))),0.25*dble(sum(nodes(elements(i,1:4),2))), &
+!        0.25*dble(sum(nodes(elements(i,1:4),3)))
+!endif
+
+                do j=1,4
+                   nbr=neighbors(i,j)
+                   tnod(1+incr)=tnod(1+incr)+BM(1+j*3+incr_b)*&
+                        dble(sigma(nbr))
+                   tnod(2+incr)=tnod(2+incr)+BM(2+j*3+incr_b)*&
+                        dble(sigma(nbr))
+                   tnod(3+incr)=tnod(3+incr)+BM(3+j*3+incr_b)*&
+                        dble(sigma(nbr))
+
+!if (iter.eq.25.and.incr.eq.3*98990) then                   
+!   print*,"Sigma Nbrs: ",nbr,j,sigma(nbr)
+!   print*,0.25*dble(sum(nodes(elements(nbr,1:4),1))),0.25*dble(sum(nodes(elements(nbr,1:4),2))), &
+!        0.25*dble(sum(nodes(elements(nbr,1:4),3)))
+!endif
+
+                end do
+
+!if (iter.eq.25.and.incr.eq.3*98990) then                   
+!   print*,"tau_sigma",tnod(1+incr),tnod(2+incr),tnod(3+incr)
+!endif
+
+                incr=incr+3
+                incr_b=incr_b+15
+                
+             end if
+          end do
+
+       case(2)
+          do i=1,nelem
+             if(use4cgrad(i)) then
+                tnod(1+incr)=BM(1+incr_b)*dble(speed(i))
+                tnod(2+incr)=BM(2+incr_b)*dble(speed(i))
+                tnod(3+incr)=BM(3+incr_b)*dble(speed(i))
+
+!if (iter.eq.25.and.incr.eq.3*98990) then                
+!   print*,"Speed Center:",speed(i)
+!   print*,"i:",0.25*dble(sum(nodes(elements(i,1:4),1))),0.25*dble(sum(nodes(elements(i,1:4),2))), &
+!        0.25*dble(sum(nodes(elements(i,1:4),3)))                
+!endif
+
+                do j=1,4
+                   nbr=neighbors(i,j)
+                   tnod(1+incr)=tnod(1+incr)+BM(1+j*3+incr_b)*&
+                        dble(speed(nbr))
+                   tnod(2+incr)=tnod(2+incr)+BM(2+j*3+incr_b)*&
+                        dble(speed(nbr))
+                   tnod(3+incr)=tnod(3+incr)+BM(3+j*3+incr_b)*&
+                        dble(speed(nbr))
+
+!if (iter.eq.25.and.incr.eq.3*98990) then                   
+!   print*,"Speed Nbrs: ",nbr,j,speed(nbr)
+!   print*,0.25*dble(sum(nodes(elements(nbr,1:4),1))),0.25*dble(sum(nodes(elements(nbr,1:4),2))), &
+!       0.25*dble(sum(nodes(elements(nbr,1:4),3)))
+!endif
+
+                end do
+
+!if (iter.eq.25.and.incr.eq.3*98990) then                
+!   print*,"tau_speed",tnod(1+incr),tnod(2+incr),tnod(3+incr)
+!endif
+
+                incr=incr+3
+                incr_b=incr_b+15
+                
+             end if
+          end do
+
+       end select
+    end do
   end subroutine build_V
   !_____________________________________________________________________
 
@@ -753,14 +976,52 @@ contains
     !count the number of non-zeros in the cross gradient constraint matrices
     !structural metric 12 indicates cross gradient constraints
     implicit none
-    integer :: i,j,k,ii,nbr
-    integer, dimension(4,3) :: iface
+    integer :: i,j,k,ii,nbr,iphys,jphys,incr,incr_b,ind1,ind2
     logical :: found
 
     if(im_fmm) then
        write(*,*) 'FMM MASTER SETTING UP CROSS-GRADIENT CONSTRAINTS'
     else
        write(*,*) 'E4D MASTER SETTING UP CROSS-GRADIENT CONSTRAINTS'
+    end if
+
+    !!modify nphys and master_ranks if needed
+    nphys = 2
+    allocate(master_ranks(nphys))
+    master_ranks(1) = 0
+    master_ranks(2) = master_proc_fmm
+
+    !!block4cgrad holds the block row index of BM
+    !!block4cgrad(1:nphys-1,1) current phys_id
+    !!block4cgrad(1:nphys-1,2) coupled phys_id
+    !!block4cgrad(1:nphys-1,3) block row index
+    allocate(block4cgrad(nphys-1,3))
+    incr=0
+    incr_b=0
+    do iphys=1,nphys-1
+       do jphys=iphys+1,nphys
+          incr=incr+1
+          if(master_ranks(iphys).eq.my_rank) then
+             incr_b=incr_b+1
+             block4cgrad(incr_b,1)=iphys
+             block4cgrad(incr_b,2)=jphys
+             block4cgrad(incr_b,3)=incr
+          elseif(master_ranks(jphys).eq. my_rank) then
+             incr_b=incr_b+1
+             block4cgrad(incr_b,1)=jphys
+             block4cgrad(incr_b,2)=iphys
+             block4cgrad(incr_b,3)=incr
+          end if
+       end do
+       if(master_ranks(iphys).eq.my_rank) then
+          exit
+       end if
+    end do
+
+    if(im_fmm) then
+       write(*,*) 'FMM: ',block4cgrad
+    else
+       write(*,*) 'E4D: ',block4cgrad
     end if
 
     !!use4cgrad determines which elements will have cross gradient
@@ -772,12 +1033,9 @@ contains
     !!constraints
     ncgrad = 0
 
-    !!nnz_cgrad is the number of zeros in the cross gradient matrix B
+    !!nnz_cgrad is the number of nonzeros in the gradient operator WA
     nnz_cgrad = 0
-    
-    !build the element volume vector evol
-    call build_evol
-    
+!print*,zone_links        
     do i=1,nelem
        do j=1,nrz
           !!12 and 13 are joint inversion constraints
@@ -785,8 +1043,9 @@ contains
              if(smetric(j,1)==zones(i)) then
                 do k = 1,4
                    nbr = neighbors(i,k)
-                   if(nbr<1) goto 10
-                   if(zones(nbr) .ne. zones(i)) then
+!if (nbr<1) print*,i,j,nbr
+                   if(nbr<1) goto 10 ! skip element which has boundary neighbor
+                   if(zones(nbr) .ne. zones(i)) then  ! neighbor element is in different zone
                       found = .false.
                       do ii=2,zone_links(j,1)+1
                          if(zone_links(j,ii) .eq. zones(nbr)) then
@@ -808,29 +1067,46 @@ contains
        end do
     end do
 
-    !!WA holds the center cordinates of each element face, for
-    !!each element that has cross gradient constraints
-    !!the first dimension references the element, the second
-    !!dimension reference the face, and the third dimension
-    !!reference the principle direction (x,y,or z)
-    allocate(WA(ncgrad,4,3))
-
-    !!iface holds the local indices for each face
-    iface(1,:) = (/2,3,4/)
-    iface(2,:) = (/1,4,3/)
-    iface(3,:) = (/1,2,4/)
-    iface(4,:) = (/1,3,2/)
+    !!WA holds the flattened 3D gradient operator for each
+    !!element that has cross gradient constraints
+    !!the third dimension references the element, the second
+    !!dimension reference the neighbors, and the first 
+    !!dimension reference the principle direction (x,y,or z)
+    allocate(WA(nnz_cgrad))
     ncgrad=0
     do i=1,nelem
        if(use4cgrad(i)) then
           ncgrad = ncgrad+1
-          do j=1,4
-             do k = 1,3
-                WA(ncgrad,j,k) = sum(nodes(elements(i,iface(j,:)),k))/3
-             end do
+          ind1 = 1+(ncgrad-1)*15
+          ind2 = 15+(ncgrad-1)*15
+          call compute_WA(i,WA(ind1:ind2))
+!do k=ind1,ind2
+!   if (WA(k).eq.0) print*,i,ind1,ind2,WA(k)
+!enddo
+       end if
+    end do
+
+    !!wts4cg holds the relative weight for each element
+    !!that has cross gradient constraints
+    allocate(wts4cg(ncgrad))
+    ncgrad=0
+    do i=1,nelem
+       if(use4cgrad(i)) then
+          ncgrad=ncgrad+1
+          do j=1,nrz
+             if(smetric(j,1)==zones(i)) then
+                wts4cg(ncgrad)=dble(zwts(j,1))
+                !!if(im_fmm) then
+                !!   write(*,*) zones(i),wts4cg(ncgrad)
+                !!end if
+                exit
+             end if
           end do
        end if
     end do
+
+    allocate(BM(15*ncgrad*(nphys-1)))
+    allocate(tnod(3*ncgrad*(nphys-1)))
   
   end subroutine setup_crossgrad
   !_____________________________________________________________________
@@ -1093,7 +1369,8 @@ contains
     
     !get the volume while we're here
     x = nodes(elements(el,4),:)-nodes(elements(el,1),:)
-    vol = sqrt(dot_product(u,cross_prod(v,x)))/6
+    !vol = sqrt(dot_product(u,cross_prod(v,x)))/6
+    vol = (dot_product(u,cross_prod(v,x)))/6
     
     !face 1,2,4
     u = nodes(elements(el,2),:)-nodes(elements(el,1),:)
@@ -1565,4 +1842,70 @@ contains
   end subroutine build_Wm
   !_____________________________________________________________________
 
+  !_____________________________________________________________________
+  subroutine compute_WA(el,grd)
+    implicit none
+    integer, intent(in) :: el
+    real*8, dimension(3,5), intent(out) :: grd
+
+    real*8, dimension(3,3) :: atild
+    real*8, dimension(3,3) :: atildi
+    real*8, dimension(4,3) :: dist
+    real*8, dimension(3)   :: elmid
+    real*8, dimension(3,5) :: temp_a
+    real*8, dimension(4,5) :: temp_b
+    integer, dimension(4,3):: iface
+    integer, dimension(4)  :: indx
+    integer :: j,k,nbr
+
+    elmid(1)=0.25*dble(sum(nodes(elements(el,1:4),1)))
+    elmid(2)=0.25*dble(sum(nodes(elements(el,1:4),2)))
+    elmid(3)=0.25*dble(sum(nodes(elements(el,1:4),3)))
+
+    ! Get C-matrix
+    do j=1,4
+       nbr = neighbors(el,j)
+       do k=1,3
+          dist(j,k) = 0.25*dble(sum(nodes(elements(nbr,1:4),k))) - elmid(k)
+          !print*,"Nbr",j,"elmid",k,0.25*dble(sum(nodes(elements(nbr,1:4),k)))
+          !print*,j,k,dist(j,k)
+       end do
+    end do
+
+    !build the shape function -> C^TC
+    atild = 0
+    do j=1,3
+       do k=1,3
+          atild(j,k)=dot_product(dist(1:4,j),dist(1:4,k))
+          !print*,j,k,atild(j,k)
+       end do
+    end do
+    
+    !!invert atild to get atildi
+    !!note MIGS routine is located in mat_inv.f
+    call MIGS(atild,3,atildi,indx)
+    !print*,atildi
+
+    ! L-matrix
+    temp_b(1,:) = (/-1,1,0,0,0/)
+    temp_b(2,:) = (/-1,0,1,0,0/)
+    temp_b(3,:) = (/-1,0,0,1,0/)
+    temp_b(4,:) = (/-1,0,0,0,1/)
+    do j=1,5
+       do k=1,3
+          ! C^T*L matrix
+          temp_a(k,j) = dot_product(dist(1:4,k),temp_b(1:4,j))
+       end do
+    end do
+
+    do j=1,5
+       do k=1,3
+          grd(k,j) = dot_product(atildi(k,1:3),temp_a(1:3,j))
+          !print*,k,j,grd(k,j)
+       end do
+    end do
+
+  end subroutine compute_WA
+  !_____________________________________________________________________
+  
 end module mod_con

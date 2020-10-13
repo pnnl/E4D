@@ -1137,11 +1137,12 @@ module slave
        real, dimension(:), allocatable :: sens
        integer :: COMM
        COMM = E4D_COMM
+       njaco = jind(my_rank,2)-jind(my_rank,1)+1
        if(im_fmm) then
           COMM = FMM_COMM
+          njaco = jind(my_rank_fmm,2)-jind(my_rank_fmm,1)+1
        end if
        
-       njaco = jind(my_rank,2)-jind(my_rank,1)+1
        allocate(sens(nelem))
        sens=0
        tag = 0
@@ -1155,6 +1156,8 @@ module slave
        deallocate(sens)
        
      end subroutine send_sens
+
+
 
     !__________________________________________________________________
 

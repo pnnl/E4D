@@ -80,7 +80,8 @@ implicit none
   real :: my_jbt
   real :: mean_sig                                         !!average apparent conductivity
   real :: mean_phase                                       !!average apparent phase
-
+  real, dimension(10) :: betalist                          !!list of reg wts (for joint inversion)
+  real :: tmp_phi_0                                        !! USED in JOINT-INVERT -> MUST BE REMOVED
   !Logicals
   logical, dimension(:), allocatable :: J_on_off           !!which elements to estimate
   logical :: cflag = .true.
@@ -144,6 +145,7 @@ implicit none
   real, dimension(:), allocatable :: my_dvals              !!values in my data assembly vector
   real, dimension(:), allocatable :: sig_up                !!conductivity update vector
   real, dimension(:), allocatable :: evol                  !!vector to store element volumes
+  real, dimension(:), allocatable :: Precond               !!vector to store preconditioner
   real, dimension(:,:), allocatable :: Jaco                !!jacobian matrix
   real*8, dimension(:,:), allocatable :: Jacoi             !!complex component jacobian matrix
   real, dimension(:,:), allocatable :: poles               !!pole solutions

@@ -78,6 +78,10 @@ contains
        if(cgmin_flag(1) .or. cgmin_flag(2)) then
        	  write(*,*) "FMM waiting to trade with E4D"
        	  call get_other_dists
+          call sync_zwts
+          call sync_beta
+       !!else
+       !!   betalist(2) = beta
        end if
        
        call nreport(2)                                  !see module: report
@@ -118,12 +122,12 @@ contains
        call nreport(72)
        call make_jaco_fmm
        !call print_sens_fmm
-
+       
        !instruct the slave to go into the e4d slave subroutine from
        !slave_fmm
        call send_command(-1)
        !do the inversion
-       if(cgmin_flag(2)) then
+       if(cgmin_flag(1)) then
            call joint_pcgls
         else
            call pcgls
@@ -146,9 +150,9 @@ contains
        !update the travel times (i.e. run fmm)
        call run_forward_fmm
   
-       !get conductivity and/or send slowness to E4D if
+       !get conductivity and send slowness to E4D if
        !this is a joint inversion
-       if(cgmin_flag(1) .or. cgmin_flag(2)) then
+       if(cgmin_flag(1) .and. cgmin_flag(2)) then
        	  write(*,*) "FMM waiting to trade with E4D"
        	  call get_other_dists
        end if
@@ -167,6 +171,16 @@ contains
      
         !see if we need to reduce beta
         call check_beta
+
+        if(cgmin_flag(1) .and. cgmin_flag(2)) then
+           !call sync_convergence
+           cgmin_flag(1) = .not. con_flag
+           call sync_joint
+           call sync_beta
+        !!else
+        !!   betalist(2) = beta
+        !!   write(*,*) betalist
+        end if
 
         call nreport(73)
      end do

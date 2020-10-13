@@ -728,8 +728,7 @@ contains
  
     !combine the contributions from each element t complete rings
     call MPI_ALLREDUCE(MPI_IN_PLACE,rings,ring_map(nnodes),MPI_INTEGER,MPI_SUM,SCOMM_FMM,ierr)
-    
-    
+
   end subroutine build_rings
   !____________________________________________________________________
 
