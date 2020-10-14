@@ -22,16 +22,18 @@ e4d_dev directory.
 
    - Once compilation is finished, enter the commands given by the compile routine to test
      the installation if desired.
+   
+5) clone the E4D repository by typing
+   git clone https://github.com/pnnl/E4d.git
 
 6) Go to <e4d_dir>/src/ and edit the file Makefile as follows
 
-   PETSC_DIR =../third_party/petsc-* (note * specified the petsc version)
+   PETSC_DIR =<location_of_main_petsc_direcotry) (note * specified the petsc version)
 
 7) Compile e4d by typing:
    make
 
-8) Copy e4d to the e4d bin directory
-   (cp e4d ../bin)
+8) Upon succesful completion the e4d executable will be included in the <e4d_dir>/src/
 
 
 ________________INSTRUCTIONS FOR COMPILING px_______________________________________
