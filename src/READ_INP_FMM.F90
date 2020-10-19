@@ -656,18 +656,18 @@ contains
              if(ios .ne. 0) then
                 open(51,file='fmm.log',status='old',action='write',position='append')
                 write(51,*)
-                write(51,*) "------------------------- WARNING ------------------------------"
+                write(51,*) '------------------------------- WARNING -------------------------------'  
                 write(51,*) "There was a problem reading the number of zones to include"
                 write(51,*) "in the forward travel time simulation after the mesh file name."
                 write(51,*) "Using all zones."
-                write(51,*) "----------------------------------------------------------------"
+                write(51,*) '-----------------------------------------------------------------------'
                 write(51,*)
                 write(*, *) 
-                write(*, *) "------------------------- WARNING ------------------------------"                
+                write(*, *) '------------------------------- WARNING -------------------------------'               
                 write(*, *) "There was a problem reading the number of zones to include"
                 write(*, *) "in the forward travel time simulation after the mesh file name."
                 write(*, *) "Using all zones."
-                write(*, *) "----------------------------------------------------------------"
+                write(*, *) '-----------------------------------------------------------------------'
                 write(*, *)
              end if
 
@@ -675,21 +675,65 @@ contains
              if(ios .ne. 0) then
                 open(51,file='fmm.log',status='old',action='write',position='append')
                 write(51,*)
-                write(51,*) "------------------------- WARNING ------------------------------"
+                write(51,*) '------------------------------- WARNING -------------------------------'  
                 write(51,*) "There was a problem reading which zones to include"
                 write(51,*) "in the forward travel time simulation."
                 write(51,*) "Using all zones" 
-                write(51,*) "----------------------------------------------------------------"
+                write(51,*) '-----------------------------------------------------------------------'
                 write(51,*)
                 write(*, *)
-                write(*, *) "------------------------- WARNING ------------------------------"                
+                write(*, *) '------------------------------- WARNING -------------------------------'              
                 write(*, *) "There was a problem reading which zones to include"
                 write(*, *) "in the forward travel time simulation."
                 write(*, *) "Using all zones"
-                write(*, *) "----------------------------------------------------------------"
+                write(*, *) '-----------------------------------------------------------------------'
                 write(*, *)
              end if
-            
+
+          case(56)
+             open(51,file='fmm.log',status='old',action='write',position='append')
+             write(51,*) '-------------------------------- ERROR --------------------------------'
+             write(51,*) "There was a problem reading the source position and/or the dominant"
+             write(51,'(2(A,I8.5))') " frequency for source number: ",indx-1,"   or ",indx
+             write(51,*) "Please make sure the x-, y-, and z-positions and frequency for "
+             write(51,'(2(A,I8.5))') " for source number: ",indx-1,"   or ", indx
+             write(51,*) "are specified correctly in fmm survey file: ",trim(tfile)
+             write(51,*) "Aborting..."
+             write(51,*) '-----------------------------------------------------------------------'
+             close(51)
+             write(*, *) '-------------------------------- ERROR --------------------------------'
+             write(*, *) "There was a problem reading the source position and/or the dominant"
+             write(*, '(2(A,I8.5))') " frequency for source number: ",indx-1,"   or ",indx
+             write(*, *) "Please make sure the x-, y-, and z-positions and frequency for "
+             write(*, '(2(A,I8.5))') " for source number: ",indx-1,"   or ", indx
+             write(*, *) "are specified correctly in fmm survey file: ",trim(tfile)
+             write(*, *) "Aborting..."
+             write(*, *) '-----------------------------------------------------------------------'
+             call crash_exit_fmm
+             
+          case(57)             
+             open(51,file='fmm.log',status='old',action='write',position='append')
+             write(51,*) '-------------------------------- ERROR --------------------------------'
+             write(51,*) "There was a problem reading the receiver position and/or data"
+             write(51,'(2(A,I8.5))') " for receiver number: ",indx-1,"   or ",indx
+             write(51,*) "Please make sure the x-, y-, and z-positions and/or data for "
+             write(51,'(2(A,I8.5))') " for receiver number: ",indx-1,"   or ", indx
+             write(51,*) "are specified correctly in fmm survey file: ",trim(tfile)
+             if (indx.eq.1) write(51,*) "NB: Problem could be with the last source position/frequency."
+             write(51,*) "Aborting..."
+             write(51,*) '-----------------------------------------------------------------------'
+             close(51)
+             write(*, *) '-------------------------------- ERROR --------------------------------'
+             write(*, *) "There was a problem reading the receiver position and/or data"
+             write(*, '(2(A,I8.5))') " for receiver number: ",indx-1,"   or ",indx
+             write(*, *) "Please make sure the x-, y-, and z-positions and/or data for "
+             write(*, '(2(A,I8.5))') " for receiver number: ",indx-1,"   or ", indx
+             write(*, *) "are specified correctly in fmm survey file: ",trim(tfile)
+             if (indx.eq.1) write(*, *) "NB: Problem could be with the last source position/frequency."
+             write(*, *) "Aborting..."
+             write(*, *) '-----------------------------------------------------------------------'
+             call crash_exit_fmm
+             
     case DEFAULT
 
     end select
@@ -757,7 +801,8 @@ contains
        allocate(s_pos(ns,3),frq(ns))  
        
        do i=1,ns
-          read(10,*,IOSTAT=ios) junk,etmp,frq(i); call check_inp_fmm(13,i)          
+          read(10,*,IOSTAT=ios) junk,etmp,frq(i); call check_inp_fmm(13,i)
+          if (junk.ne.i)  call check_inp_fmm(56,i)
           if(frq(i).le.0) call check_inp_fmm(53,i)
           if(junk>ns) call check_inp_fmm(14,i)
           s_pos(junk,1:3)=etmp
@@ -770,7 +815,8 @@ contains
     read(10,*,IOSTAT=ios) nm_fmm;     call check_inp_fmm(17,nm_fmm)
     allocate(dobs_fmm(nm_fmm),s_conf_fmm(nm_fmm,2),Wd_fmm(nm_fmm))
        do i=1,nm_fmm
-          read(10,*,IOSTAT=ios) junk,s_conf_fmm(i,1:2),dobs_fmm(i),Wd_fmm(i); call check_inp_fmm(18,i)         
+          read(10,*,IOSTAT=ios) junk,s_conf_fmm(i,1:2),dobs_fmm(i),Wd_fmm(i); call check_inp_fmm(18,i)
+          if (junk.ne.i) call check_inp_fmm(57,i)
           if(Wd_fmm(i) <= 0) then
              Wd_fmm(i)=1e15
              if( wdwarn) call check_inp_fmm(19,i)
