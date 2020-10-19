@@ -63,9 +63,9 @@ contains
 
 10  continue
       open(51,file='e4d.log',status='old',action='write',position='append')
-      write(51,*) 'Cannot find the output options file: ',trim(outfile)
+      write(51,*) ' E4D: Cannot find the output options file: ',trim(outfile)
       close(51)
-      write(*,*) 'Cannot find the output options file: ',trim(outfile)
+      write(*,*) ' E4D: Cannot find the output options file: ',trim(outfile)
       return
       
 11    continue

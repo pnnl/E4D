@@ -29,20 +29,20 @@ contains
 
     call send_command(20)
     if(im_fmm) then
-       write(*,*) "FMM: STARTING INVERSION"
+       write(*,*) " FMM: STARTING INVERSION"
     else
-       write(*,*) "E4D: STARTING INVERSION"
+       write(*,*) " E4D: STARTING INVERSION"
     end if
 
-    if(im_fmm .and. iter.eq.1) then
-       do i=1,nrz
-          write(*,*) 'FMM smetric: ',smetric(i,:),', zwts: ',zwts(i,:)
-       end do
-    elseif(iter.eq.1) then
-       do i=1,nrz
-          write(*,*) 'E4D smetric: ',smetric(i,:),', zwts: ',zwts(i,:)
-       end do
-    end if
+    !if(im_fmm .and. iter.eq.1) then
+    !   do i=1,nrz
+    !      write(*,*) 'FMM smetric: ',smetric(i,:),', zwts: ',zwts(i,:)
+    !   end do
+    !elseif(iter.eq.1) then
+    !   do i=1,nrz
+    !      write(*,*) 'E4D smetric: ',smetric(i,:),', zwts: ',zwts(i,:)
+    !   end do
+    !end if
 
     !ncon=ccount !maxval(wrows)   
     xpar = 0
@@ -82,13 +82,22 @@ contains
 
     if(wopt) then
        call cpu_time(ce)
-       write(*,"(A,g10.4,A)") "  SENDING DATA NOISE TO SLAVES AT: ",ce-cs," seconds"
+       if (im_fmm) then
+          write(*,"(A,g10.4,A)") "  FMM: SENDING DATA NOISE TO SLAVES AT: ",ce-cs," seconds"
+       else
+          write(*,"(A,g10.4,A)") "  E4D: SENDING DATA NOISE TO SLAVES AT: ",ce-cs," seconds"
+       endif       
        call send_data_noise
     end if
 
     !!Build the model part of b
     call cpu_time(ce)
-    write(*,"(A,g10.4,A)") "  CONSTRUCTING CONSTRAINT RESIDUALS AT: ",ce-cs," seconds"
+    if (im_fmm) then       
+       write(*,"(A,g10.4,A)") "  FMM: CONSTRUCTING CONSTRAINT RESIDUALS AT: ",ce-cs," seconds"
+    else
+       write(*,"(A,g10.4,A)") "  E4D: CONSTRUCTING CONSTRAINT RESIDUALS AT: ",ce-cs," seconds"
+    endif
+    
     do i=1,ccount
        
        if(invi .and. Wm(i) .eq. 0) then 
@@ -377,8 +386,8 @@ contains
     !!beta4cg = sqrt(betalist(1))*sqrt(betalist(2))
     !beta4cg = 1.0 !beta4cg*2 !!for test
     
-    if(im_fmm) write(*,*) 'FMM beta4cg:',iter,beta4cg
-    if(.not. im_fmm) write(*,*) 'E4D beta4cg',iter,beta4cg
+    !if(im_fmm) write(*,*) ' FMM beta4cg:',iter,beta4cg
+    !if(.not. im_fmm) write(*,*) ' E4D beta4cg',iter,beta4cg
 
     ! if (im_fmm) then
     !    if (iter.eq.1) then
@@ -454,8 +463,12 @@ contains
     unstable = 0
     resNE = 0
     call cpu_time(ce)
-    write(*,"(A,g10.4,A)") "  STARTING JOINT INNER ITERATIONS AT: ",ce-cs," seconds"
-
+    if (im_fmm) then
+       write(*,"(A,g10.4,A)") "  FMM: STARTING JOINT INNER ITERATIONS AT: ",ce-cs," seconds"
+    else
+       write(*,"(A,g10.4,A)") "  E4D: STARTING JOINT INNER ITERATIONS AT: ",ce-cs," seconds"
+    endif
+    
     do i=1,max_initer
 
        !if( info .ne. 0) then

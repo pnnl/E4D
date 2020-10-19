@@ -258,8 +258,9 @@ contains
       
     end do
     call cpu_time(tc)
-    write(*,"(A27,F6.3,A8)") "  DONE WITH FORWARD RUN IN:",(tc-ts)/60," minutes"
-    write(*,*) 
+    write(*,"(A32,F6.3,A8)") "  FMM: DONE WITH FORWARD RUN IN:",(tc-ts)/60," minutes"
+    write(*,*)
+    
   end subroutine run_forward_fmm
   !____________________________________________________________________
 
@@ -709,7 +710,9 @@ contains
     integer :: status(MPI_STATUS_SIZE)
     integer :: i,n,ntot
     integer, dimension(nm_fmm) :: failed,tmp
+    real :: ts,tc    
 
+    call cpu_time(ts)
     call send_command_fmm(10)
     if(.not.fresnel) then
        ntot = 0
@@ -736,6 +739,9 @@ contains
 
 
     end if
+
+    call cpu_time(tc)
+    write(*,"(A29,F5.1,A8)") " FMM: DONE BUILDING JACO IN:",(tc-ts)/60," minutes"
 
   end subroutine make_jaco_fmm
   !____________________________________________________________________
@@ -768,6 +774,207 @@ contains
     end if
   end subroutine build_use_ele
   !____________________________________________________________________
+
+   !****************************************************************************
+   !* validate joint inversion
+   !****************************************************************************
+   subroutine validate_jointInv_fmm
+     implicit none
+
+     ! local variables
+     integer :: tag,lenchar,mnchar1,mnchar2
+     integer ::  status(MPI_STATUS_SIZE)
+     integer ::  jnk1, jnk2, jnk3, jnk4     
+     integer :: tjnk1,tjnk2,tjnk3,tjnk4
+     character(len=len(mshfile)) :: tmpmshfile
+
+     
+     ! STart
+     if (.not.cgmin_flag(1).and..not.cgmin_flag(2)) then
+        open(51,file='fmm.log',status='old',action='write',position='append')                     
+        write(51,*) '======================================================================='
+        write(51,*) '                  FMM: RUNNING IN SEPERATE INVERSION MODE ... '
+        write(51,*) '======================================================================='
+        close(51)
+        write(*, *) '======================================================================='
+        write(*, *) '                  FMM: RUNNING IN SEPERATE INVERSION MODE ... '
+        write(*, *) '======================================================================='
+     elseif (cgmin_flag(1).and..not.cgmin_flag(2)) then
+        open(51,file='fmm.log',status='old',action='write',position='append')
+        write(51,*) '=============================== WARNING ==============================='
+        write(51,*) ' E4D inverse option file doesnot request joint inversion but'
+        write(51,*) ' FMM inverse option file ',trim(invfile),' requests joint inversion!'
+        write(51,*) ' NO JOINT INVERSION WILL BE PERFORMED.'
+        write(51,*) '                  FMM: RUNNING IN SEPERATE INVERSION MODE ... '
+        write(51,*) '======================================================================='
+        close(51)
+        write(*, *) '=============================== WARNING ==============================='
+        write(*, *) ' E4D inverse option file doesnot request joint inversion but'
+        write(*, *) ' FMM inverse option file ',trim(invfile),' requests joint inversion!'
+        write(*, *) ' NO JOINT INVERSION WILL BE PERFORMED.'
+        write(*, *) '                  FMM: RUNNING IN SEPERATE INVERSION MODE ... '
+        write(*, *) '======================================================================='
+     elseif (.not.cgmin_flag(1).and.cgmin_flag(2)) then
+        open(51,file='fmm.log',status='old',action='write',position='append')
+        write(51,*) '=============================== WARNING ==============================='
+        write(51,*) ' E4D inverse option file requests joint inversion but FMM inverse'
+        write(51,*) ' option file ',trim(invfile),' doesnot request joint inversion!'
+        write(51,*) ' NO JOINT INVERSION WILL BE PERFORMED.'
+        write(51,*) '                  FMM: RUNNING IN SEPERATE INVERSION MODE ... '
+        write(51,*) '======================================================================='
+        close(51)
+        write(*, *) '=============================== WARNING ==============================='
+        write(*, *) ' E4D inverse option file requests joint inversion but FMM inverse'
+        write(*, *) ' option file ',trim(invfile),' doesnot request joint inversion!'
+        write(*, *) ' NO JOINT INVERSION WILL BE PERFORMED.'
+        write(*, *) '                  FMM: RUNNING IN SEPERATE INVERSION MODE ... '
+        write(*, *) '======================================================================='
+     elseif (cgmin_flag(1).and.cgmin_flag(2)) then
+        open(51,file='fmm.log',status='old',action='write',position='append')                     
+        write(51,*) '======================================================================='
+        write(51,*) '                  FMM: RUNNING IN JOINT INVERSION MODE ... '
+        write(51,*) '======================================================================='
+        close(51)
+        write(*, *) '======================================================================='
+        write(*, *) '                  FMM: RUNNING IN JOINT INVERSION MODE ... '
+        write(*, *) '======================================================================='
+
+        tag = 0
+        lenchar = len(mshfile)
+        call MPI_SEND(mshfile,   lenchar,MPI_CHARACTER,0,tag,MPI_COMM_WORLD,ierr)
+        call MPI_RECV(tmpmshfile,lenchar,MPI_CHARACTER,0,tag,MPI_COMM_WORLD,status,ierr)
+     
+        ! Check if both physics have same mesh files
+        mnchar1=index(mshfile,'.')
+        mnchar2=index(tmpmshfile,'.')
+
+        if (mshfile(1:mnchar1) .ne. tmpmshfile(1:mnchar2)) then
+           open(51,file='fmm.log',status='old',action='write',position='append')
+           write(51,*) '------------------------------- WARNING -------------------------------'
+           write(51,*) ' FMM mesh file name ',trim(mshfile),' is different from '
+           write(51,*) ' E4D mesh file name ',trim(tmpmshfile)
+           write(51,*) ' Checking if they both have the same number of nodes, elements, and faces.'
+           write(51,*) '-----------------------------------------------------------------------'
+           close(51)
+           write(*, *) '------------------------------- WARNING -------------------------------'
+           write(*, *) ' FMM mesh file name ',trim(mshfile),' is different from '
+           write(*, *) ' E4D mesh file name ',trim(tmpmshfile)
+           write(*, *) ' Checking if they both have the same number of nodes, elements, and faces.'
+           write(*, *) '-----------------------------------------------------------------------'
+
+           ! Checking number of nodes
+           open(331,file=   mshfile(1:mnchar1+1)//".node",status="old",action="read")
+           open(332,file=tmpmshfile(1:mnchar2+1)//".node",status="old",action="read")
+
+           read(331,*)  jnk1, jnk2, jnk3, jnk4
+           read(332,*) tjnk1,tjnk2,tjnk3,tjnk4
+
+           close(331); close(332)
+          
+           if (jnk1 .ne. tjnk1) then
+              open(51,file='fmm.log',status='old',action='write',position='append')
+              write(51,*) '-------------------------------- ERROR --------------------------------'
+              write(51,*) ' FMM node file ',mshfile(1:mnchar1+1)//".node",' has different number '
+              write(51,*) ' of nodes than E4D node file ',tmpmshfile(1:mnchar2+1)//".node"
+              write(51,*) ' FMM node file has ',jnk1,' nodes but E4D has ',tjnk1,' nodes.'
+              write(51,*) ' FMM node file should have the same number of nodes as E4D node file  '
+              write(51,*) ' for the cross-gradient joint inversion.'
+              write(51,*) ' Aborting ...'
+              write(51,*) '-----------------------------------------------------------------------'
+              close(51)
+              write(*, *) '-------------------------------- ERROR --------------------------------'
+              write(*, *) ' FMM node file ',mshfile(1:mnchar1+1)//".node",' has different number '
+              write(*, *) ' of nodes than E4D node file ',tmpmshfile(1:mnchar2+1)//".node"
+              write(*, *) ' FMM node file has ',jnk1,' nodes but E4D has ',tjnk1,' nodes.'
+              write(*, *) ' FMM node file should have the same number of nodes as E4D node file  '
+              write(*, *) ' for the cross-gradient joint inversion.'
+              write(*, *) ' Aborting ...'
+              write(*, *) '-----------------------------------------------------------------------'
+              call crash_exit_fmm
+           else
+              open(51,file='fmm.log',status='old',action='write',position='append')              
+              write(51,*) ' FMM: Passed nodes - same number of nodes.'
+              close(51)
+              write(*, *) ' FMM: Passed nodes - same number of nodes.'
+           endif
+
+           ! checking number of elements
+           open(331,file=   mshfile(1:mnchar1+1)//".ele",status="old",action="read")
+           open(332,file=tmpmshfile(1:mnchar2+1)//".ele",status="old",action="read")
+
+           read(331,*)  jnk1, jnk2, jnk3
+           read(332,*) tjnk1,tjnk2,tjnk3
+
+           close(331); close(332)
+        
+           if (jnk1 .ne. tjnk1) then
+              open(51,file='fmm.log',status='old',action='write',position='append')
+              write(51,*) '-------------------------------- ERROR --------------------------------'
+              write(51,*) ' FMM element file ',mshfile(1:mnchar1+1)//".ele",' has different number '
+              write(51,*) ' of elements than E4D element file ',tmpmshfile(1:mnchar2+1)//".ele"
+              write(51,*) ' FMM element file has ',jnk1,' elements but E4D has ',tjnk1,' elements.'
+              write(51,*) ' FMM element file should have the same number of elements as E4D element'
+              write(51,*) ' file for the cross-gradient joint inversion.'           
+              write(51,*) ' Aborting ...'
+              write(51,*) '-----------------------------------------------------------------------'
+              close(51)
+              write(*, *) '-------------------------------- ERROR --------------------------------'
+              write(*, *) ' FMM element file ',mshfile(1:mnchar1+1)//".ele",' has different number '
+              write(*, *) ' of elements than E4D element file ',tmpmshfile(1:mnchar2+1)//".ele"
+              write(*, *) ' FMM element file has ',jnk1,' elements but E4D has ',tjnk1,' elements.'
+              write(*, *) ' FMM element file should have the same number of elements as E4D element'
+              write(*, *) ' file for the cross-gradient joint inversion.'           
+              write(*, *) ' Aborting ...'
+              write(*, *) '-----------------------------------------------------------------------'
+              call crash_exit_fmm
+           else
+              open(51,file='fmm.log',status='old',action='write',position='append')              
+              write(51,*) ' FMM: Passed elements - same number of elements.'
+              close(51)
+              write(*, *) ' FMM: Passed elements - same number of elements.'
+           endif
+
+           open(331,file=   mshfile(1:mnchar1+1)//".face",status="old",action="read")
+           open(332,file=tmpmshfile(1:mnchar2+1)//".face",status="old",action="read")
+
+           read(331,*)  jnk1, jnk2
+           read(332,*) tjnk1,tjnk2
+
+           close(331); close(332)
+        
+           if (jnk1 .ne. tjnk1) then
+              open(51,file='fmm.log',status='old',action='write',position='append')
+              write(51,*) '-------------------------------- ERROR --------------------------------'
+              write(51,*) ' FMM face file ',mshfile(1:mnchar1+1)//".face",' has different number '
+              write(51,*) ' of faces than E4D face file ',tmpmshfile(1:mnchar2+1)//".face"
+              write(51,*) ' FMM face file has ',jnk1,' faces but E4D has ',tjnk1,' faces.'
+              write(51,*) ' FMM face file should have the same number of faces as E4D face file'
+              write(51,*) ' for the cross-gradient joint inversion.'           
+              write(51,*) ' Aborting ...'
+              write(51,*) '-----------------------------------------------------------------------'
+              close(51)
+              write(*, *) '-------------------------------- ERROR --------------------------------'
+              write(*, *) ' FMM face file ',mshfile(1:mnchar1+1)//".face",' has different number '
+              write(*, *) ' of faces than E4D face file ',tmpmshfile(1:mnchar2+1)//".face"
+              write(*, *) ' FMM face file has ',jnk1,' faces but E4D has ',tjnk1,' faces.'
+              write(*, *) ' FMM face file should have the same number of faces as E4D face file'
+              write(*, *) ' for the cross-gradient joint inversion.'  
+              write(*, *) ' Aborting ...'
+              write(*, *) '-----------------------------------------------------------------------'
+              call crash_exit_fmm
+           else
+              open(51,file='fmm.log',status='old',action='write',position='append')              
+              write(51,*) ' FMM: Passed faces - same number of faces.'
+              close(51)
+              write(*, *) ' FMM: Passed faces - same number of faces.'
+           endif                  
+           
+        endif ! mesh files are different
+
+     endif ! cgmin(1) and cgmin(2) -> true
+             
+   end subroutine validate_jointInv_fmm
+     
 
 end module master_fmm
 

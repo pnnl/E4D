@@ -68,23 +68,25 @@ contains
        call nreport_fmm(2)
        call run_forward_fmm
     end if
-      
+     
     if(mode_fmm==3) then
        
        call get_inv_optsII
        if(simulate_e4d) call sync_joint                 !see master
        
+       ! validate joint inversion run
+       call validate_jointInv_fmm
        
-       if(cgmin_flag(1) .or. cgmin_flag(2)) then
-       	  write(*,*) "FMM waiting to trade with E4D"
+       if(cgmin_flag(1) .and. cgmin_flag(2)) then
+       	  write(*,*) " FMM: waiting to trade with E4D"
        	  call get_other_dists
           call sync_zwts
           call sync_beta
        !!else
        !!   betalist(2) = beta
        end if
-       
-       call nreport(2)                                  !see module: report
+     
+       !call nreport(2)                                  !see module: report
        call build_WmII                                  !see module: mod_con
        call send_J_on_off       
    end if
@@ -110,7 +112,7 @@ contains
     call check_convergence                              !see module: obj
     call nreport(1)
    
- 
+
     !the outer iterations start here
     iter = 0
     do while(.not. con_flag) 
@@ -119,7 +121,7 @@ contains
        call nreport(67)
        
        !do the ray tracing to compute the Jacobian
-       call nreport(72)
+       call nreport_fmm(72)
        call make_jaco_fmm
        !call print_sens_fmm
        
@@ -127,7 +129,7 @@ contains
        !slave_fmm
        call send_command(-1)
        !do the inversion
-       if(cgmin_flag(1)) then
+       if(cgmin_flag(1)) then 
            call joint_pcgls
         else
            call pcgls
@@ -153,7 +155,7 @@ contains
        !get conductivity and send slowness to E4D if
        !this is a joint inversion
        if(cgmin_flag(1) .and. cgmin_flag(2)) then
-       	  write(*,*) "FMM waiting to trade with E4D"
+       	  write(*,*) " FMM: waiting to trade with E4D"
        	  call get_other_dists
        end if
        

@@ -980,9 +980,9 @@ contains
     logical :: found
 
     if(im_fmm) then
-       write(*,*) 'FMM MASTER SETTING UP CROSS-GRADIENT CONSTRAINTS'
+       write(*,*) ' FMM: MASTER SETTING UP CROSS-GRADIENT CONSTRAINTS'
     else
-       write(*,*) 'E4D MASTER SETTING UP CROSS-GRADIENT CONSTRAINTS'
+       write(*,*) ' E4D: MASTER SETTING UP CROSS-GRADIENT CONSTRAINTS'
     end if
 
     !!modify nphys and master_ranks if needed
@@ -1018,11 +1018,11 @@ contains
        end if
     end do
 
-    if(im_fmm) then
-       write(*,*) 'FMM: ',block4cgrad
-    else
-       write(*,*) 'E4D: ',block4cgrad
-    end if
+    !if(im_fmm) then
+    !   write(*,*) 'FMM: ',block4cgrad
+    !else
+    !   write(*,*) 'E4D: ',block4cgrad
+    !end if
 
     !!use4cgrad determines which elements will have cross gradient
     !!constraints

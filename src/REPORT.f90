@@ -141,7 +141,7 @@ module report
       ! 2
       if(tag==2) then
          
-         write(*,*) " EXECUTING FORWARD RUN"
+         write(*,*) " E4D: EXECUTING FORWARD RUN ..."
          !open(67,file='e4d.log',status='old',position='append')
          !write(67,*) "Master building model weighting matrix"
          !close(67)
@@ -381,20 +381,20 @@ module report
 
       if(tag==65) then
          write(*,*)
-         write(*,*) " BUILDING FORWARD MATRIX MAPPING VECTORS "
+         write(*,*) " E4D: BUILDING FORWARD MATRIX MAPPING VECTORS "
       end if
 
       if(tag==66) then 
-         write(*,*) " BUILDING FORWARD COUPLING MATRIX "
+         write(*,*) " E4D: BUILDING FORWARD COUPLING MATRIX "
       end if
 
       if(tag==67) then
-         write(*,*) 
-         write(*,"(A,I3.3,A)") "------------------------ ITERATION ",iter," ------------------------"
+         write(*,*)             
+         write(*,"(A,I3.3,A)") " ---------------------------- ITERATION ",iter," ----------------------------"
       end if
 
       if(tag==68) then
-         write(*,*) " EXECUTING FORWARD RUN ..."
+         write(*,*) " E4D: EXECUTING FORWARD RUN ..."
       end if
 
       if(tag==69) then
@@ -414,15 +414,15 @@ module report
        end if
 
        if(tag==71) then
-          write(*,*) " EXECUTING FORWARD IRUN ..."
+          write(*,*) " E4D: EXECUTING FORWARD IRUN ..."
        end if
 
        if(tag==72) then
-          write(*,*) " BUILDING JACOBIAN MATRIX "
+          write(*,*) " E4D: BUILDING JACOBIAN MATRIX "
        end if
 
        if(tag==73) then
-          write(*,"(A,I3.3,A)") "---------------------- END ITERATION ",iter," ----------------------"
+          write(*,"(A,I3.3,A)") " ------------------------ END ITERATION ",iter," ----------------------------"
        end if
 
       ! 100

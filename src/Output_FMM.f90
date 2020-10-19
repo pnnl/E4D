@@ -35,9 +35,9 @@ contains
 
 10  continue
       open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) 'Cannot find the output options file: ',trim(outfile_fmm)
+      write(51,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       close(51)
-      write(*,*) 'Cannot find the output options file: ',trim(outfile_fmm)
+      write(*,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       return
       
 11    continue
@@ -184,10 +184,10 @@ contains
 10  continue
       open(51,file='fmm.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' Cannot find the output options file: ',trim(outfile_fmm)
+      write(51,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       close(51)
       write(*,*) 
-      write(*,*) ' Cannot find the output options file: ',trim(outfile_fmm)
+      write(*,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       return
       
 11    continue

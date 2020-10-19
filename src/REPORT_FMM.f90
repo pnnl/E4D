@@ -54,7 +54,7 @@ module report_fmm
       write(*,*) "All rights reserved."
       write(*,*)"Current date: ",trim(month)," ",trim(day),", ",trim(year)
       write(*,*)"Current time:  ",trim(hour),":",trim(minute),":",trim(second)
-      write(*,"(A,I7.7,A)")" Running on ",n_rank," processing cores"
+      write(*,"(A,I7.7,A)")" Running on ",n_rank_fmm," processing cores"
       !write(*,"(A,I7.7,A)")" (1 master process, and ",n_rank-1," slave processes)"
       write(*,*)"Please refer to fmm.log for further logging information ..."
       write(*,*)"****************************************************************"
@@ -72,7 +72,7 @@ module report_fmm
       write(51,*) "All rights reserved."
       write(51,*)"Current date: ",trim(month)," ",trim(day),", ",trim(year)
       write(51,*)"Current time:  ",trim(hour),":",trim(minute),":",trim(second)
-      write(51,"(A,I7.7,A)")" Running on ",n_rank," processing cores"
+      write(51,"(A,I7.7,A)")" Running on ",n_rank_fmm," processing cores"
       !write(51,"(A,I7.7,A)")" (1 master process, and ",n_rank-1," slave processes)"
       write(51,*)"****************************************************************"
 
@@ -101,7 +101,7 @@ module report_fmm
 
       ! 2
       if(tag==2) then   
-         write(*,*) " FMM: EXECUTING FORWARD RUN"
+         write(*,*) " FMM: EXECUTING FORWARD RUN ..."
       end if
 
 
@@ -250,11 +250,11 @@ module report_fmm
        end if
 
        if(tag==71) then
-          write(*,*) " EXECUTING FORWARD IRUN ..."
+          write(*,*) " FMM: EXECUTING FORWARD IRUN ..."
        end if
 
        if(tag==72) then
-          write(*,*) " BUILDING JACOBIAN MATRIX "
+          write(*,*) " FMM: BUILDING JACOBIAN MATRIX "
        end if
 
        if(tag==73) then

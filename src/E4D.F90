@@ -278,10 +278,13 @@ program main
      !what needs to be communicated for a joint inversion
      if(simulate_fmm) call sync_joint
 
+     ! validate joint inversion run
+     call validate_jointInv
+
      !send and/or get parmeters needed for cross gradient constraints
      
-     if(cgmin_flag(1) .or. cgmin_flag(2)) then
-        write(*,*) "E4D waiting to trade with FMM"
+     if(cgmin_flag(1) .and. cgmin_flag(2)) then
+        write(*,*) " E4D: waiting to trade with FMM"
         call get_other_dists
         call sync_zwts
         call sync_beta
@@ -289,7 +292,7 @@ program main
      !!   betalist(1) = beta
      end if
      
-     call nreport(2)                                  !see module: report
+     !call nreport(2)                                  !see module: report
      call build_WmII                                  !see module: mod_con
      call send_J_on_off
      call build_rrseq                                 !see module: master
@@ -395,7 +398,7 @@ program main
         
         !get and send the slowness update if this is a joint inversion
         if(cgmin_flag(1) .and. cgmin_flag(2)) then
-           write(*,*) "E4D waiting to trade with FMM"
+           write(*,*) " E4D: waiting to trade with FMM"
            call get_other_dists
         end if
      	
