@@ -112,7 +112,6 @@ contains
     call check_convergence                              !see module: obj
     call nreport(1)
    
-
     !the outer iterations start here
     iter = 0
     do while(.not. con_flag) 

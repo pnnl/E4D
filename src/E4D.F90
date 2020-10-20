@@ -348,7 +348,7 @@ program main
 
   !get the phase if this is an sip inversion  
    if(i_flag) call get_phase
-
+   
   !the inverse iterations start here
    do while (.not. con_flag)
      iter = iter+1

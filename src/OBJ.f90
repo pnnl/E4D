@@ -5,7 +5,7 @@ module obj
   use mod_con
   
   implicit none
-  real :: phi_tot,phi_data,phi_model,chi2,PHI_D,PHI_M,PLAM
+  real :: phi_tot,phi_data,phi_model,chi2,PHI_D,PHI_M,PLAM,phi_cg
   real :: PHI_T = 0,errm,erms,errm0,erms0,chi20,phi_data0,o_chi2
   real , dimension(15) :: phi=0
   integer :: ncull
@@ -315,7 +315,9 @@ module obj
       phi_model = beta * dot_product(mod_vec,mod_vec)    
       phi_tot = phi_data + phi_model
       deallocate(mod_vec)
-        
+
+      if (cgmin_flag(1)) phi_cg = dot_product(tnod,tnod)
+      
       if(iter==0) then
           PHI_T = phi_tot
           PHI_D = phi_data
@@ -541,7 +543,9 @@ module obj
           phi_model = beta * dot_product(mod_vec,mod_vec)    
           phi_tot = phi_data + phi_model
           deallocate(mod_vec)
-            
+
+          if (cgmin_flag(1)) phi_cg = dot_product(tnod,tnod)
+
           if(iter==0) then
               PHI_T = phi_tot
               PHI_D = phi_data

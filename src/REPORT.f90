@@ -105,9 +105,16 @@ module report
          else
             write(67,"(A,I3.3,A)") " ********** CONVERGENCE STATISTICS AFTER INVERSE UPDATE # ",iter," **********"
          end if
-     
-         write(67,"(4A15)") "    Phi_dat    ","    Phi_Mod    "," Phi_Mod/Beta  ","    Phi_Tot    "
-         write(67,"(4g15.5)") phi_data,phi_model,phi_model/beta,phi_tot
+
+         if (cgmin_flag(1)) then ! joint inversion
+            write(67,"(5A15)") "    Phi_dat    ","    Phi_Mod    "," Phi_Mod/Beta  ","     Phi_CG    ","    Phi_Tot    "            
+            write(67,"(5g15.5)") phi_data,phi_model,phi_model/beta,phi_cg,phi_tot            
+         else ! separate inversion
+            write(67,"(4A15)") "    Phi_dat    ","    Phi_Mod    "," Phi_Mod/Beta  ","    Phi_Tot    "            
+            write(67,"(4g15.5)") phi_data,phi_model,phi_model/beta,phi_tot            
+         endif
+         
+
          write(67,*)
          !if(sum(imod_vec)>0) then
          write(67,"(A,I10.10)")" Total Number of Constraint Eqs: ",sum(inum_vec)
