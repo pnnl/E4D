@@ -621,7 +621,7 @@ contains
 
     call send_command_fmm(4)
     call MPI_BCAST(nspd, 1, MPI_INTEGER, 0,FMM_COMM,ierr)
-    call MPI_BCAST(speed, nspd,MPI_REAL,0,FMM_COMM,ierr)
+    call MPI_BCAST(velocity, nspd,MPI_REAL,0,FMM_COMM,ierr)
 
    end subroutine send_slowness
   !____________________________________________________________________

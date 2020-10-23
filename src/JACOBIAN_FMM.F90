@@ -88,8 +88,8 @@ contains
        !Jaco(jrow,el) = tsr*wi/sum(wi)
        if(sum(wi)>0) wi = wi/sum(wi)
        do el=1,nelem
-          if(speed(el).gt.0) then
-             Jaco(jrow,el) = wi(el)*tsr/sqrt(speed(el))
+          if(velocity(el).gt.0) then
+             Jaco(jrow,el) = wi(el)*tsr/sqrt(velocity(el))
           end if
        end do
 

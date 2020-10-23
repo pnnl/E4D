@@ -82,7 +82,7 @@ contains
                        LTT(nct) = TT(elements(cur_ele,j))
                     end if
                  end do
-                 M(1,1) = speed(cur_ele); M(2,2)=speed(cur_ele); M(3,3)=speed(cur_ele)
+                 M(1,1) = velocity(cur_ele); M(2,2)=velocity(cur_ele); M(3,3)=velocity(cur_ele)
                  call local_tt(xp(1,:),xp(2,:),xp(3,:),xp(4,:),ltt(1),ltt(2),ltt(3),M,tt_test(1,1))
      
                  !if the test travel time is less than the current, update TT and heap
@@ -206,7 +206,7 @@ contains
              
              !compute the test travel time to this tnode
              e_vec(1:3,1) = nodes(tnode,1:3) - nodes(snode,1:3)
-             M(1,1) = speed(cur_ele); M(2,2)=speed(cur_ele); M(3,3)=speed(cur_ele)
+             M(1,1) = velocity(cur_ele); M(2,2)=velocity(cur_ele); M(3,3)=velocity(cur_ele)
              tt_test = sqrt(MATMUL(TRANSPOSE(e_vec),MATMUL(M,e_vec)))
              
              !if the test travel time is less than the current, update TT and heap
@@ -279,7 +279,7 @@ contains
                        LTT(nct) = TT(elements(cur_ele,j))
                     end if
                  end do
-                 M(1,1) = speed(cur_ele); M(2,2)=speed(cur_ele); M(3,3)=speed(cur_ele)
+                 M(1,1) = velocity(cur_ele); M(2,2)=velocity(cur_ele); M(3,3)=velocity(cur_ele)
                  call local_tt(xp(1,:),xp(2,:),xp(3,:),xp(4,:),ltt(1),ltt(2),ltt(3),M,tt_test(1,1))
      
                  !if the test travel time is less than the current, update TT and heap

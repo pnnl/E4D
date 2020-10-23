@@ -146,7 +146,7 @@ contains
        call send_slowness
    
        !write the solution to file
-       call write_speed
+       call write_velocity
 
        !update the travel times (i.e. run fmm)
        call run_forward_fmm

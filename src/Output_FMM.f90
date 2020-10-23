@@ -238,20 +238,20 @@ contains
   !____________________________________________________________________
   
   !_______________________________________________________________________________________
-  subroutine write_speed
+  subroutine write_velocity
     implicit none
     integer :: i
     character(20) :: fname=""
     
-    write(fname,"(A,I0)") "speed.",iter
+    write(fname,"(A,I0)") "velocity.",iter
     open(12,file=fname,status='replace',action='write')
     write(12,*) nelem," 1"
     do i=1,nelem
-          write(12,*) sqrt(1/speed(i))
+          write(12,*) sqrt(1/velocity(i))
     end do
     
     close(12)
-  end subroutine write_speed
+  end subroutine write_velocity
   !_______________________________________________________________________________________
  
  

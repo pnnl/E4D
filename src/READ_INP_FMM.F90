@@ -54,7 +54,7 @@ contains
     
     ! read survey file  
     read(10,*,IOSTAT=ios) tfile;           call check_inp_fmm(3,junk)
-    ! read slowness file
+    ! read velocity file
     read(10,*,IOSTAT=ios) spdfile;         call check_inp_fmm(4,junk)
     read(10,*,IOSTAT=ios) outfile_fmm;     call check_inp_fmm(5,junk)
 
@@ -89,8 +89,8 @@ contains
        call translate_source
     end if
 
-    !!read the speed file
-    call read_slowness
+    !!read the velocity file
+    call read_velocity
 
   end subroutine read_input_fmm
   !___________________________________________________________________________________
@@ -216,12 +216,12 @@ contains
     case(4)
        open(51,file='fmm.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
-          write(51,*) "There was a problem reading the speed file name in fmm.inp: aborting"
-          write(*,*) "There was a problem reading the speed file name in fmm.inp: aborting"
+          write(51,*) "There was a problem reading the velocity file name in fmm.inp: aborting"
+          write(*,*) "There was a problem reading the velocity file name in fmm.inp: aborting"
           close(51)
           call crash_exit_fmm
        else
-          write(51,*) " Speed file:                       ",trim(spdfile)
+          write(51,*) " Velocity file:                       ",trim(spdfile)
        end if
        close(51)
 
@@ -505,8 +505,8 @@ contains
    case(22)
       if(ios .ne. 0) then
          open(51,file='fmm.log',status='old',action='write',position='append')
-         write(51,*) "There was a problem reading the number of speeds in"
-         write(51,*) "in the speed file: ",trim(spdfile)
+         write(51,*) "There was a problem reading the number of velocities in"
+         write(51,*) "in the velocity file: ",trim(spdfile)
          write(51,*) "aborting."
          close(51)
          call crash_exit_fmm
@@ -518,18 +518,18 @@ contains
          open(51,file='fmm.log',status='old',action='write',position='append')
          if(ios == 0) then
             write(51,*)
-            write(51,*) " SPEED FILE SUMMARY "
-            write(51,"(A,I10.10)") "  Number of speed values:    ",nspd
+            write(51,*) " VELOCITY FILE SUMMARY "
+            write(51,"(A,I10.10)") "  Number of velocity values:    ",nspd
             close(51)
          else
             write(51,*) 
             write(51,*) " There was a problem reading the number of "
-            write(51,*) " speed values in ",trim(spdfile)
+            write(51,*) " velocity values in ",trim(spdfile)
             write(51,*) " Aborting ..."
             close(51)
             write(*,*) 
             write(*,*) " There was a problem reading the number of "
-            write(*,*) " speed values in ",trim(spdfile)
+            write(*,*) " velocity values in ",trim(spdfile)
             write(*,*) " Aborting ..."
             close(51)
             call crash_exit_fmm
@@ -538,8 +538,8 @@ contains
       if(ios .ne. 0) then
          open(51,file='fmm.log',status='old',action='write',position='append')
          write(51,*)
-         write(51,"(A,I10.10)") "  There was a problem reading speed number ",indx
-         write(51,*) " in the speed file: ",trim(spdfile),"."
+         write(51,"(A,I10.10)") "  There was a problem reading velocity number ",indx
+         write(51,*) " in the velocity file: ",trim(spdfile),"."
          write(51,*) " Aborting ..."
          close(51)
          write(*,*)
@@ -570,11 +570,11 @@ contains
   case(25)
      open(51,file='fmm.log',status='old',action='write',position='append')
      write(51,*) 
-     write(51,*) " Can't find the slowness file: ",trim(spdfile)
+     write(51,*) " Can't find the velocity file: ",trim(spdfile)
      write(51,*) " Aborting ..."
      close(51)
      write(*,*) 
-     write(*,*) " Can't find the slowness file: ",trim(spdfile)
+     write(*,*) " Can't find the velocity file: ",trim(spdfile)
      write(*,*) " Aborting ..."
      close(51)
      call crash_exit_fmm
@@ -874,7 +874,7 @@ contains
   !_________________________________________________________________________
 
   !_________________________________________________________________________
-  subroutine read_slowness
+  subroutine read_velocity
     implicit none
     integer :: i,junk,npre,nchr
     logical :: exst
@@ -908,9 +908,10 @@ contains
                 open(10,file=mshfile(1:npre)//".ele",status='old',action='read')
                 read(10,*) nspd
                 close(10)
-                allocate(speed(nspd))
-                !velocity is slowness**2 for the forward computations
-                speed=tspd**(-2)
+                allocate(velocity(nspd))
+                !slowness is 1/velocity**2 for the forward computations
+                ! NB: velocity is defined here as slowness^2
+                velocity=tspd**(-2)
                 return
              end if
           end if
@@ -918,17 +919,18 @@ contains
        open(10,file=spdfile,status='old',action='read')
        read(10,*,IOSTAT=ios) nspd; call check_inp_fmm(23,0) 
        
-       allocate(speed(nspd))
+       allocate(velocity(nspd))
        
        do i=1,nspd
-          read(10,*,IOSTAT=ios) speed(i); call check_inp_fmm(23,i)
-          !convert speed to 1/(speed^2) for travel time computations
-          speed(i) = speed(i)**(-2)
+          read(10,*,IOSTAT=ios) velocity(i); call check_inp_fmm(23,i)
+          !convert velocity to 1/(velocity^2) for travel time computations
+          ! NB: velocity is defined here as slowness^2
+          velocity(i) = velocity(i)**(-2)
        end do
        close(10)
     end if
        
-  end subroutine read_slowness
+  end subroutine read_velocity
   !_________________________________________________________________________
   !_________________________________________________________________________
   subroutine crash_exit_fmm

@@ -1118,18 +1118,18 @@ contains
     nsig_min=0
 
     if(im_fmm) then
-       !at this point speed is 1/(velocity**2) (i.e slowness**2)
+       !at this point velocity is 1/(velocity**2) (i.e slowness**2)
  
        do ii=1,nelem
-          !change speed to slowness and update (note sig_up is the update delta
+          !change velocity to slowness and update (note sig_up is the update delta
           !in terms of slowness
-          speed(ii) = sqrt(speed(ii))+sig_up(ii)
-          if((1/speed(ii)) < min_sig) speed(ii) = 1/min_sig
-          if((1/speed(ii)) > max_sig) speed(ii) = 1/max_sig
+          velocity(ii) = sqrt(velocity(ii))+sig_up(ii)
+          if((1/velocity(ii)) < min_sig) velocity(ii) = 1/min_sig
+          if((1/velocity(ii)) > max_sig) velocity(ii) = 1/max_sig
        end do
 
-       !change speed back to slowness squared for the forward computations
-       speed = speed**2
+       !change velocity back to slowness squared for the forward computations
+       velocity = velocity**2
      
     else
        
@@ -1968,11 +1968,11 @@ contains
      tag = 0
      if(cgmin_flag(1)) then
         if(.not. allocated(sigma)) allocate(sigma(nelem))
-        if(.not. allocated(speed)) allocate(speed(nelem))
+        if(.not. allocated(velocity)) allocate(velocity(nelem))
      end if
      if(cgmin_flag(2)) then
         call MPI_BCAST(sigma,nelem,MPI_REAL,0,M_COMM,ierr)
-        call MPI_BCAST(speed,nelem,MPI_REAL,1,M_COMM,ierr)
+        call MPI_BCAST(velocity,nelem,MPI_REAL,1,M_COMM,ierr)
      end if     
      return
      
@@ -1986,8 +1986,8 @@ contains
         end if
 
         if(cgmin_flag(2)) then
-           !send speed to the E4D master
-           call MPI_SEND(speed,nelem,MPI_REAL,0,tag,MPI_COMM_WORLD,ierr)
+           !send velocity to the E4D master
+           call MPI_SEND(velocity,nelem,MPI_REAL,0,tag,MPI_COMM_WORLD,ierr)
         end if
 
      else
@@ -1998,11 +1998,11 @@ contains
         end if
 
         if(cgmin_flag(1)) then
-           !get speed from the FMM master
-           if(allocated(speed)) deallocate(speed)
-           allocate(speed(nelem))
-           call MPI_RECV(speed,nelem,MPI_REAL,master_proc_fmm,tag,MPI_COMM_WORLD,status,ierr)
-           !write(*,*) "E4D got speed",maxval(speed),minval(speed)
+           !get velocity from the FMM master
+           if(allocated(velocity)) deallocate(velocity)
+           allocate(velocity(nelem))
+           call MPI_RECV(velocity,nelem,MPI_REAL,master_proc_fmm,tag,MPI_COMM_WORLD,status,ierr)
+           !write(*,*) "E4D got velocity",maxval(velocity),minval(velocity)
         end if
 
      end if
