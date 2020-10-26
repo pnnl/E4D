@@ -802,14 +802,14 @@ contains
      elseif (cgmin_flag(1).and..not.cgmin_flag(2)) then
         open(51,file='fmm.log',status='old',action='write',position='append')
         write(51,*) '=============================== WARNING ==============================='
-        write(51,*) ' E4D inverse option file doesnot request joint inversion but'
+        write(51,*) ' E4D inverse option file does not request joint inversion but'
         write(51,*) ' FMM inverse option file ',trim(invfile),' requests joint inversion!'
         write(51,*) ' NO JOINT INVERSION WILL BE PERFORMED.'
         write(51,*) '                  FMM: RUNNING IN SEPARATE INVERSION MODE ... '
         write(51,*) '======================================================================='
         close(51)
         write(*, *) '=============================== WARNING ==============================='
-        write(*, *) ' E4D inverse option file doesnot request joint inversion but'
+        write(*, *) ' E4D inverse option file does not request joint inversion but'
         write(*, *) ' FMM inverse option file ',trim(invfile),' requests joint inversion!'
         write(*, *) ' NO JOINT INVERSION WILL BE PERFORMED.'
         write(*, *) '                  FMM: RUNNING IN SEPARATE INVERSION MODE ... '
@@ -822,14 +822,14 @@ contains
         open(51,file='fmm.log',status='old',action='write',position='append')
         write(51,*) '=============================== WARNING ==============================='
         write(51,*) ' E4D inverse option file requests joint inversion but FMM inverse'
-        write(51,*) ' option file ',trim(invfile),' doesnot request joint inversion!'
+        write(51,*) ' option file ',trim(invfile),' does not request joint inversion!'
         write(51,*) ' NO JOINT INVERSION WILL BE PERFORMED.'
         write(51,*) '                  FMM: RUNNING IN SEPARATE INVERSION MODE ... '
         write(51,*) '======================================================================='
         close(51)
         write(*, *) '=============================== WARNING ==============================='
         write(*, *) ' E4D inverse option file requests joint inversion but FMM inverse'
-        write(*, *) ' option file ',trim(invfile),' doesnot request joint inversion!'
+        write(*, *) ' option file ',trim(invfile),' does not request joint inversion!'
         write(*, *) ' NO JOINT INVERSION WILL BE PERFORMED.'
         write(*, *) '                  FMM: RUNNING IN SEPARATE INVERSION MODE ... '
         write(*, *) '======================================================================='

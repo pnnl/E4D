@@ -4,9 +4,7 @@ PETSC_ARCH= arch-linux2-c-opt
 #PETSC_DIR =/home/john775/codes/petsc_opt/petsc
 #PETSC_ARCH=arch-linux2-c-opt
 
-FLAGS = -ffpe-summary=none 
-
-f95 = ${PETSC_DIR}/${PETSC_ARCH}/bin/mpif90 $(FLAGS)
+f95 = ${PETSC_DIR}/${PETSC_ARCH}/bin/mpif90
 libs =
 
 

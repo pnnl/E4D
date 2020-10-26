@@ -92,6 +92,9 @@ contains
     !!read the velocity file
     call read_velocity
 
+    ! examine min and max Fresnel volume
+    !if (fresnel) call check_fresnel
+
   end subroutine read_input_fmm
   !___________________________________________________________________________________
 
@@ -932,11 +935,52 @@ contains
        
   end subroutine read_velocity
   !_________________________________________________________________________
+  subroutine check_fresnel
+    implicit none
+
+    integer :: i
+    real    :: avgVel,length_sr
+    real    :: FresVol,minFresVol,maxFresVol
+
+    ! Start
+    minFresVol = 1e15
+    maxFresVol = 0.
+    
+    ! get average velocity
+    avgVel = sum(1/sqrt(velocity))/nspd
+
+    do i=1,nm_fmm
+       ! get Fresnel volume
+       length_sr = norm2( s_pos(s_conf_fmm(i,1),:) - s_pos(s_conf_fmm(i,2),:) )
+       FresVol   = sqrt(avgVel*length_sr/frq(s_conf_fmm(i,1)))
+       if (FresVol<minFresVol) minFresVol = FresVol
+       if (FresVol>maxFresVol) maxFresVol = FresVol    
+    enddo
+
+    !open(51,file='fmm.log',status='old',action='write')
+    !write(51,*)
+    !write(51,*) " ======================================================================="
+    !write(51,*) " FMM: Minimum Fresnel Volume: ",minFresVol
+    !write(51,*) " FMM: Maximum Fresnel Volume: ",maxFresVol
+    !write(51,*) " ======================================================================="
+    !write(51,*)
+    ! close(51)
+    ! write(*, *)
+    ! write(*, *) " ======================================================================="
+    ! write(*, *) "  FMM: Minimum Fresnel Volume: ",minFresVol
+    ! write(*, *) "  FMM: Maximum Fresnel Volume: ",maxFresVol
+    ! write(*, *) " ======================================================================="
+    ! write(*, *)
+        
+  end subroutine check_fresnel  
   !_________________________________________________________________________
   subroutine crash_exit_fmm
+    implicit none
+    integer, parameter :: errcode=100
     
     call MPI_BCAST(0,1,MPI_INTEGER,0,FMM_COMM,ierr)
-    call PetscFinalize(perr)
+    call MPI_ABORT(MPI_COMM_WORLD,errcode,ierr)
+    call PetscFinalize(perr)    
     stop
   end subroutine crash_exit_fmm
   !__________________________________________________________________________

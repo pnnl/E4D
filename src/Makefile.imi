@@ -5,10 +5,7 @@ PETSC_ARCH= arch-linux2-c-opt
 #PETSC_ARCH=arch-linux2-c-opt
 
 
-FLAGS = -ffpe-summary=none                                                      # NON DEBUG CODE
-#FLAGS = -fbacktrace -ffpe-trap=invalid,zero,overflow,underflow,denormal        # DEBUG CODE
-
-f95 = ${PETSC_DIR}/${PETSC_ARCH}/bin/mpif90 $(FLAGS)
+f95 = ${PETSC_DIR}/${PETSC_ARCH}/bin/mpif90 
 libs =
 
 CFLAGS = ${PETSC_CC_INCLUDES}

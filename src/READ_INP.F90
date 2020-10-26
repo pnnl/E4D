@@ -3310,9 +3310,11 @@ contains
   !_________________________________________________________________________
   !_________________________________________________________________________
   subroutine crash_exit
-    
+    implicit none
+    integer, parameter :: errcode=100
     call MPI_BCAST(0,1,MPI_INTEGER,0,E4D_COMM,ierr)
-    call PetscFinalize(perr)
+    call MPI_ABORT(MPI_COMM_WORLD,errcode,ierr)
+    call PetscFinalize(perr)    
     stop
   end subroutine crash_exit
   !__________________________________________________________________________

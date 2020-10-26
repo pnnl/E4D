@@ -2119,14 +2119,14 @@ contains
      elseif (.not.cgmin_flag(1).and.cgmin_flag(2)) then
         open(51,file='e4d.log',status='old',action='write',position='append')
         write(51,*) '=============================== WARNING ==============================='
-        write(51,*) ' E4D inverse option file ',trim(invfile),' doesnot requests joint'
+        write(51,*) ' E4D inverse option file ',trim(invfile),' does not requests joint'
         write(51,*) ' inversion but FMM inverse option file requests joint inversion. '
         write(51,*) ' NO JOINT INVERSION WILL BE PERFORMED.'
         write(51,*) '                  E4D: RUNNING IN SEPARATE INVERSION MODE ... '
         write(51,*) '======================================================================='
         close(51)
         write(*, *) '=============================== WARNING ==============================='
-        write(*, *) ' E4D inverse option file ',trim(invfile),' doesnot requests joint'
+        write(*, *) ' E4D inverse option file ',trim(invfile),' does not requests joint'
         write(*, *) ' inversion but FMM inverse option file requests joint inversion. '
         write(*, *) ' NO JOINT INVERSION WILL BE PERFORMED.'
         write(*, *) '                  E4D: RUNNING IN SEPARATE INVERSION MODE ... '
