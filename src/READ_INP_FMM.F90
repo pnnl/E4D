@@ -978,7 +978,7 @@ contains
     implicit none
     integer, parameter :: errcode=100
     
-    call MPI_BCAST(0,1,MPI_INTEGER,0,FMM_COMM,ierr)
+    !call MPI_BCAST(0,1,MPI_INTEGER,0,FMM_COMM,ierr)
     call MPI_ABORT(MPI_COMM_WORLD,errcode,ierr)
     call PetscFinalize(perr)    
     stop
