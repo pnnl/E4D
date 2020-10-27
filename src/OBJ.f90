@@ -5,7 +5,7 @@ module obj
   use mod_con
   
   implicit none
-  real :: phi_tot,phi_data,phi_model,chi2,PHI_D,PHI_M,PLAM
+  real :: phi_tot,phi_data,phi_model,chi2,PHI_D,PHI_M,PLAM,phi_cg
   real :: PHI_T = 0,errm,erms,errm0,erms0,chi20,phi_data0,o_chi2
   real , dimension(15) :: phi=0
   integer :: ncull
@@ -315,7 +315,9 @@ module obj
       phi_model = beta * dot_product(mod_vec,mod_vec)    
       phi_tot = phi_data + phi_model
       deallocate(mod_vec)
-        
+
+      if (cgmin_flag(1)) phi_cg = dot_product(tnod,tnod)
+      
       if(iter==0) then
           PHI_T = phi_tot
           PHI_D = phi_data
@@ -436,59 +438,59 @@ module obj
                 inum_vec(rbi) = inum_vec(rbi) + 1
                 select case(smetric(rbi,2))
                 case(1)
-                      mod_vec(i)=Wm(i)*(sqrt(speed(rblock(i,1)))-sqrt(speed(rblock(i,2))))
+                      mod_vec(i)=Wm(i)*(sqrt(velocity(rblock(i,1)))-sqrt(velocity(rblock(i,2))))
                    
                 case(2)
-                      mod_vec(i)=Wm(i)*abs(sqrt(speed(rblock(i,1)))-sqrt(speed(rblock(i,2))))
+                      mod_vec(i)=Wm(i)*abs(sqrt(velocity(rblock(i,1)))-sqrt(velocity(rblock(i,2))))
                  
                 case(3)
                    select case(smetric(rbi,3))
                    case(0)
-                         mod_vec(i) = Wm(i)*(sqrt(speed(rblock(i,1)))-(C_targ(rbi)))
+                         mod_vec(i) = Wm(i)*(sqrt(velocity(rblock(i,1)))-(C_targ(rbi)))
                                        
                    case(1)
-                         mod_vec(i) = Wm(i)*(sqrt(speed(rblock(i,1)))-(refsig(rblock(i,1))))
+                         mod_vec(i) = Wm(i)*(sqrt(velocity(rblock(i,1)))-(refsig(rblock(i,1))))
                         
                    case(2)
-                         mod_vec(i) = Wm(i)*(sqrt(speed(rblock(i,1)))-(prefsig(rblock(i,1))))
+                         mod_vec(i) = Wm(i)*(sqrt(velocity(rblock(i,1)))-(prefsig(rblock(i,1))))
                    
                    end select
     
                 case(4)
                    select case(smetric(rbi,3))
                    case(0)
-                         mod_vec(i) = Wm(i)*abs(sqrt(speed(rblock(i,1)))-C_targ(rbi))
+                         mod_vec(i) = Wm(i)*abs(sqrt(velocity(rblock(i,1)))-C_targ(rbi))
                       
     
                    case(1)
-                         mod_vec(i) = Wm(i)*abs(sqrt(speed(rblock(i,1)))-(refsig(rblock(i,1))))                     
+                         mod_vec(i) = Wm(i)*abs(sqrt(velocity(rblock(i,1)))-(refsig(rblock(i,1))))                     
     
                    case(2)
-                         mod_vec(i) = Wm(i)*abs(sqrt(speed(rblock(i,1)))-(prefsig(rblock(i,1))))
+                         mod_vec(i) = Wm(i)*abs(sqrt(velocity(rblock(i,1)))-(prefsig(rblock(i,1))))
                    
                    end select
     
                   
              
                 case(5)
-                      mod_vec(i)=Wm(i)*(sqrt(speed(rblock(i,1)))-sqrt(speed(rblock(i,2))))  
+                      mod_vec(i)=Wm(i)*(sqrt(velocity(rblock(i,1)))-sqrt(velocity(rblock(i,2))))  
                   
                 case(6)
-                      mod_vec(i)=Wm(i)*abs(sqrt(speed(rblock(i,1)))-sqrt(speed(rblock(i,2))))
+                      mod_vec(i)=Wm(i)*abs(sqrt(velocity(rblock(i,1)))-sqrt(velocity(rblock(i,2))))
                    
                 case(7)
                    select case(smetric(rbi,3))
                    case(0)
-                         mod_vec(i)=Wm(i)*( (C_targ(rbi) - sqrt(speed(rblock(i,2)))) - &
-                              (C_targ(rbi) - sqrt(speed(rblock(i,1)))))
+                         mod_vec(i)=Wm(i)*( (C_targ(rbi) - sqrt(velocity(rblock(i,2)))) - &
+                              (C_targ(rbi) - sqrt(velocity(rblock(i,1)))))
                   
                    case(1)
-                         mod_vec(i)=Wm(i)*(sqrt(speed(rblock(i,2)))-(refsig(rblock(i,2))) - &
-                              (sqrt(speed(rblock(i,1)))-(refsig(rblock(i,1)))))
+                         mod_vec(i)=Wm(i)*(sqrt(velocity(rblock(i,2)))-(refsig(rblock(i,2))) - &
+                              (sqrt(velocity(rblock(i,1)))-(refsig(rblock(i,1)))))
                      
                    case(2)
-                         mod_vec(i)=Wm(i)*(sqrt(speed(rblock(i,2)))-(prefsig(rblock(i,2))) - &
-                              (sqrt(speed(rblock(i,1)))-(prefsig(rblock(i,1)))))
+                         mod_vec(i)=Wm(i)*(sqrt(velocity(rblock(i,2)))-(prefsig(rblock(i,2))) - &
+                              (sqrt(velocity(rblock(i,1)))-(prefsig(rblock(i,1)))))
     
                    end select
     
@@ -496,37 +498,37 @@ module obj
                 case(8)
                    select case(smetric(rbi,3))
                    case(0)
-                         mod_vec(i)=Wm(i)*( (C_targ(rbi) - sqrt(speed(rblock(i,2)))) - &
-                              (C_targ(rbi) - sqrt(speed(rblock(i,1)))))
+                         mod_vec(i)=Wm(i)*( (C_targ(rbi) - sqrt(velocity(rblock(i,2)))) - &
+                              (C_targ(rbi) - sqrt(velocity(rblock(i,1)))))
                       
                       
                    case(1)
-                         mod_vec(i)=Wm(i)*(sqrt(speed(rblock(i,2)))-(refsig(rblock(i,2))) - &
-                              (sqrt(speed(rblock(i,1)))-(refsig(rblock(i,1)))))
+                         mod_vec(i)=Wm(i)*(sqrt(velocity(rblock(i,2)))-(refsig(rblock(i,2))) - &
+                              (sqrt(velocity(rblock(i,1)))-(refsig(rblock(i,1)))))
                        
                       
                    case(2)
-                         mod_vec(i)=Wm(i)*(sqrt(speed(rblock(i,2)))-(prefsig(rblock(i,2))) - &
-                              (sqrt(speed(rblock(i,1)))-(prefsig(rblock(i,1)))))
+                         mod_vec(i)=Wm(i)*(sqrt(velocity(rblock(i,2)))-(prefsig(rblock(i,2))) - &
+                              (sqrt(velocity(rblock(i,1)))-(prefsig(rblock(i,1)))))
                       
                    end select
     
                case(9)
-                     mod_vec(i)=Wm(i)*(sqrt(speed(rblock(i,1)))-sqrt(speed(rblock(i,2))))
+                     mod_vec(i)=Wm(i)*(sqrt(velocity(rblock(i,1)))-sqrt(velocity(rblock(i,2))))
                   
     
                 case(10)
-                      mod_vec(i)=Wm(i)*abs(sqrt(speed(rblock(i,1)))-sqrt(speed(rblock(i,2))))
+                      mod_vec(i)=Wm(i)*abs(sqrt(velocity(rblock(i,1)))-sqrt(velocity(rblock(i,2))))
                    
                 case(11)
-                      mod_vec(i)=Wm(i)*abs(sqrt(speed(rblock(i,1)))-sqrt(speed(rblock(i,2))))
+                      mod_vec(i)=Wm(i)*abs(sqrt(velocity(rblock(i,1)))-sqrt(velocity(rblock(i,2))))
                    
                 case(12)
-                   mod_vec(i)=Wm(i)*sqrt(speed(rblock(i,1)))*cg_wts(rblock(i,2),1)
+                   mod_vec(i)=Wm(i)*sqrt(velocity(rblock(i,1)))*cg_wts(rblock(i,2),1)
                    do j=1,4
                       k=neighbors(rblock(i,1),j)
                       if(k>0) then
-                         mod_vec(i)=mod_vec(i)+Wm(i)*sqrt(speed(k))*cg_wts(rblock(i,2),j+1)
+                         mod_vec(i)=mod_vec(i)+Wm(i)*sqrt(velocity(k))*cg_wts(rblock(i,2),j+1)
                       end if
                    end do
                   
@@ -541,7 +543,9 @@ module obj
           phi_model = beta * dot_product(mod_vec,mod_vec)    
           phi_tot = phi_data + phi_model
           deallocate(mod_vec)
-            
+
+          if (cgmin_flag(1)) phi_cg = dot_product(tnod,tnod)
+
           if(iter==0) then
               PHI_T = phi_tot
               PHI_D = phi_data

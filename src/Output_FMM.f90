@@ -35,9 +35,9 @@ contains
 
 10  continue
       open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) 'Cannot find the output options file: ',trim(outfile_fmm)
+      write(51,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       close(51)
-      write(*,*) 'Cannot find the output options file: ',trim(outfile_fmm)
+      write(*,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       return
       
 11    continue
@@ -184,10 +184,10 @@ contains
 10  continue
       open(51,file='fmm.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' Cannot find the output options file: ',trim(outfile_fmm)
+      write(51,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       close(51)
       write(*,*) 
-      write(*,*) ' Cannot find the output options file: ',trim(outfile_fmm)
+      write(*,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       return
       
 11    continue
@@ -238,20 +238,20 @@ contains
   !____________________________________________________________________
   
   !_______________________________________________________________________________________
-  subroutine write_speed
+  subroutine write_velocity
     implicit none
     integer :: i
     character(20) :: fname=""
     
-    write(fname,"(A,I0)") "speed.",iter
+    write(fname,"(A,I0)") "velocity.",iter
     open(12,file=fname,status='replace',action='write')
     write(12,*) nelem," 1"
     do i=1,nelem
-          write(12,*) sqrt(1/speed(i))
+          write(12,*) sqrt(1/velocity(i))
     end do
     
     close(12)
-  end subroutine write_speed
+  end subroutine write_velocity
   !_______________________________________________________________________________________
  
  

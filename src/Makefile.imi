@@ -1,15 +1,16 @@
-#PETSC_DIR =(PLACE PETSC DIRECTORY HERE)
-#PETSC_ARCH=(PLACE PETSC ARCH HERE eg. arch-linux2-c-opt)
-PETSC_DIR =/home/robi526/codes/petsc
-PETSC_ARCH=arch-linux2-c-opt
+PETSC_DIR = /home/jays242/softwares/bx_E4D_dev/e4d_dev/third_party/petsc
+PETSC_ARCH= arch-linux2-c-opt
+
+#PETSC_DIR =/home/john775/codes/petsc_opt/petsc
+#PETSC_ARCH=arch-linux2-c-opt
 
 
-
-f95 = ${PETSC_DIR}/${PETSC_ARCH}/bin/mpif90
+f95 = ${PETSC_DIR}/${PETSC_ARCH}/bin/mpif90 
 libs =
 
 CFLAGS = ${PETSC_CC_INCLUDES}
 FFLAGS = ${PETSC_FC_INCLUDES}
+
 
 include ${PETSC_DIR}/lib/petsc/conf/variables
 
@@ -142,3 +143,7 @@ JACOBIAN_FMM.o : JACOBIAN_FMM.F90
 REORDER_MESH.o : REORDER_MESH.f90
 	$(f95) -c REORDER_MESH.f90 -o REORDER_MESH.o
 	
+
+.PHONY: clean
+clean :
+	rm -f *.o *.mod e4d *~

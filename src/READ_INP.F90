@@ -1932,6 +1932,42 @@ contains
         close(51)
         call crash_exit
 
+     case(118)
+        open(51,file='e4d.log',status='old',action='write',position='append')
+        if (i_flag) then
+           write(51,*)
+           write(51,"(A,I8.8)") "  There was a problem reading measurement number ",indx
+           write(51,*) " in the survey file: ",trim(efile)
+           write(51,"(A,I8.8)") "  The data for measurement number ",indx
+           write(51,*) " is zero. THIS IS NOT ALLOWED. "
+           write(51,*) " Please make sure to include only non-zero data in the surevy file. "
+           write(51,*) " Aborting ..."
+           write(*,*)
+           write(*, "(A,I8.8)") "  There was a problem reading measurement number ",indx             
+           write(*, *) " in the survey file: ",trim(efile)
+           write(*, "(A,I8.8)") "  The data for measurement number ",indx
+           write(*, *) " is zero. THIS IS NOT ALLOWED. "
+           write(*, *) " Please make sure to include only non-zero data in the surevy file. "
+           write(*, *) " Aborting ..."
+        else
+           write(51,*)
+           write(51,"(A,I8.8)") "  There was a problem reading measurement number ",indx
+           write(51,*) " in the survey file: ",trim(efile)
+           write(51,"(A,I8.8)") "  The data for measurement number ",indx
+           write(51,*) " is zero. THIS IS NOT ALLOWED. "
+           write(51,*) " Please make sure to include only non-zero data in the surevy file. "
+           write(51,*) " Aborting ..."
+           write(*,*)
+           write(*, "(A,I8.8)") "  There was a problem reading measurement number ",indx             
+           write(*, *) " in the survey file: ",trim(efile)
+           write(*, "(A,I8.8)") "  The data for measurement number ",indx
+           write(*, *) " is zero. THIS IS NOT ALLOWED. "
+           write(*, *) " Please make sure to include only non-zero data in the surevy file. "
+           write(*, *) " Aborting ..."
+        end if
+        close(51)
+        call crash_exit
+        
      case(121)
         open(51,file='e4d.log',status='old',action='write',position='append')
         if(mshfile(mnchar+2:mnchar+6) == ".node") then
@@ -1967,8 +2003,7 @@ contains
            call crash_exit
         end if
         close(51)
-      
-      
+       
     case DEFAULT
 
     end select
@@ -3039,22 +3074,24 @@ contains
             case(36)
                
                if (mode==0) then
-				   if(im_fmm) then
-					  open(52,file='fmm.log',status='old',action='write',position='append')    
-				   else
-					  open(52,file='e4d.log',status='old',action='write',position='append')
-				   end if
-				   write(*,*)
-				   write(52,*) "Reference model not used in inversion options file."
-				   write(52,*) "The validity of this entry in e4d.inp was not checked."
-				   write(*,*)
-				   write(*,*) "Reference model not used in inversion options file."
-				   write(*,*) "The validity of this entry in e4d.inp was not checked."
+                  if(im_fmm) then
+                     open(52,file='fmm.log',status='old',action='write',position='append')
+                  else
+                     open(52,file='e4d.log',status='old',action='write',position='append')
+                  end if
+                  if (.not.im_fmm) then
+                     write(*,*)
+                     write(52,*) "Reference model not used in inversion options file."
+                     write(52,*) "The validity of this entry in e4d.inp was not checked."
+                     write(*,*)
+                     write(*,*) "Reference model not used in inversion options file."
+                     write(*,*) "The validity of this entry in e4d.inp was not checked."
+                  endif                  
+                  close(52)
+               end if                   
 
-				   close(52)
-				end if
-
-          case default
+            case default
+               
     end select
   end subroutine check_inv_opts
   !_________________________________________________________________________  
@@ -3095,6 +3132,7 @@ contains
 
        do i=1,nm         
           read(10,*,IOSTAT=ios) junk,s_conf(i,1:4),dobs(i),Wd(i),dobsi(i),Wdi(i); call check_inp(18,i)
+          if ( dobs(i)==0 .or. dobsi(i)==0 ) call check_inp(118,i)
           if(Wd(i) <= 0 .or. Wdi(i) <= 0) then
              Wd(i) = 1e15
              Wdi(i) = 1e15
@@ -3115,7 +3153,7 @@ contains
     else
        do i=1,nm
           read(10,*,IOSTAT=ios) junk,s_conf(i,1:4),dobs(i),Wd(i); call check_inp(18,i)
-          
+          if ( dobs(i)==0 ) call check_inp(118,i)
           if(Wd(i) <= 0) then
              Wd(i)=1e15
              if( wdwarn) call check_inp(19,i)
@@ -3272,9 +3310,11 @@ contains
   !_________________________________________________________________________
   !_________________________________________________________________________
   subroutine crash_exit
-    
-    call MPI_BCAST(0,1,MPI_INTEGER,0,E4D_COMM,ierr)
-    call PetscFinalize(perr)
+    implicit none
+    integer, parameter :: errcode=100
+    !call MPI_BCAST(0,1,MPI_INTEGER,0,E4D_COMM,ierr)
+    call MPI_ABORT(MPI_COMM_WORLD,errcode,ierr)
+    call PetscFinalize(perr)    
     stop
   end subroutine crash_exit
   !__________________________________________________________________________

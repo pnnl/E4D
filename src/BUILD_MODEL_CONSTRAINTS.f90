@@ -352,7 +352,7 @@ contains
  
     case(1) 
        if(im_fmm) then
-           X=(sqrt(speed(rblock(indx,1)))-sqrt(speed(rblock(indx,2))))
+           X=(sqrt(velocity(rblock(indx,1)))-sqrt(velocity(rblock(indx,2))))
        else
          if(invi) then
             X=(log(phase(rblock(indx,1)))-log(phase(rblock(indx,2))))
@@ -363,7 +363,7 @@ contains
        
     case(2)
        if(im_fmm) then
-           X=abs(sqrt(speed(rblock(indx,1)))-sqrt(speed(rblock(indx,2))))
+           X=abs(sqrt(velocity(rblock(indx,1)))-sqrt(velocity(rblock(indx,2))))
        else
          if(invi) then
             !X=abs(log(sigmai(rblock(indx,1)))-log(sigmai(rblock(indx,2))))
@@ -377,7 +377,7 @@ contains
        select case(smetric(rbi,3))
        case(0)
           if(im_fmm) then
-             X=sqrt(speed(rblock(indx,1)))-(C_targ(rbi))
+             X=sqrt(velocity(rblock(indx,1)))-(C_targ(rbi))
           else
              if(invi) then
                 X=log(phase(rblock(indx,1)))-(C_targ(rbi))
@@ -387,7 +387,7 @@ contains
           end if
        case(1)
           if(im_fmm) then
-             X=sqrt(speed(rblock(indx,1)))-(refsig(rblock(indx,1)))
+             X=sqrt(velocity(rblock(indx,1)))-(refsig(rblock(indx,1)))
           else
              if(invi) then
                 X=log(phase(rblock(indx,1)))-log(refsig(rblock(indx,1)))
@@ -397,7 +397,7 @@ contains
           end if   
        case(2)
           if(im_fmm) then
-             X=sqrt(speed(rblock(indx,1)))-(prefsig(rblock(indx,1)))
+             X=sqrt(velocity(rblock(indx,1)))-(prefsig(rblock(indx,1)))
 	  else
              if(invi) then
                 X=log(phase(rblock(indx,1)))-log(prefsig(rblock(indx,1)))
@@ -411,7 +411,7 @@ contains
        select case(smetric(rbi,3))
        case(0)
        	  if(im_fmm) then
-       	     X=abs(sqrt(speed(rblock(indx,1)))-(C_targ(rbi)))
+       	     X=abs(sqrt(velocity(rblock(indx,1)))-(C_targ(rbi)))
        	  else
              if(invi) then
                 X=abs(log(phase(rblock(indx,1)))-(C_targ(rbi)))
@@ -421,7 +421,7 @@ contains
           end if
        case(1)
           if(im_fmm) then
-             X=abs(sqrt(speed(rblock(indx,1)))-(refsig(rblock(indx,1))))
+             X=abs(sqrt(velocity(rblock(indx,1)))-(refsig(rblock(indx,1))))
           else
              if(invi) then
                 X=abs(log(phase(rblock(indx,1)))-log(refsig(rblock(indx,1))))
@@ -431,7 +431,7 @@ contains
           end if
        case(2)
           if(im_fmm) then
-             X=abs(sqrt(speed(rblock(indx,1)))-(prefsig(rblock(indx,1))))
+             X=abs(sqrt(velocity(rblock(indx,1)))-(prefsig(rblock(indx,1))))
           else
              if(invi) then
                 X=abs(log(phase(rblock(indx,1)))-log(prefsig(rblock(indx,1))))
@@ -443,7 +443,7 @@ contains
      
     case(5)
        if(im_fmm) then
-          X=(sqrt(speed(rblock(indx,1)))-sqrt(speed(rblock(indx,2)))) 
+          X=(sqrt(velocity(rblock(indx,1)))-sqrt(velocity(rblock(indx,2)))) 
        else
           if(invi) then
              X=(log(phase(rblock(indx,1)))-log(phase(rblock(indx,2)))) 
@@ -473,7 +473,7 @@ contains
        
     case(6)
        if(im_fmm) then
-          X=abs(sqrt(speed(rblock(indx,1)))-sqrt(speed(rblock(indx,2))))  
+          X=abs(sqrt(velocity(rblock(indx,1)))-sqrt(velocity(rblock(indx,2))))  
        else
           if(invi) then
              X=abs(log(phase(rblock(indx,1)))-log(phase(rblock(indx,2))))
@@ -516,8 +516,8 @@ contains
        select case(smetric(rbi,3))
        case(0)
           if(im_fmm) then
-             X=(sqrt(speed(rblock(indx,1)))-C_targ(rbi)) - &
-               (sqrt(speed(rblock(indx,2)))-C_targ(rbi))
+             X=(sqrt(velocity(rblock(indx,1)))-C_targ(rbi)) - &
+               (sqrt(velocity(rblock(indx,2)))-C_targ(rbi))
           else
              if(invi) then
                 X=(log(phase(rblock(indx,1)))-C_targ(rbi)) - &
@@ -529,8 +529,8 @@ contains
           end if
        case(1)
           if(im_fmm) then
-              X=(sqrt(speed(rblock(indx,1)))-(refsig(rblock(indx,1)))) - &
-                (sqrt(speed(rblock(indx,2)))-(refsig(rblock(indx,2)))) 
+              X=(sqrt(velocity(rblock(indx,1)))-(refsig(rblock(indx,1)))) - &
+                (sqrt(velocity(rblock(indx,2)))-(refsig(rblock(indx,2)))) 
           else
              if(invi) then
                 X=(log(phase(rblock(indx,1)))-log(refsig(rblock(indx,1)))) - &
@@ -543,8 +543,8 @@ contains
           end if
       case(2)
          if(im_fmm) then
-            X=(sqrt(speed(rblock(indx,1)))-(prefsig(rblock(indx,1)))) - &
-              (sqrt(speed(rblock(indx,2)))-(prefsig(rblock(indx,2))))         
+            X=(sqrt(velocity(rblock(indx,1)))-(prefsig(rblock(indx,1)))) - &
+              (sqrt(velocity(rblock(indx,2)))-(prefsig(rblock(indx,2))))         
          else
             if(invi) then
                X=(log(phase(rblock(indx,1)))-log(prefsig(rblock(indx,1)))) - &
@@ -561,8 +561,8 @@ contains
        select case(smetric(rbi,3))
        case(0)
           if(im_fmm) then
-             X=abs((sqrt(speed(rblock(indx,1)))-C_targ(rbi)) - &
-                   (sqrt(speed(rblock(indx,2)))-C_targ(rbi)))
+             X=abs((sqrt(velocity(rblock(indx,1)))-C_targ(rbi)) - &
+                   (sqrt(velocity(rblock(indx,2)))-C_targ(rbi)))
           else
              if(invi) then
                 X=abs((log(phase(rblock(indx,1)))-C_targ(rbi)) - &
@@ -574,8 +574,8 @@ contains
           end if
        case(1)
           if(im_fmm) then
-             X=abs((sqrt(speed(rblock(indx,1)))-(refsig(rblock(indx,1)))) - &
-                   (sqrt(speed(rblock(indx,2)))-(refsig(rblock(indx,2)))))
+             X=abs((sqrt(velocity(rblock(indx,1)))-(refsig(rblock(indx,1)))) - &
+                   (sqrt(velocity(rblock(indx,2)))-(refsig(rblock(indx,2)))))
           else
              if(invi) then
                 X=abs((log(phase(rblock(indx,1)))-log(refsig(rblock(indx,1)))) - &
@@ -587,8 +587,8 @@ contains
           end if
        case(2)
           if(im_fmm) then
-             X=abs((sqrt(speed(rblock(indx,1)))-(prefsig(rblock(indx,1)))) - &
-                  (sqrt(speed(rblock(indx,2))) -(prefsig(rblock(indx,2)))))
+             X=abs((sqrt(velocity(rblock(indx,1)))-(prefsig(rblock(indx,1)))) - &
+                  (sqrt(velocity(rblock(indx,2))) -(prefsig(rblock(indx,2)))))
           else
              if(invi) then
                 X=abs((log(phase(rblock(indx,1)))-log(prefsig(rblock(indx,1)))) - &
@@ -602,7 +602,7 @@ contains
 
     case(9)
        if(im_fmm) then
-          X=(sqrt(speed(rblock(indx,1)))-sqrt(speed(rblock(indx,2))))
+          X=(sqrt(velocity(rblock(indx,1)))-sqrt(velocity(rblock(indx,2))))
        else
          if(invi) then
             X=(log(phase(rblock(indx,1)))-log(phase(rblock(indx,2))))
@@ -613,7 +613,7 @@ contains
        
     case(10)
        if(im_fmm) then
-          X=abs(sqrt(speed(rblock(indx,1)))-sqrt(speed(rblock(indx,2))))
+          X=abs(sqrt(velocity(rblock(indx,1)))-sqrt(velocity(rblock(indx,2))))
        else
           if(invi) then
              X=abs(log(phase(rblock(indx,1)))-log(phase(rblock(indx,2))))
@@ -624,7 +624,7 @@ contains
        
     case(11) !test case for horizontal radial regularization TCJ 11/04/15
        if(im_fmm) then
-           X=abs(sqrt(speed(rblock(indx,1)))-sqrt(speed(rblock(indx,2))))
+           X=abs(sqrt(velocity(rblock(indx,1)))-sqrt(velocity(rblock(indx,2))))
        else
           if(invi) then
              X=abs(log(phase(rblock(indx,1)))-log(phase(rblock(indx,2))))
@@ -667,10 +667,10 @@ contains
        !is the row of cg_wts that holds this constraint.
        call build_cgwt(rblock(indx,1),rblock(indx,2))
        if(im_fmm) then
-          X=sqrt(speed(rblock(indx,1)))*cg_wts(rblock(indx,2),1)
+          X=sqrt(velocity(rblock(indx,1)))*cg_wts(rblock(indx,2),1)
           do i=1,4
              eln=neighbors(rblock(indx,1),i)
-             X=X+sqrt(speed(eln))*cg_wts(rblock(indx,2),i+1)
+             X=X+sqrt(velocity(eln))*cg_wts(rblock(indx,2),i+1)
           end do
        else
           X=log(sigma(rblock(indx,1)))*cg_wts(rblock(indx,2),1)
@@ -808,9 +808,9 @@ contains
           do i=1,nelem
              if(use4cgrad(i)) then
                 ncgrad=ncgrad+1
-                grad(1)=WA(1+(ncgrad-1)*15)*dble(speed(i))
-                grad(2)=WA(2+(ncgrad-1)*15)*dble(speed(i))
-                grad(3)=WA(3+(ncgrad-1)*15)*dble(speed(i))
+                grad(1)=WA(1+(ncgrad-1)*15)*dble(velocity(i))
+                grad(2)=WA(2+(ncgrad-1)*15)*dble(velocity(i))
+                grad(3)=WA(3+(ncgrad-1)*15)*dble(velocity(i))
                 ! DGB: Store col index
                 !itemp(1) = i
                 do j=1,4
@@ -819,11 +819,11 @@ contains
                    !itemp(j+1) = nbr
                    
                    grad(1)=grad(1)+WA(1+j*3+(ncgrad-1)*15)*&
-                       dble(speed(nbr))
+                       dble(velocity(nbr))
                    grad(2)=grad(2)+WA(2+j*3+(ncgrad-1)*15)*&
-                        dble(speed(nbr))
+                        dble(velocity(nbr))
                    grad(3)=grad(3)+WA(3+j*3+(ncgrad-1)*15)*&
-                        dble(speed(nbr))
+                        dble(velocity(nbr))
                 end do
 
 !if (iter.eq.25.and.incr_b.eq.15*98990) print*,"ielem, grad_m2:",i,grad                
@@ -928,12 +928,12 @@ contains
        case(2)
           do i=1,nelem
              if(use4cgrad(i)) then
-                tnod(1+incr)=BM(1+incr_b)*dble(speed(i))
-                tnod(2+incr)=BM(2+incr_b)*dble(speed(i))
-                tnod(3+incr)=BM(3+incr_b)*dble(speed(i))
+                tnod(1+incr)=BM(1+incr_b)*dble(velocity(i))
+                tnod(2+incr)=BM(2+incr_b)*dble(velocity(i))
+                tnod(3+incr)=BM(3+incr_b)*dble(velocity(i))
 
 !if (iter.eq.25.and.incr.eq.3*98990) then                
-!   print*,"Speed Center:",speed(i)
+!   print*,"Velocity Center:",velocity(i)
 !   print*,"i:",0.25*dble(sum(nodes(elements(i,1:4),1))),0.25*dble(sum(nodes(elements(i,1:4),2))), &
 !        0.25*dble(sum(nodes(elements(i,1:4),3)))                
 !endif
@@ -941,14 +941,14 @@ contains
                 do j=1,4
                    nbr=neighbors(i,j)
                    tnod(1+incr)=tnod(1+incr)+BM(1+j*3+incr_b)*&
-                        dble(speed(nbr))
+                        dble(velocity(nbr))
                    tnod(2+incr)=tnod(2+incr)+BM(2+j*3+incr_b)*&
-                        dble(speed(nbr))
+                        dble(velocity(nbr))
                    tnod(3+incr)=tnod(3+incr)+BM(3+j*3+incr_b)*&
-                        dble(speed(nbr))
+                        dble(velocity(nbr))
 
 !if (iter.eq.25.and.incr.eq.3*98990) then                   
-!   print*,"Speed Nbrs: ",nbr,j,speed(nbr)
+!   print*,"Velocity Nbrs: ",nbr,j,velocity(nbr)
 !   print*,0.25*dble(sum(nodes(elements(nbr,1:4),1))),0.25*dble(sum(nodes(elements(nbr,1:4),2))), &
 !       0.25*dble(sum(nodes(elements(nbr,1:4),3)))
 !endif
@@ -956,7 +956,7 @@ contains
                 end do
 
 !if (iter.eq.25.and.incr.eq.3*98990) then                
-!   print*,"tau_speed",tnod(1+incr),tnod(2+incr),tnod(3+incr)
+!   print*,"tau_velocity",tnod(1+incr),tnod(2+incr),tnod(3+incr)
 !endif
 
                 incr=incr+3
@@ -980,9 +980,9 @@ contains
     logical :: found
 
     if(im_fmm) then
-       write(*,*) 'FMM MASTER SETTING UP CROSS-GRADIENT CONSTRAINTS'
+       write(*,*) ' FMM: MASTER SETTING UP CROSS-GRADIENT CONSTRAINTS'
     else
-       write(*,*) 'E4D MASTER SETTING UP CROSS-GRADIENT CONSTRAINTS'
+       write(*,*) ' E4D: MASTER SETTING UP CROSS-GRADIENT CONSTRAINTS'
     end if
 
     !!modify nphys and master_ranks if needed
@@ -1018,11 +1018,11 @@ contains
        end if
     end do
 
-    if(im_fmm) then
-       write(*,*) 'FMM: ',block4cgrad
-    else
-       write(*,*) 'E4D: ',block4cgrad
-    end if
+    !if(im_fmm) then
+    !   write(*,*) 'FMM: ',block4cgrad
+    !else
+    !   write(*,*) 'E4D: ',block4cgrad
+    !end if
 
     !!use4cgrad determines which elements will have cross gradient
     !!constraints
@@ -1254,12 +1254,12 @@ contains
           end do
 
        else
-          C1 = G(3,1)*sqrt(speed(elm))
-          C2 = G(2,1)*sqrt(speed(elm))
+          C1 = G(3,1)*sqrt(velocity(elm))
+          C2 = G(2,1)*sqrt(velocity(elm))
           do i=2,5
              nbr = neighbors(elm,i-1)
-             C1 = C1+G(3,i)*sqrt(speed(nbr))
-             C2 = C2+G(2,i)*sqrt(speed(nbr))
+             C1 = C1+G(3,i)*sqrt(velocity(nbr))
+             C2 = C2+G(2,i)*sqrt(velocity(nbr))
           end do  
        end if
 
@@ -1285,12 +1285,12 @@ contains
           end do
 
        else
-          C1 = G(1,1)*sqrt(speed(elm))
-          C2 = G(3,1)*sqrt(speed(elm))
+          C1 = G(1,1)*sqrt(velocity(elm))
+          C2 = G(3,1)*sqrt(velocity(elm))
           do i=2,5
              nbr = neighbors(elm,i-1)
-             C1 = C1+G(1,i)*sqrt(speed(nbr))
-             C2 = C2+G(3,i)*sqrt(speed(nbr))
+             C1 = C1+G(1,i)*sqrt(velocity(nbr))
+             C2 = C2+G(3,i)*sqrt(velocity(nbr))
           end do  
        end if
 
@@ -1316,12 +1316,12 @@ contains
           end do
 
        else
-          C1 = G(2,1)*sqrt(speed(elm))
-          C2 = G(1,1)*sqrt(speed(elm))
+          C1 = G(2,1)*sqrt(velocity(elm))
+          C2 = G(1,1)*sqrt(velocity(elm))
           do i=2,5
              nbr = neighbors(elm,i-1)
-             C1 = C1+G(2,i)*sqrt(speed(nbr))
-             C2 = C2+G(1,i)*sqrt(speed(nbr))
+             C1 = C1+G(2,i)*sqrt(velocity(nbr))
+             C2 = C2+G(1,i)*sqrt(velocity(nbr))
           end do  
        end if
 

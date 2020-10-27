@@ -29,20 +29,20 @@ contains
 
     call send_command(20)
     if(im_fmm) then
-       write(*,*) "FMM: STARTING INVERSION"
+       write(*,*) " FMM: STARTING INVERSION"
     else
-       write(*,*) "E4D: STARTING INVERSION"
+       write(*,*) " E4D: STARTING INVERSION"
     end if
 
-    if(im_fmm .and. iter.eq.1) then
-       do i=1,nrz
-          write(*,*) 'FMM smetric: ',smetric(i,:),', zwts: ',zwts(i,:)
-       end do
-    elseif(iter.eq.1) then
-       do i=1,nrz
-          write(*,*) 'E4D smetric: ',smetric(i,:),', zwts: ',zwts(i,:)
-       end do
-    end if
+    !if(im_fmm .and. iter.eq.1) then
+    !   do i=1,nrz
+    !      write(*,*) 'FMM smetric: ',smetric(i,:),', zwts: ',zwts(i,:)
+    !   end do
+    !elseif(iter.eq.1) then
+    !   do i=1,nrz
+    !      write(*,*) 'E4D smetric: ',smetric(i,:),', zwts: ',zwts(i,:)
+    !   end do
+    !end if
 
     !ncon=ccount !maxval(wrows)   
     xpar = 0
@@ -50,7 +50,7 @@ contains
 
     if(im_fmm) then
        sigma = log(sigma)
-       speed = sqrt(speed)
+       velocity = sqrt(velocity)
        nm=nm_fmm
        allocate(q(nm+ccount),r(nm+ccount),b(nm+ccount),r1(nm+ccount))
        b = 0
@@ -65,7 +65,7 @@ contains
           refsig=log(refsig)
           if(allocated(prefsig)) prefsig=log(prefsig)
        end if
-       speed = sqrt(speed)
+       velocity = sqrt(velocity)
     end if
  
     if(invi) then
@@ -82,13 +82,22 @@ contains
 
     if(wopt) then
        call cpu_time(ce)
-       write(*,"(A,g10.4,A)") "  SENDING DATA NOISE TO SLAVES AT: ",ce-cs," seconds"
+       if (im_fmm) then
+          write(*,"(A,g10.4,A)") "  FMM: SENDING DATA NOISE TO SLAVES AT: ",ce-cs," seconds"
+       else
+          write(*,"(A,g10.4,A)") "  E4D: SENDING DATA NOISE TO SLAVES AT: ",ce-cs," seconds"
+       endif       
        call send_data_noise
     end if
 
     !!Build the model part of b
     call cpu_time(ce)
-    write(*,"(A,g10.4,A)") "  CONSTRUCTING CONSTRAINT RESIDUALS AT: ",ce-cs," seconds"
+    if (im_fmm) then       
+       write(*,"(A,g10.4,A)") "  FMM: CONSTRUCTING CONSTRAINT RESIDUALS AT: ",ce-cs," seconds"
+    else
+       write(*,"(A,g10.4,A)") "  E4D: CONSTRUCTING CONSTRAINT RESIDUALS AT: ",ce-cs," seconds"
+    endif
+    
     do i=1,ccount
        
        if(invi .and. Wm(i) .eq. 0) then 
@@ -101,7 +110,7 @@ contains
        select case(smetric(rbi,2))
        case(1) 
           if(im_fmm) then
-               b(nm+i)=Wm(i)*(speed(rblock(i,2)) - speed(rblock(i,1))) 
+               b(nm+i)=Wm(i)*(velocity(rblock(i,2)) - velocity(rblock(i,1))) 
           else
              if(invi) then
                 !b(nm+i)=Wm(i)*(sigmai(rblock(i,2)) - sigmai(rblock(i,1))) 
@@ -112,7 +121,7 @@ contains
           end if
        case(2)
           if(im_fmm) then
-             b(nm+i)=Wm(i)*(speed(rblock(i,2)) - speed(rblock(i,1))) 
+             b(nm+i)=Wm(i)*(velocity(rblock(i,2)) - velocity(rblock(i,1))) 
           else
              if(invi) then
                 !b(nm+i)=Wm(i)*(sigmai(rblock(i,2)) - sigmai(rblock(i,1)))
@@ -125,7 +134,7 @@ contains
           select case(smetric(rbi,3))
           case(0)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*(C_targ(rbi) - speed(rblock(i,1)))
+                b(nm+i)=Wm(i)*(C_targ(rbi) - velocity(rblock(i,1)))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*((C_targ(rbi))+ sigma(rblock(i,1)) - sigmai(rblock(i,1)))
@@ -135,7 +144,7 @@ contains
              end if
           case(1)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*(refsig(rblock(i,1)) - speed(rblock(i,1)))
+                b(nm+i)=Wm(i)*(refsig(rblock(i,1)) - velocity(rblock(i,1)))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*(refsig(rblock(i,1))+ sigma(rblock(i,1)) - sigmai(rblock(i,1)))
@@ -145,7 +154,7 @@ contains
              end if
           case(2)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*(prefsig(rblock(i,1)) - speed(rblock(i,1)))
+                b(nm+i)=Wm(i)*(prefsig(rblock(i,1)) - velocity(rblock(i,1)))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*(prefsig(rblock(i,1)) + sigma(rblock(i,1)) - sigmai(rblock(i,1)))
@@ -160,7 +169,7 @@ contains
           select case(smetric(rbi,3))
           case(0)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*(C_targ(rbi) - speed(rblock(i,1)))
+                b(nm+i)=Wm(i)*(C_targ(rbi) - velocity(rblock(i,1)))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*(C_targ(rbi) + sigma(rblock(i,1)) - sigmai(rblock(i,1)))
@@ -170,7 +179,7 @@ contains
              end if
           case(1)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*(refsig(rblock(i,1)) - speed(rblock(i,1)))
+                b(nm+i)=Wm(i)*(refsig(rblock(i,1)) - velocity(rblock(i,1)))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*(refsig(rblock(i,1)) - sigmai(rblock(i,1)))
@@ -180,7 +189,7 @@ contains
              end if
           case(2)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*(prefsig(rblock(i,1)) - speed(rblock(i,1)))
+                b(nm+i)=Wm(i)*(prefsig(rblock(i,1)) - velocity(rblock(i,1)))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*(prefsig(rblock(i,1)) - sigmai(rblock(i,1)))
@@ -192,7 +201,7 @@ contains
           
        case(5)
           if(im_fmm) then
-             b(nm+i)=Wm(i)*(speed(rblock(i,2)) - speed(rblock(i,1))) 
+             b(nm+i)=Wm(i)*(velocity(rblock(i,2)) - velocity(rblock(i,1))) 
           else
              if(invi) then
                 b(nm+i)=Wm(i)*(sigmai(rblock(i,2)) - sigmai(rblock(i,1))) 
@@ -203,7 +212,7 @@ contains
 
        case(6)
           if(im_fmm) then
-             b(nm+i)=Wm(i)*(speed(rblock(i,2)) - speed(rblock(i,1))) 
+             b(nm+i)=Wm(i)*(velocity(rblock(i,2)) - velocity(rblock(i,1))) 
           else
              if(invi) then
                 b(nm+i)=Wm(i)*(sigmai(rblock(i,2)) - sigmai(rblock(i,1)))   
@@ -216,7 +225,7 @@ contains
           select case(smetric(rbi,3))
           case(0)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*( (C_targ(rbi) - speed(rblock(i,2))) - (C_targ(rbi) - speed(rblock(i,1))))
+                b(nm+i)=Wm(i)*( (C_targ(rbi) - velocity(rblock(i,2))) - (C_targ(rbi) - velocity(rblock(i,1))))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*( (C_targ(rbi) - sigmai(rblock(i,2))) - (C_targ(rbi) - sigmai(rblock(i,1))))
@@ -226,8 +235,8 @@ contains
              end if
           case(1)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*((speed(rblock(i,2))-refsig(rblock(i,2))) - &
-                     (speed(rblock(i,1))-refsig(rblock(i,1))))
+                b(nm+i)=Wm(i)*((velocity(rblock(i,2))-refsig(rblock(i,2))) - &
+                     (velocity(rblock(i,1))-refsig(rblock(i,1))))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*((sigmai(rblock(i,2))-refsig(rblock(i,2))) - &
@@ -239,8 +248,8 @@ contains
              end if
           case(2)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*((speed(rblock(i,2))-prefsig(rblock(i,2))) - &
-                     (speed(rblock(i,1))-prefsig(rblock(i,1))))
+                b(nm+i)=Wm(i)*((velocity(rblock(i,2))-prefsig(rblock(i,2))) - &
+                     (velocity(rblock(i,1))-prefsig(rblock(i,1))))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*((sigmai(rblock(i,2))-prefsig(rblock(i,2))) - &
@@ -257,8 +266,8 @@ contains
           select case(smetric(rbi,3))
           case(0)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*( (C_targ(rbi) - speed(rblock(i,2))) &
-                     - (C_targ(rbi) - speed(rblock(i,1))))
+                b(nm+i)=Wm(i)*( (C_targ(rbi) - velocity(rblock(i,2))) &
+                     - (C_targ(rbi) - velocity(rblock(i,1))))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*( (C_targ(rbi) - sigmai(rblock(i,2))) &
@@ -270,8 +279,8 @@ contains
              end if
           case(1)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*((speed(rblock(i,2))-refsig(rblock(i,2))) - &
-                     (speed(rblock(i,1))-refsig(rblock(i,1))))
+                b(nm+i)=Wm(i)*((velocity(rblock(i,2))-refsig(rblock(i,2))) - &
+                     (velocity(rblock(i,1))-refsig(rblock(i,1))))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*(sigma(rblock(i,1))-sigmai(rblock(i,1)) - & 
@@ -283,8 +292,8 @@ contains
              end if
           case(2)
              if(im_fmm) then
-                b(nm+i)=Wm(i)*((speed(rblock(i,2))-prefsig(rblock(i,2))) - &
-                     (speed(rblock(i,1))-prefsig(rblock(i,1))))
+                b(nm+i)=Wm(i)*((velocity(rblock(i,2))-prefsig(rblock(i,2))) - &
+                     (velocity(rblock(i,1))-prefsig(rblock(i,1))))
              else
                 if(invi) then
                    b(nm+i)=Wm(i)*(sigma(rblock(i,1))-sigmai(rblock(i,1)) - & 
@@ -298,7 +307,7 @@ contains
 
        case(9)
           if(im_fmm) then
-             b(nm+i)=Wm(i)*(speed(rblock(i,2)) - speed(rblock(i,1)))
+             b(nm+i)=Wm(i)*(velocity(rblock(i,2)) - velocity(rblock(i,1)))
           else
              if(invi) then
                 b(nm+i)=Wm(i)*(sigmai(rblock(i,2)) - sigmai(rblock(i,1))) 
@@ -309,7 +318,7 @@ contains
           
        case(10)
           if(im_fmm) then
-             b(nm+i)=Wm(i)*(speed(rblock(i,2)) - speed(rblock(i,1))) 
+             b(nm+i)=Wm(i)*(velocity(rblock(i,2)) - velocity(rblock(i,1))) 
           else
              if(invi) then
                 b(nm+i)=Wm(i)*(sigmai(rblock(i,2)) - sigmai(rblock(i,1))) 
@@ -319,7 +328,7 @@ contains
           end if
        case(11)
           if(im_fmm) then
-             b(nm+i)=Wm(i)*(speed(rblock(i,2)) - speed(rblock(i,1))) 
+             b(nm+i)=Wm(i)*(velocity(rblock(i,2)) - velocity(rblock(i,1))) 
           else
              if(invi) then
                 b(nm+i)=Wm(i)*(sigmai(rblock(i,2)) - sigmai(rblock(i,1))) 
@@ -330,11 +339,11 @@ contains
 
        case(12)      
        	  if(im_fmm) then
-             b(nm+i) = -Wm(i)*cg_wts(rblock(i,2),1)*speed(rblock(i,1))
+             b(nm+i) = -Wm(i)*cg_wts(rblock(i,2),1)*velocity(rblock(i,1))
              do j=1,4
                 nbr = neighbors(rblock(i,1),j)
                 if(nbr>0) then
-                   b(nm+i) = b(nm+i) - Wm(i)*cg_wts(rblock(i,2),j+1)*speed(nbr)
+                   b(nm+i) = b(nm+i) - Wm(i)*cg_wts(rblock(i,2),j+1)*velocity(nbr)
                 end if
              end do
 
@@ -377,8 +386,8 @@ contains
     !!beta4cg = sqrt(betalist(1))*sqrt(betalist(2))
     !beta4cg = 1.0 !beta4cg*2 !!for test
     
-    if(im_fmm) write(*,*) 'FMM beta4cg:',iter,beta4cg
-    if(.not. im_fmm) write(*,*) 'E4D beta4cg',iter,beta4cg
+    !if(im_fmm) write(*,*) ' FMM beta4cg:',iter,beta4cg
+    !if(.not. im_fmm) write(*,*) ' E4D beta4cg',iter,beta4cg
 
     ! if (im_fmm) then
     !    if (iter.eq.1) then
@@ -454,8 +463,12 @@ contains
     unstable = 0
     resNE = 0
     call cpu_time(ce)
-    write(*,"(A,g10.4,A)") "  STARTING JOINT INNER ITERATIONS AT: ",ce-cs," seconds"
-
+    if (im_fmm) then
+       write(*,"(A,g10.4,A)") "  FMM: STARTING JOINT INNER ITERATIONS AT: ",ce-cs," seconds"
+    else
+       write(*,"(A,g10.4,A)") "  E4D: STARTING JOINT INNER ITERATIONS AT: ",ce-cs," seconds"
+    endif
+    
     do i=1,max_initer
 
        !if( info .ne. 0) then
@@ -542,7 +555,7 @@ contains
     
     if(im_fmm) then
        sigma = exp(sigma)
-       speed = speed**2
+       velocity = velocity**2
        sig_up = real(xpar)
     else
        if(invi) then
@@ -555,7 +568,7 @@ contains
        end if
        !!map xpar to sigup
        sig_up = real(xpar)
-       speed = speed**2
+       velocity = velocity**2
     end if
  100 continue
   

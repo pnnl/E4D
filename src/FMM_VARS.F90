@@ -40,7 +40,7 @@ implicit none
   real, dimension(:,:), allocatable :: s_pos                  !!source positions
   real, dimension(:,:), allocatable :: rc_pos                 !!receiver positions
   real, dimension(:), allocatable :: dobs_fmm,Wd_fmm          !!observed data and weighting vector
-  real, dimension(:), allocatable :: speed                    !!element speed
+  real, dimension(:), allocatable :: velocity                    !!element velocity
   real, dimension(:), allocatable :: TT
   real, dimension(:,:), allocatable :: ttimes
   real, dimension(:), allocatable :: ttpred                   !!predicted data vector
@@ -49,7 +49,7 @@ implicit none
   integer :: mode_fmm                                         !!run mode
   integer :: ns,tns                                           !!num my sources, total num sources
   integer :: nrc                                              !!num of receivers
-  integer :: nspd                                             !!number of elements, speed values
+  integer :: nspd                                             !!number of elements, velocity values
   integer :: nm_fmm                                           !!number of measurements
   integer, dimension(:,:), allocatable :: s_conf_fmm          !!survey configuration
   integer, dimension(:), allocatable :: s_nods                !!indices of source nodes

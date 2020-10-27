@@ -1,8 +1,9 @@
-PETSC_DIR = /Users/jays242/softwares/E4D_dev2/third_party/petsc-3.14.0/
-PETSC_ARCH= arch-darwin-c-debug
+PETSC_DIR = /home/jays242/softwares/bx_E4D_dev/e4d_dev/third_party/petsc
+PETSC_ARCH= arch-linux2-c-opt
 
 #PETSC_DIR =/home/john775/codes/petsc_opt/petsc
 #PETSC_ARCH=arch-linux2-c-opt
+
 f95 = ${PETSC_DIR}/${PETSC_ARCH}/bin/mpif90
 libs =
 

@@ -298,8 +298,8 @@ module slave_fmm
       implicit none
       
       call MPI_BCAST(nspd, 1, MPI_INTEGER, 0,FMM_COMM,ierr)
-      if(.not.allocated(speed)) allocate(speed(nspd))
-      call MPI_BCAST(speed, nspd,MPI_REAL,0,FMM_COMM,ierr)
+      if(.not.allocated(velocity)) allocate(velocity(nspd))
+      call MPI_BCAST(velocity, nspd,MPI_REAL,0,FMM_COMM,ierr)
 
     end subroutine receive_slowness
     !__________________________________________________________________
