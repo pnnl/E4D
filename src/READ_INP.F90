@@ -302,10 +302,14 @@ contains
        else if(mshfile(mnchar+1:mnchar+3).ne."cfg") then
           call check_inp(21,0)
        end if
+
+       ! Both E4D and FMM can't build mesh file together so
+       if (simulate_fmm) call check_inp(58,junk)
+       
+       ! return for mesh generation mode       
+       return       
     end if
     
-    if(mode == 1) return
-
     !!check mesh files
     if (mode > 1)then 
        call check_inp(121,mnchar)
@@ -1105,7 +1109,7 @@ contains
        inquire(file='e4d.inp',exist=exst)
        if(.not. exst) then
           open(51,file='e4d.log',status='old',action='write',position='append')
-          write(51,*) "Cannot find the primary input file e4d.inp: aborting"
+          write(51,*) "E4D: Cannot find the primary input file e4d.inp: aborting"
           close(51)
           call crash_exit
        end if
@@ -1113,7 +1117,7 @@ contains
     case(101)
        if(ios .ne. 0) then
           open(51,file='e4d.log',status='old',action='write',position='append')
-          write(51,*) "There was a problem reading the mode in e4d.inp: aborting"
+          write(51,*) "E4D: There was a problem reading the mode in e4d.inp: aborting"
           close(51)
           call crash_exit
        end if
@@ -1121,10 +1125,10 @@ contains
     case(1)
        if(ios .ne. 0) then
           open(51,file='e4d.log',status='old',action='write',position='append')
-          write(51,*) " There was a problem reading the mode in e4d.inp."
-          write(51,*) " Aborting ..."
-          write(*,*) " There was a problem reading the mode in e4d.inp."
-          write(*,*) " Aborting ..."
+          write(51,*) " E4D: There was a problem reading the mode in e4d.inp."
+          write(51,*) " E4D: Aborting ..."
+          write(*, *) " E4D: There was a problem reading the mode in e4d.inp."
+          write(*, *) " E4D: Aborting ..."
           close(51)
           call crash_exit
        end if
@@ -1309,18 +1313,18 @@ contains
        if(ios .ne. 0) then
 
           if(mode == 1 .or. mode == 21 .or. mode == 31) then
-             write(51,*) "  ERROR: There was a problem reading the mesh config. file name in e4d.inp"
-             write(51,*) "  Aborting ..."
+             write(51,*) "  E4D:  There was a problem reading the mesh config. file name in e4d.inp"
+             write(51,*) "  E4D: Aborting ..."
              close(51)
-             write(*,*) "  ERROR: There was a problem reading the mesh config. file name in e4d.inp"
-             write(*,*) "  Aborting ..."
+             write(*,*) "  E4D:  There was a problem reading the mesh config. file name in e4d.inp"
+             write(*,*) "  E4D: Aborting ..."
           else
              open(51,file='e4d.log',status='old',action='write',position='append')
-             write(51,*) "  ERROR: There was a problem reading the mesh file name in e4d.inp"
-             write(51,*) "  Aborting ..."
+             write(51,*) "  E4D:  There was a problem reading the mesh file name in e4d.inp"
+             write(51,*) "  E4D: Aborting ..."
              close(51)
-             write(*,*) "  ERROR: There was a problem reading the mesh file name in e4d.inp"
-             write(*,*) "  Aborting ..."
+             write(*,*) "  E4D:  There was a problem reading the mesh file name in e4d.inp"
+             write(*,*) "  E4D: Aborting ..."
           end if
           call crash_exit
 
@@ -1337,8 +1341,8 @@ contains
 
        open(51,file='e4d.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
-          write(51,*) "There was a problem reading the survey file name in e4d.inp: aborting"
-          write(*,*) "There was a problem reading the survey file name in e4d.inp: aborting"
+          write(51,*) "E4D: There was a problem reading the survey file name in e4d.inp: aborting"
+          write(*,*) "E4D: There was a problem reading the survey file name in e4d.inp: aborting"
           close(51)
           call crash_exit
        else
@@ -1349,8 +1353,8 @@ contains
     case(4)
        open(51,file='e4d.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
-          write(51,*) "There was a problem reading the conductivity file name in e4d.inp: aborting"
-          write(*,*) "There was a problem reading the conductivity file name in e4d.inp: aborting"
+          write(51,*) "E4D: There was a problem reading the conductivity file name in e4d.inp: aborting"
+          write(*,*) "E4D: There was a problem reading the conductivity file name in e4d.inp: aborting"
           close(51)
           call crash_exit
        else
@@ -1366,8 +1370,8 @@ contains
       
        open(51,file='e4d.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
-          write(51,*) "There was a problem reading the output options file name in e4d.inp: aborting"
-          write(*,*) "There was a problem reading the output options file name in e4d.inp: aborting"
+          write(51,*) "E4D: There was a problem reading the output options file name in e4d.inp: aborting"
+          write(*,*) "E4D: There was a problem reading the output options file name in e4d.inp: aborting"
           close(51)
           call crash_exit
        else
@@ -1384,27 +1388,27 @@ contains
        	
        if(ios .ne. 0) then
          if(im_fmm) then
-            write(51,*) "There was a problem reading the inverse options file name in fmm.inp: aborting"
-            write(*,*) "There was a problem reading the inverse options file name in fmm.inp: aborting"
+            write(51,*) "E4D: There was a problem reading the inverse options file name in fmm.inp: aborting"
+            write(*,*) "E4D: There was a problem reading the inverse options file name in fmm.inp: aborting"
             close(51)
             call crash_exit
          else
             if(mode == 22 .or. mode == 23) then
-                write(51,*) "There was a problem reading the two SIP inverse option file names in e4d.inp: aborting"
-                write(*,*) "There was a problem reading the two SIP inverse option file names in e4d.inp: aborting"
+                write(51,*) "E4D: There was a problem reading the two SIP inverse option file names in e4d.inp: aborting"
+                write(*,*) "E4D: There was a problem reading the two SIP inverse option file names in e4d.inp: aborting"
              else if (mode==0) then
                 if (i_flag) then
-					write(51,*) "No ERT or SIP inverse options file name specified in e4d.inp."
-					write(*,*) "No ERT or SIP inverse options file name specified in e4d.inp."
+					write(51,*) "E4D: No ERT or SIP inverse options file name specified in e4d.inp."
+					write(*,*) "E4D: No ERT or SIP inverse options file name specified in e4d.inp."
 				else
-					write(51,*) "No ERT inverse options file name specified in e4d.inp."
-					write(*,*) "No ERT inverse options file name specified in e4d.inp."				
+					write(51,*) "E4D: No ERT inverse options file name specified in e4d.inp."
+					write(*,*) "E4D: No ERT inverse options file name specified in e4d.inp."				
 				end if
                 inv_opt_flag=.false.
                 return
              else
-                write(51,*) "There was a problem reading the inverse options file name in e4d.inp: aborting"
-                write(*,*) "There was a problem reading the inverse options file name in e4d.inp: aborting"
+                write(51,*) "E4D: There was a problem reading the inverse options file name in e4d.inp: aborting"
+                write(*,*) "E4D: There was a problem reading the inverse options file name in e4d.inp: aborting"
              end if
              close(51)
              call crash_exit
@@ -1431,11 +1435,11 @@ contains
        
        if(ios .ne. 0) then
           if (mode==0) then
-			  write(51,*) "No reference model file name specified in e4d.inp."
-			  write(*,*) "No reference model file name specified in e4d.inp."
+			  write(51,*) "E4D: No reference model file name specified in e4d.inp."
+			  write(*,*) "E4D: No reference model file name specified in e4d.inp."
 		  else
-			  write(51,*) "There was a problem reading the reference model file name in e4d.inp: aborting"
-			  write(*,*) "There was a problem reading the reference model file name in e4d.inp: aborting"
+			  write(51,*) "E4D: There was a problem reading the reference model file name in e4d.inp: aborting"
+			  write(*,*) "E4D: There was a problem reading the reference model file name in e4d.inp: aborting"
 			  call crash_exit
 		  end if
           close(51)
@@ -1451,18 +1455,18 @@ contains
        open(51,file='e4d.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
           if (mode==0) then
-			  write(51,*) "There was no time-lapse survey file name specified and/or "
-			  write(51,*) "reference model update option in e4d.inp."
+			  write(51,*) "E4D: There was no time-lapse survey file name specified and/or "
+			  write(51,*) "E4D: reference model update option in e4d.inp."
 			  close(51)
-			  write(*,*) "There was no time-lapse survey file name specified and/or "
-			  write(*,*) "reference model update option in e4d.inp."
+			  write(*,*) "E4D: There was no time-lapse survey file name specified and/or "
+			  write(*,*) "E4D: reference model update option in e4d.inp."
 			  return
           else 
-			  write(51,*) "There was a problem reading the time-lapse survey file name"
-			  write(51,*) "and/or reference model update option in e4d.inp: aborting"
+			  write(51,*) "E4D: There was a problem reading the time-lapse survey file name"
+			  write(51,*) "E4D: and/or reference model update option in e4d.inp: aborting"
 			  close(51)
-			  write(*,*) "There was a problem reading the time-lapse survey file name"
-			  write(*,*) "and/or reference model update option in e4d.inp: aborting"
+			  write(*,*) "E4D: There was a problem reading the time-lapse survey file name"
+			  write(*,*) "E4D: and/or reference model update option in e4d.inp: aborting"
 			  call crash_exit  
 		  end if
           
@@ -1484,8 +1488,8 @@ contains
        inquire(file=trim(tl_file),exist=exst)
        if(.not.exst .and. .not. rt_flag) then
           write(*,*) 
-          write(51,*) " Cannot find the time lapse survey list file: ",trim(tl_file)," ... aborting"
-          write(*,*) " Cannot find the time lapse survey list file: ",trim(tl_file)," ... aborting"
+          write(51,*) " E4D: Cannot find the time lapse survey list file: ",trim(tl_file)," ... aborting"
+          write(*,*) " E4D: Cannot find the time lapse survey list file: ",trim(tl_file)," ... aborting"
           close(51)
           call crash_exit
        end if
@@ -1496,8 +1500,8 @@ contains
 
        open(51,file='e4d.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
-          write(51,*) "There was a problem reading the number of survey files in ",trim(tl_file),"  :aborting"
-          write(*,*) "There was a problem reading the number of survey files in ",trim(tl_file),"  :aborting"
+          write(51,*) "E4D: There was a problem reading the number of survey files in ",trim(tl_file),"  :aborting"
+          write(*,*) "E4D: There was a problem reading the number of survey files in ",trim(tl_file),"  :aborting"
           close(51)
           call crash_exit
        else
@@ -1516,10 +1520,10 @@ contains
     case(10)
        open(51,file='e4d.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
-          write(51,*) "There was a problem reading time-lapse file at time ",indx
-          write(51,*) "in the time lapse survey file: ",trim(tl_file)
-          write(*,*) "There was a problem reading time-lapse file at time ",indx
-          write(*,*) "in the time lapse survey file: ",trim(tl_file)
+          write(51,*) "E4D: There was a problem reading time-lapse file at time ",indx
+          write(51,*) "E4D: in the time lapse survey file: ",trim(tl_file)
+          write(*,*) "E4D: There was a problem reading time-lapse file at time ",indx
+          write(*,*) "E4D: in the time lapse survey file: ",trim(tl_file)
           close(51)
           call crash_exit
        else
@@ -1538,10 +1542,10 @@ contains
 
     case(11)
        open(51,file='e4d.log',status='old',action='write',position='append')
-       write(51,*) " There was a problem finding the time-lapse file: ",trim(tl_dfils(indx))
-       write(51,*) " aborting ..."
-       write(*,*) " There was a problem finding the time-lapse file: ",trim(tl_dfils(indx))
-       write(*,*) " aborting ..."
+       write(51,*) " E4D: There was a problem finding the time-lapse file: ",trim(tl_dfils(indx))
+       write(51,*) " E4D: aborting ..."
+       write(*,*) " E4D: There was a problem finding the time-lapse file: ",trim(tl_dfils(indx))
+       write(*,*) " E4D: aborting ..."
        close(51)
        call crash_exit
       
@@ -1551,11 +1555,11 @@ contains
        if(ios .ne. 0) then
           open(51,file='e4d.log',status='old',action='write',position='append')
           write(51,*) 
-          write(51,*) " There was a problem reading the number of electrodes in the survey file ",trim(efile)
-          write(51,*) " Aborting ..."
+          write(51,*) " E4D: There was a problem reading the number of electrodes in the survey file ",trim(efile)
+          write(51,*) " E4D: Aborting ..."
           write(*,*) 
-          write(*,*) " There was a problem reading the number of electrodes in the survey file ",trim(efile)
-          write(*,*) " Aborting ..."
+          write(*,*) " E4D: There was a problem reading the number of electrodes in the survey file ",trim(efile)
+          write(*,*) " E4D: Aborting ..."
           
           close(51)
           call crash_exit
@@ -1582,13 +1586,13 @@ contains
     case(14)
        open(51,file='e4d.log',status='old',action='write',position='append')
        write(51,*) 
-       write(51,*) " The electrode index specified for electrode: ",indx
-       write(51,*) " is greater than the total number of electrodes."
-       write(51,*) " Aborting ..."
+       write(51,*) " E4D: The electrode index specified for electrode: ",indx
+       write(51,*) " E4D: is greater than the total number of electrodes."
+       write(51,*) " E4D: Aborting ..."
        write(*,*) 
-       write(*,*) " The electrode index specified for electrode: ",indx
-       write(*,*) " is greater than the total number of electrodes."
-       write(*,*) " Aborting ..."
+       write(*,*) " E4D: The electrode index specified for electrode: ",indx
+       write(*,*) " E4D: is greater than the total number of electrodes."
+       write(*,*) " E4D: Aborting ..."
      
        close(51)
        
@@ -1599,11 +1603,11 @@ contains
        if(.not. exst) then
           open(51,file='e4d.log',status='old',action='write',position='append')
           write(51,*)
-          write(51,*) " Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn' 
-          write(51,*) " Aborting..."
+          write(51,*) " E4D: Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn' 
+          write(51,*) " E4D: Aborting..."
           write(*,*)
-          write(*,*) " Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn' 
-          write(*,*) " Aborting..."
+          write(*,*) " E4D: Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn' 
+          write(*,*) " E4D: Aborting..."
           close(51)
           call crash_exit
        end if
@@ -1612,14 +1616,14 @@ contains
        if(ios .ne. 0) then
           open(51,file='e4d.log',status='old',action='write',position='append')
           write(51,*)
-          write(51,*) " There was a problem reading the mesh "
-          write(51,*) " translation numbers in: ",trim(mshfile(1:mnchar))//'trn' 
-          write(51,*) " Aborting ... "
+          write(51,*) " E4D: There was a problem reading the mesh "
+          write(51,*) " E4D: translation numbers in: ",trim(mshfile(1:mnchar))//'trn' 
+          write(51,*) " E4D: Aborting ... "
           close(51)
           write(*,*)
-          write(*,*) " There was a problem reading the mesh "
-          write(*,*) " translation numbers in: ",trim(mshfile(1:mnchar))//'trn' 
-          write(*,*) " Aborting ... "
+          write(*,*) " E4D: There was a problem reading the mesh "
+          write(*,*) " E4D: translation numbers in: ",trim(mshfile(1:mnchar))//'trn' 
+          write(*,*) " E4D: Aborting ... "
           close(51)
           call crash_exit
        end if
@@ -1629,20 +1633,20 @@ contains
        if(ios .ne. 0) then
           open(51,file='e4d.log',status='old',action='write',position='append')
           write(51,*)
-          write(51,*) " There was a problem reading the number of measurements" 
-          write(51,*) " in the survey file: ",trim(efile)
+          write(51,*) " E4D: There was a problem reading the number of measurements" 
+          write(51,*) " E4D: in the survey file: ",trim(efile)
           close(51)
           write(*,*)
-          write(*,*) " There was a problem reading the number of measurements" 
-          write(*,*) " in the survey file: ",trim(efile)
+          write(*,*) " E4D: There was a problem reading the number of measurements" 
+          write(*,*) " E4D: in the survey file: ",trim(efile)
           close(51)
           call crash_exit
        elseif(nm .le. 0 .and. .not. res_flag) then
-          write(51,*) " The number of measurements is not positive: ",indx
-          write(51,*) " Aborting ..."
+          write(51,*) " E4D: The number of measurements is not positive: ",indx
+          write(51,*) " E4D: Aborting ..."
           write(*,*)
-          write(*,*) " The number of measurements is not positive: ",indx
-          write(*,*) " Aborting ..."
+          write(*,*) " E4D: The number of measurements is not positive: ",indx
+          write(*,*) " E4D: Aborting ..."
           close(51)
           call crash_exit
        else
@@ -1719,22 +1723,22 @@ contains
       open(51,file='e4d.log',status='old',action='write',position='append')
       if(indx==0) then
          write(51,*)
-         write(51,*) " In mode 1 you must provide a mesh configuration (*.cfg) file "
-         write(51,*) " In all other modes you must provide a node or element file name"
-         write(51,*) " You provided: ",trim(mshfile)
-         write(51,*) " Aborting ..."
+         write(51,*) " E4D: In mode 1 you must provide a mesh configuration (*.cfg) file "
+         write(51,*) " E4D: In all other modes you must provide a node or element file name"
+         write(51,*) " E4D: You provided: ",trim(mshfile)
+         write(51,*) " E4D: Aborting ..."
          write(*,*)
-         write(*,*) " In mode 1 you must provide a mesh configuration (*.cfg) file "
-         write(*,*) " In all other modes you must provide a node or element file name"
-         write(*,*) " You provided: ",trim(mshfile)
-         write(*,*) " Aborting ..."
+         write(*,*) " E4D: In mode 1 you must provide a mesh configuration (*.cfg) file "
+         write(*,*) " E4D: In all other modes you must provide a node or element file name"
+         write(*,*) " E4D: You provided: ",trim(mshfile)
+         write(*,*) " E4D: Aborting ..."
       else if(indx==1) then
          write(51,*) 
-         write(51,*) " Cannot find the mesh configuration file: ",trim(mshfile)
-         write(51,*) " Aborting ..."
+         write(51,*) " E4D: Cannot find the mesh configuration file: ",trim(mshfile)
+         write(51,*) " E4D: Aborting ..."
          write(*,*) 
-         write(*,*) " Cannot find the mesh configuration file: ",trim(mshfile)
-         write(*,*) " Aborting ..."
+         write(*,*) " E4D: Cannot find the mesh configuration file: ",trim(mshfile)
+         write(*,*) " E4D: Aborting ..."
       end if
       close(51)
       call crash_exit
@@ -1742,9 +1746,9 @@ contains
    case(22)
       if(ios .ne. 0) then
          open(51,file='e4d.log',status='old',action='write',position='append')
-         write(51,*) "There was a problem reading the number of conductivities in"
-         write(51,*) "in the conductivity file: ",trim(sigfile)
-         write(51,*) "aborting."
+         write(51,*) "E4D: There was a problem reading the number of conductivities in"
+         write(51,*) "E4D: in the conductivity file: ",trim(sigfile)
+         write(51,*) "E4D: aborting."
          close(51)
          call crash_exit
       end if
@@ -1765,14 +1769,14 @@ contains
             close(51)
          else
             write(51,*) 
-            write(51,*) " There was a problem reading the number of "
-            write(51,*) " conductivity values in ",trim(sigfile)
-            write(51,*) " Aborting ..."
+            write(51,*) " E4D: There was a problem reading the number of "
+            write(51,*) " E4D: conductivity values in ",trim(sigfile)
+            write(51,*) " E4D: Aborting ..."
             close(51)
             write(*,*) 
-            write(*,*) " There was a problem reading the number of "
-            write(*,*) " conductivity values in ",trim(sigfile)
-            write(*,*) " Aborting ..."
+            write(*,*) " E4D: There was a problem reading the number of "
+            write(*,*) " E4D: conductivity values in ",trim(sigfile)
+            write(*,*) " E4D: Aborting ..."
             close(51)
             call crash_exit
          end if
@@ -1798,11 +1802,11 @@ contains
      open(51,file='e4d.log',status='old',action='write',position='append')
      if(indx == 0) then
         write(51,*)
-        write(51,*) " Can't find the survey file: ",trim(efile)
-        write(51,*) " aborting."
+        write(51,*) " E4D: Can't find the survey file: ",trim(efile)
+        write(51,*) " E4D: aborting."
         write(*,*)
-        write(*,*) " Can't find the survey file: ",trim(efile)
-        write(*,*) " aborting."
+        write(*,*) " E4D: Can't find the survey file: ",trim(efile)
+        write(*,*) " E4D: aborting."
         close(51)
         call crash_exit
      else
@@ -1814,12 +1818,12 @@ contains
   case(25)
      open(51,file='e4d.log',status='old',action='write',position='append')
      write(51,*) 
-     write(51,*) " Can't find the conductivity file: ",trim(sigfile)
-     write(51,*) " Aborting ..."
+     write(51,*) " E4D: Can't find the conductivity file: ",trim(sigfile)
+     write(51,*) " E4D: Aborting ..."
      close(51)
      write(*,*) 
-     write(*,*) " Can't find the conductivity file: ",trim(sigfile)
-     write(*,*) " Aborting ..."
+     write(*,*) " E4D: Can't find the conductivity file: ",trim(sigfile)
+     write(*,*) " E4D: Aborting ..."
      close(51)
      call crash_exit
       
@@ -1827,29 +1831,29 @@ contains
      open(51,file='e4d.log',status='old',action='write',position='append')
      if(i_flag) then
         write(51,*)
-        write(51,*) " All real and complex conductivities must be positive"
-        write(51,*) " The conductivities on line: ",indx," are ",sigma(indx),sigmai(indx)
-        write(51,*) " See conductivity file: ",trim(sigfile)
-        write(51,*) " Aborting ..."
+        write(51,*) " E4D: All real and complex conductivities must be positive"
+        write(51,*) " E4D: The conductivities on line: ",indx," are ",sigma(indx),sigmai(indx)
+        write(51,*) " E4D: See conductivity file: ",trim(sigfile)
+        write(51,*) " E4D: Aborting ..."
         
         write(*,*) 
-        write(*,*) " All real and complex conductivities must be positive"
-        write(*,*) " The conductivities on line: ",indx," are ",sigma(indx),sigmai(indx)
-        write(*,*) " See conductivity file: ",trim(sigfile)
-        write(*,*) " Aborting ..."
+        write(*,*) " E4D: All real and complex conductivities must be positive"
+        write(*,*) " E4D: The conductivities on line: ",indx," are ",sigma(indx),sigmai(indx)
+        write(*,*) " E4D: See conductivity file: ",trim(sigfile)
+        write(*,*) " E4D: Aborting ..."
        
      else
         write(51,*)
-        write(51,*) " All conductivities must be positive"
-        write(51,*) " The conductivity on line: ",indx," is ",sigma(indx)
-        write(51,*) " See conductivity file: ",trim(sigfile)
-        write(51,*) " Aborting ..."
+        write(51,*) " E4D: All conductivities must be positive"
+        write(51,*) " E4D: The conductivity on line: ",indx," is ",sigma(indx)
+        write(51,*) " E4D: See conductivity file: ",trim(sigfile)
+        write(51,*) " E4D: Aborting ..."
         write(51,*) 
         write(*,*)
-        write(*,*) " All conductivities must be positive"
-        write(*,*) " The conductivity on line: ",indx," is ",sigma(indx)
-        write(*,*) " See conductivity file: ",trim(sigfile)
-        write(*,*) " Aborting ..."
+        write(*,*) " E4D: All conductivities must be positive"
+        write(*,*) " E4D: The conductivity on line: ",indx," is ",sigma(indx)
+        write(*,*) " E4D: See conductivity file: ",trim(sigfile)
+        write(*,*) " E4D: Aborting ..."
         write(*,*) 
         
      end if
@@ -1861,20 +1865,20 @@ contains
         open(51,file='e4d.log',status='old',action='write',position='append')
      
         write(51,*)
-        write(51,*) " In tank mode the last electrode specified in the survey file must"
-        write(51,*) " be the ghost node (see E4D User Guide)"
-        write(51,*) " The ghost node cannot be used as an electrode in a survey."
-        write(51,*) " Measurement: ",indx," uses the ghost node as an electrode."
-        write(51,*) " Aborting ..."
+        write(51,*) " E4D: In tank mode the last electrode specified in the survey file must"
+        write(51,*) " E4D: be the ghost node (see E4D User Guide)"
+        write(51,*) " E4D: The ghost node cannot be used as an electrode in a survey."
+        write(51,*) " E4D: Measurement: ",indx," uses the ghost node as an electrode."
+        write(51,*) " E4D: Aborting ..."
         write(51,*)
        
            
         write(*,*)
-        write(*,*) " In tank mode the last electrode specified in the survey file must"
-        write(*,*) " be the ghost node (see E4D User Guide)"
-        write(*,*) " The ghost node cannot be used as an electrode in a survey."
-        write(*,*) " Measurement: ",indx," uses the ghost node as an electrode."
-        write(*,*) " Aborting ..."
+        write(*,*) " E4D: In tank mode the last electrode specified in the survey file must"
+        write(*,*) " E4D: be the ghost node (see E4D User Guide)"
+        write(*,*) " E4D: The ghost node cannot be used as an electrode in a survey."
+        write(*,*) " E4D: Measurement: ",indx," uses the ghost node as an electrode."
+        write(*,*) " E4D: Aborting ..."
         write(*,*)
 
         close(51)
@@ -1883,22 +1887,22 @@ contains
      case(28)
         open(51,file='e4d.log',status='old',action='write',position='append')
         write(51,*) 
-        write(51,*) "Can't find the conductivity list file ",trim(sigfile)," specified in e4d.inp."
-        write(51,*) "aborting ..."
-        write(*,*) "Can't find the conductivity list file ",trim(sigfile)," specified in e4d.inp."
-        write(*,*) "aborting ..."
+        write(51,*) "E4D: Can't find the conductivity list file ",trim(sigfile)," specified in e4d.inp."
+        write(51,*) "E4D: aborting ..."
+        write(*,*) "E4D: Can't find the conductivity list file ",trim(sigfile)," specified in e4d.inp."
+        write(*,*) "E4D: aborting ..."
         close(51)
         call crash_exit
 
      case(29)
         open(51,file='e4d.log',status='old',action='write',position='append')
         write(51,*) 
-        write(51,*) "There was a problem reading the number of files listed "
-        write(51,*) "on the first lint of ",trim(sigfile),"."
-        write(51,*) "aborting ..."
-        write(*,*) "There was a problem reading the number of files listed "
-        write(*,*) "on the first lint of ",trim(sigfile),"."
-        write(*,*) "aborting ..."
+        write(51,*) "E4D: There was a problem reading the number of files listed "
+        write(51,*) "E4D: on the first lint of ",trim(sigfile),"."
+        write(51,*) "E4D: aborting ..."
+        write(*,*) "E4D: There was a problem reading the number of files listed "
+        write(*,*) "E4D: on the first lint of ",trim(sigfile),"."
+        write(*,*) "E4D: aborting ..."
 
         close(51)
         call crash_exit
@@ -1906,15 +1910,15 @@ contains
      case(30)
         open(51,file='e4d.log',status='old',action='write',position='append')
         write(51,*)
-        write(51,*) "There was a problem reading conductivity file number ",indx
-        write(51,*) "in the conductivity list file: ",trim(sigfile)
-        write(51,*) "Remember to include the output file name in the second column"
-        write(51,*) "aborting ..."
+        write(51,*) "E4D: There was a problem reading conductivity file number ",indx
+        write(51,*) "E4D: in the conductivity list file: ",trim(sigfile)
+        write(51,*) "E4D: Remember to include the output file name in the second column"
+        write(51,*) "E4D: aborting ..."
        
-        write(*,*) "There was a problem reading conductivity file number ",indx
-        write(*,*) "in the conductivity list file: ",trim(sigfile)
-        write(51,*) "Remember to include the output file name in the second column"
-        write(*,*) "aborting ..."
+        write(*,*) "E4D: There was a problem reading conductivity file number ",indx
+        write(*,*) "E4D: in the conductivity list file: ",trim(sigfile)
+        write(51,*) "E4D: Remember to include the output file name in the second column"
+        write(*,*) "E4D: aborting ..."
         
         close(51)
         call crash_exit
@@ -1922,13 +1926,13 @@ contains
      case(31)
         open(51,file='e4d.log',status='old',action='write',position='append')
         write(51,*)
-        write(51,*) "Cannot find find file ",trim(tl_cfils(indx,1))," listed in"
-        write(51,*) "the conductivity list file: ",trim(sigfile)
-        write(51,*) "aborting ..."
+        write(51,*) "E4D: Cannot find find file ",trim(tl_cfils(indx,1))," listed in"
+        write(51,*) "E4D: the conductivity list file: ",trim(sigfile)
+        write(51,*) "E4D: aborting ..."
         write(*,*)
-        write(*,*) "Cannot find find file ",trim(tl_cfils(indx,1))," listed in"
-        write(*,*) "the conductivity list file: ",trim(sigfile)
-        write(*,*) "aborting ..."
+        write(*,*) "E4D: Cannot find find file ",trim(tl_cfils(indx,1))," listed in"
+        write(*,*) "E4D: the conductivity list file: ",trim(sigfile)
+        write(*,*) "E4D: aborting ..."
         close(51)
         call crash_exit
 
@@ -1967,6 +1971,19 @@ contains
         end if
         close(51)
         call crash_exit
+
+     case(58)
+        open(51,file='e4d.log',status='old',action='write',position='append')
+        write(51,*)
+        write(51,*) "E4D: E4D and FMM cannot build mesh files together."
+        write(51,*) "E4D: Please build mesh files either using E4D or FMM."
+        write(51,*) "E4D: Aborting ..."
+        write(*, *)
+        write(*, *) "E4D: E4D and FMM cannot build mesh files together."
+        write(*, *) "E4D: Please build mesh files either using E4D or FMM."
+        write(*, *) "E4D: Aborting ..."
+        close(51)
+        call crash_exit
         
      case(121)
         open(51,file='e4d.log',status='old',action='write',position='append')
@@ -1975,8 +1992,8 @@ contains
            if(.not.exst) then
               write(51,*)
               write(*,*)
-              write(51,*) " Cannot find the specified mesh node file: ",trim(mshfile)
-              write(*,*) " Cannot find the specified mesh node file: ",trim(mshfile)
+              write(51,*) " E4D: Cannot find the specified mesh node file: ",trim(mshfile)
+              write(*,*) " E4D: Cannot find the specified mesh node file: ",trim(mshfile)
               close(51)
               call crash_exit
            end if
@@ -1985,20 +2002,20 @@ contains
            if(.not.exst) then
               write(51,*)
               write(*,*)
-              write(51,*) " Cannot find the specified mesh element file: ",trim(mshfile)
-              write(*,*) " Cannot find the specified mesh element file: ",trim(mshfile)
+              write(51,*) " E4D: Cannot find the specified mesh element file: ",trim(mshfile)
+              write(*,*) " E4D: Cannot find the specified mesh element file: ",trim(mshfile)
               close(51)
               call crash_exit
            end if
         else
            write(51,*)
            write(*,*)
-           write(51,*) " If mode > 1 you must provide the name of the mesh"
-           write(51,*) " node file (*.node) or mesh element file (*.ele) ."
-           write(51,*) " You provided: ",trim(mshfile)
-           write(*,*) " If mode > 1 you must provide the name of the mesh"
-           write(*,*) " node file (*.node) or mesh element file (*.ele) ."
-           write(*,*) " You provided: ",trim(mshfile)
+           write(51,*) " E4D: If mode > 1 you must provide the name of the mesh"
+           write(51,*) " E4D: node file (*.node) or mesh element file (*.ele) ."
+           write(51,*) " E4D: You provided: ",trim(mshfile)
+           write(*,*) " E4D: If mode > 1 you must provide the name of the mesh"
+           write(*,*) " E4D: node file (*.node) or mesh element file (*.ele) ."
+           write(*,*) " E4D: You provided: ",trim(mshfile)
            close(51)
            call crash_exit
         end if

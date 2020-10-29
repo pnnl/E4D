@@ -48,10 +48,10 @@ contains
        simulate_fmm = .true.
        
        !FMM requires at least two processes
-       if(num_fmm_procs < 2) then
-          call dist_report(2,-1)
-          call dist_abort
-       end if
+       !if(num_fmm_procs < 2) then
+       !   call dist_report(2,-1)
+       !   call dist_abort
+       !end if
        
        !If all the processes are assigned to FMM
        !then turn off the e4d flag

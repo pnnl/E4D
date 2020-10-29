@@ -33,8 +33,13 @@ contains
     integer , dimension(1) :: mind
     real*8 :: w1,w2,w3
     logical :: exst,mtran
+   
+    if (im_fmm) then
+       open(52,file="mesh_build_fmm.log",action='write',status='replace')
+    else
+       open(52,file="mesh_build.log",action='write',status='replace')
+    endif
     
-    open(52,file="mesh_build.log",action='write',status='replace')
     close(52)
 
     !!OPEN AND READ MESH FILE
@@ -53,7 +58,7 @@ contains
     allocate(all_points(n_points,3),tflag(n_points),edge_flag(n_points))
     allocate(tall_points(n_points,3),tmp_flag(n_points),pmap(n_points))
    
-    
+   
     !!Read in the points. The surface points (including the edges) must
     !!be specified first in the file.
     all_points=0
@@ -65,7 +70,12 @@ contains
     tmp_flag=0
     pmap=0
     n2pts = 0
-    open(52,file="mesh_build.log",action='write',status='old',position='append')
+    if (im_fmm) then
+       open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+    else
+       open(52,file="mesh_build.log",action='write',status='old',position='append')
+    endif
+    
     do i=1,n_points
        
        read(10,*,IOSTAT=ios) j,tall_points(i,1:3),tmp_flag(i) 
@@ -115,7 +125,6 @@ contains
     end do
     deallocate(tall_points,tmp_flag)
 
-
     !!build a sequential list of edge pnts defining the surface boundary
     call check_minp(11,ios)
     allocate(edge_sep(nedge),edges(nedge,2),edge_seq(nedge))
@@ -145,15 +154,18 @@ contains
           end if
        end do
     end do
-    
-    
+       
     
     !!If there are other PLCs defined besides the boundary,
     !!store them in a scratch file for now
     read(10,*,IOSTAT=ios) nplc ; call check_minp(12,ios)
     call check_minp(13,nplc)
     
-    open(52,file="mesh_build.log",action='write',status='old',position='append')
+    if (im_fmm) then
+       open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+    else
+       open(52,file="mesh_build.log",action='write',status='old',position='append')
+    endif
     if(nplc > 0) then
        
        open(13,status='scratch',form='unformatted')
@@ -195,7 +207,11 @@ contains
        do i=1,nholes
           read(10,*,IOSTAT=ios) j,hole_xyz(i,1:3)
           if(ios .ne. 0) call check_minp(18,i)
-          open(52,file="mesh_build.log",action='write',status='old',position='append')
+          if (im_fmm) then
+             open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+          else
+             open(52,file="mesh_build.log",action='write',status='old',position='append')
+          endif          
           write(52,*) "Coordinates for hole: ",i," are ",hole_xyz(i,1:3)
           close(52)
        end do
@@ -214,15 +230,23 @@ contains
           else
              read(10,*,IOSTAT=ios) zon_labs(i,1),zone_xyz(i,1:3),min_vols(i),zsigs(i)
           end if
-          if(ios .ne. 0) call check_minp(21,i)
-          open(52,file="mesh_build.log",action='write',status='old',position='append')
+          if(ios .ne. 0) call check_minp(21,i)          
+          if (im_fmm) then             
+             open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+          else
+             open(52,file="mesh_build.log",action='write',status='old',position='append')
+          endif
           write(52,*)
           write(52,*) "Config info for zone: ",i," ....... "
           write(52,*) 'Zone Number: ',zon_labs(i,1)
           write(52,*) 'Point in zone: ',zone_xyz(i,1:3)
           write(52,*) 'Maximum volume: ',min_vols(i)
-          write(52,*) 'Conductivity: ',zsigs(i)
-          if(i_flag) write(52,*) "Complex Conductivity: ",zsigsi(i)
+          if (im_fmm) then
+             write(52,*) 'Velocity: ',zsigs(i)
+          else             
+             write(52,*) 'Conductivity: ',zsigs(i)
+             if(i_flag) write(52,*) "Complex Conductivity: ",zsigsi(i)
+          endif          
           close(52)
           zon_labs(i,2) = zon_labs(i,1)
        end do
@@ -249,8 +273,8 @@ contains
     end if
        
     close(10)
-    
-    if (mode==0) then
+     
+    if ((.not.im_fmm.and.mode==0).or.(im_fmm.and.mode_fmm==0)) then
 		return
     end if
        
@@ -764,22 +788,37 @@ contains
    
     !!build the exodus file if specified
     if(exoflag==1) then
-       if (index(trim(exocom),'px')>0) then
-	       write(*,*) "Build the xmf/h5 files using: ",trim(mshfile(1:npre))
-	       write(*,*) trim(exocom)//" -f "//trim(mshfile(1:npre-1))//" "//trim(mshfile(1:npre-1))//".sig "&
-		  //trim(mshfile(1:npre-1))//" 0" 
-	       call system(trim(exocom)//" -f "//trim(mshfile(1:npre-1))//" "//trim(mshfile(1:npre-1))//".sig "&
+       if (im_fmm) then
+          if (index(trim(exocom),'px')>0) then
+             write(*,*) "Build the xmf/h5 files using: ",trim(mshfile(1:npre))
+	     write(*,*) trim(exocom)//" -f "//trim(mshfile(1:npre-1))//" "//trim(mshfile(1:npre-1))//".vel "&
+        	  //trim(mshfile(1:npre-1))//" 0" 
+             call system(trim(exocom)//" -f "//trim(mshfile(1:npre-1))//" "//trim(mshfile(1:npre-1))//".vel "&
 		  //trim(mshfile(1:npre-1))//" 0" )
+          else
+             write(*,*) "Build the exodus file ",trim(mshfile(1:npre))//"exo"
+             write(*,*) trim(exocom)//" -f "//trim(mshfile(1:npre-1))//".1 "//trim(mshfile(1:npre-1))//".vel "&
+                  //trim(mshfile(1:npre-1))//".exo 0.0"
+             call system(trim(exocom)//" -f "//trim(mshfile(1:npre-1))//".1 "//trim(mshfile(1:npre-1))//".vel "&
+                  //trim(mshfile(1:npre-1))//".exo 0.0" )
+          endif             
        else
-	       write(*,*) "Build the exodus file ",trim(mshfile(1:npre))//"exo"
-	       write(*,*) trim(exocom)//" -f "//trim(mshfile(1:npre-1))//".1 "//trim(mshfile(1:npre-1))//".sig "&
-		  //trim(mshfile(1:npre-1))//".exo 0.0" 
-	       call system(trim(exocom)//" -f "//trim(mshfile(1:npre-1))//".1 "//trim(mshfile(1:npre-1))//".sig "&
-		  //trim(mshfile(1:npre-1))//".exo 0.0" )
-       end if
+          if (index(trim(exocom),'px')>0) then
+             write(*,*) "Build the xmf/h5 files using: ",trim(mshfile(1:npre))
+	     write(*,*) trim(exocom)//" -f "//trim(mshfile(1:npre-1))//" "//trim(mshfile(1:npre-1))//".sig "&
+        	  //trim(mshfile(1:npre-1))//" 0" 
+             call system(trim(exocom)//" -f "//trim(mshfile(1:npre-1))//" "//trim(mshfile(1:npre-1))//".sig "&
+		  //trim(mshfile(1:npre-1))//" 0" )
+          else
+             write(*,*) "Build the exodus file ",trim(mshfile(1:npre))//"exo"
+             write(*,*) trim(exocom)//" -f "//trim(mshfile(1:npre-1))//".1 "//trim(mshfile(1:npre-1))//".sig "&
+                  //trim(mshfile(1:npre-1))//".exo 0.0"
+             call system(trim(exocom)//" -f "//trim(mshfile(1:npre-1))//".1 "//trim(mshfile(1:npre-1))//".sig "&
+                  //trim(mshfile(1:npre-1))//".exo 0.0" )
+          endif           
+       endif                  
     end if
-    
-   
+       
 111 format(BN,(I10),A71) 
 112 format(A12,BN,(I10),A63)    
 113 format(I10,3ES22.12,2I10)
@@ -1109,15 +1148,24 @@ contains
     select case (indx)
 
        case(1)
-          open(52,file="mesh_build.log",action='write',status='old',position='append') 
+          if (im_fmm) then
+             open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+          else
+             open(52,file="mesh_build.log",action='write',status='old',position='append')
+          endif
+          
           write(52,*) "Cannot find the mesh configuration file: ",trim(mshfile)
           close(52) 
           write(*,*) "Cannot find the mesh configuration file: ",trim(mshfile)
           call crash_exit
        
        case(2)
-          if(ios .ne. 0) then
-             open(52,file="mesh_build.log",action='write',status='old',position='append') 
+          if(ios .ne. 0) then            
+             if (im_fmm) then
+                open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+             else
+                open(52,file="mesh_build.log",action='write',status='old',position='append')
+             endif
              write(52,*) "There was a problem reading the quality factor max element volume in ",trim(mshfile)
              close(52) 
              write(*,*) "There was a problem reading the quality factor max element volume in ",trim(mshfile)
@@ -1126,7 +1174,11 @@ contains
 
        case(3)
           if(ios .ne. 0) then
-             open(52,file="mesh_build.log",action='write',status='old',position='append') 
+             if (im_fmm) then
+                open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+             else
+                open(52,file="mesh_build.log",action='write',status='old',position='append')
+             endif             
              write(52,*) "There was a problem reading the minimum elevation in ",trim(mshfile)
              close(52) 
              write(*,*) "There was a problem reading the minimum elevation in ",trim(mshfile)
@@ -1136,7 +1188,11 @@ contains
           
        case(4)
           if(ios .ne. 0) then
-             open(52,file="mesh_build.log",action='write',status='old',position='append') 
+             if (im_fmm) then
+                open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+             else
+                open(52,file="mesh_build.log",action='write',status='old',position='append')
+             endif
              write(52,*) "There was a problem reading the build tetgen flag ",trim(mshfile)
              close(52) 
              write(*,*) "There was a problem reading the build tetgen flag ",trim(mshfile)
@@ -1145,7 +1201,11 @@ contains
 
        case(5)
           if(ios .ne. 0) then
-             open(52,file="mesh_build.log",action='write',status='old',position='append') 
+             if (im_fmm) then
+                open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+             else
+                open(52,file="mesh_build.log",action='write',status='old',position='append')
+             endif
              write(52,*) "There was a problem reading the tetgen executable name in ",trim(mshfile)
              close(52) 
              write(*,*) "There was a problem reading the tetgen executable name in ",trim(mshfile)
@@ -1154,7 +1214,11 @@ contains
 
        case(6)
           if(ios .ne. 0) then
-             open(52,file="mesh_build.log",action='write',status='old',position='append') 
+             if (im_fmm) then
+                open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+             else
+                open(52,file="mesh_build.log",action='write',status='old',position='append')
+             endif
              write(52,*) "There was a problem reading the triangle executable name in ",trim(mshfile)
              close(52) 
              write(*,*) "There was a problem reading the triangle executable name in ",trim(mshfile)
@@ -1163,7 +1227,11 @@ contains
 
        case(7)
           if(ios .ne. 0) then
-             open(52,file="mesh_build.log",action='write',status='old',position='append') 
+             if (im_fmm) then
+                open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+             else
+                open(52,file="mesh_build.log",action='write',status='old',position='append')
+             endif
              write(52,*) "There was a problem reading the number of control points ",trim(mshfile)
              close(52) 
              write(*,*) "There was a problem reading the number of control points ",trim(mshfile)
@@ -1172,13 +1240,21 @@ contains
 
           
        case(8)
-          open(52,file="mesh_build.log",action='write',status='old',position='append') 
+          if (im_fmm) then
+             open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+          else
+             open(52,file="mesh_build.log",action='write',status='old',position='append')
+          endif          
           write(52,*) "Allocating arrays for ",ios,' control points'
           close(52) 
 
        case(9)
           if(ios .ne. 0) then
-             open(52,file="mesh_build.log",action='write',status='old',position='append') 
+             if (im_fmm) then
+                open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+             else
+                open(52,file="mesh_build.log",action='write',status='old',position='append')
+             endif
              write(52,*) "There was a problem reading control point number: ",ios
              close(52) 
              write(*,*) "There was a problem reading control point number: ",ios
@@ -1186,7 +1262,11 @@ contains
           end if
 
        case(10)
-          open(52,file="mesh_build.log",action='write',status='old',position='append') 
+          if (im_fmm) then
+                open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+             else
+                open(52,file="mesh_build.log",action='write',status='old',position='append')
+             endif
           write(52,*) 'SURFACE POINTS (flag 1 or 2) MUST BE DEFINED BEFORE INTERNAL POINTS (flag 0)'
           write(52,*) 'SEE POINT ',ios,' IN MESH CONFIGURATION FILE ',trim(mshfile)
           close(52)
@@ -1195,12 +1275,20 @@ contains
           call crash_exit
 
        case(11)
-         open(52,file="mesh_build.log",action='write',status='old',position='append') 
-         write(52,*) "Building sequetial list of control points for outer boundary"
+          if (im_fmm) then
+             open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+          else
+             open(52,file="mesh_build.log",action='write',status='old',position='append')
+          endif             
+          write(52,*) "Building sequetial list of control points for outer boundary"
          close(52) 
       case(12)
          if(ios .ne. 0) then
-            open(52,file="mesh_build.log",action='write',status='old',position='append') 
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else
+               open(52,file="mesh_build.log",action='write',status='old',position='append')
+            endif
             write(52,*) 'There was a problem reading the number of piecewise linear complexes in',trim(mshfile)
             close(52)
             write(*,*) 'There was a problem reading the number of piecewise linear complexes in',trim(mshfile)
@@ -1208,13 +1296,21 @@ contains
          end if
 
        case(13)
-          open(52,file="mesh_build.log",action='write',status='old',position='append') 
+          if (im_fmm) then
+             open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+          else
+             open(52,file="mesh_build.log",action='write',status='old',position='append')
+          endif             
           write(52,*)
           write(52,*) 'There are: ',ios, 'piecewise linear complexes' 
           close(52)
          
        case(14)
-            open(52,file="mesh_build.log",action='write',status='old',position='append') 
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else
+               open(52,file="mesh_build.log",action='write',status='old',position='append')
+            endif            
             write(52,*) 'There was a problem reading the number of points and boundary number'
             write(52,*) 'for piecewise linear complex: ',ios,' in ',trim(mshfile)
             close(52)
@@ -1223,7 +1319,11 @@ contains
             call crash_exit
             
          case(15)
-            open(52,file="mesh_build.log",action='write',status='old',position='append') 
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else                
+               open(52,file="mesh_build.log",action='write',status='old',position='append')
+            endif
             write(52,*) 'There was a problem reading the control points for plc number: ',ios
             close(52)
             write(*,*) 'There was a problem reading the control points for plc number: ',ios
@@ -1231,7 +1331,11 @@ contains
         
          case(16)
             if(ios .ne. 0) then
-               open(52,file="mesh_build.log",action='write',status='old',position='append') 
+               if (im_fmm) then
+                  open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+               else                   
+                 open(52,file="mesh_build.log",action='write',status='old',position='append')
+               endif              
                write(52,*) 'There was a problem reading the number of holes',trim(mshfile)
                close(52)
                write(*,*) 'There was a problem reading the number of holes',trim(mshfile)
@@ -1239,13 +1343,21 @@ contains
             end if
 
          case(17)
-            open(52,file="mesh_build.log",action='write',status='old',position='append') 
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else               
+               open(52,file="mesh_build.log",action='write',status='old',position='append')               
+            endif            
             write(52,*)
             write(52,*) 'There are: ',ios, 'holes' 
             close(52)
 
          case(18)
-            open(52,file="mesh_build.log",action='write',status='old',position='append') 
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else               
+               open(52,file="mesh_build.log",action='write',status='old',position='append')               
+            endif
             write(52,*) 'There was a problem reading the hole coordinates for hole',ios
             close(52)
             write(*,*) 'There was a problem reading the hole coordinates for hole',ios
@@ -1253,7 +1365,11 @@ contains
   
          case(19)
             if(ios .ne. 0) then
-               open(52,file="mesh_build.log",action='write',status='old',position='append') 
+               if (im_fmm) then
+                  open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+               else                   
+                 open(52,file="mesh_build.log",action='write',status='old',position='append')
+               endif
                write(52,*) 'There was a problem reading the number of zones in ',trim(mshfile)
                close(52)
                write(*,*) 'There was a problem reading the number of zones in ',trim(mshfile)
@@ -1261,13 +1377,21 @@ contains
             end if
             
         case(20)
-            open(52,file="mesh_build.log",action='write',status='old',position='append') 
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else                   
+              open(52,file="mesh_build.log",action='write',status='old',position='append')
+            endif
             write(52,*)
             write(52,*) 'There are: ',ios, 'zones' 
             close(52)
 
          case(21)
-            open(52,file="mesh_build.log",action='write',status='old',position='append') 
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else                   
+              open(52,file="mesh_build.log",action='write',status='old',position='append')
+            endif
             write(52,*) 'There was a problem reading config. info for zone ',ios
             close(52)
             write(*,*) 'There was a problem reading config. info for zone ',ios
@@ -1275,7 +1399,11 @@ contains
 
          case(22)
             if(ios .ne. 0) then
-               open(52,file="mesh_build.log",action='write',status='old',position='append') 
+               if (im_fmm) then
+                  open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+               else                  
+                  open(52,file="mesh_build.log",action='write',status='old',position='append')                  
+               endif               
                write(52,*) 'There was a problem reading the exodus build flag'
                close(52)
                write(*,*) 'There was a problem reading the exodus build flag'
@@ -1284,7 +1412,11 @@ contains
               
         case(23)
             if(ios .ne. 0) then
-               open(52,file="mesh_build.log",action='write',status='old',position='append') 
+               if (im_fmm) then
+                  open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+               else                  
+                  open(52,file="mesh_build.log",action='write',status='old',position='append')                  
+               endif               
                write(52,*) 'There was a problem reading the location of the exodus executable'
                close(52)
                write(*,*) 'There was a problem reading the location of the exodus executable'
@@ -1306,7 +1438,11 @@ contains
                write(*,*) 'It appears there was a problem building the surface mesh'
                write(*,*) 'Cannot find one of the surface mesh files surface.1.*'
                write(*,*) 'Aborting'
-               open(52,file="mesh_build.log",action='write',status='old',position='append') 
+               if (im_fmm) then
+                  open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+               else                  
+                  open(52,file="mesh_build.log",action='write',status='old',position='append')                  
+               endif               
                write(52,*) 'It appears there was a problem building the surface mesh'
                write(52,*) 'Cannot find one of the surface mesh files surface.1.*'
                write(52,*) 'Aborting'
@@ -1318,7 +1454,11 @@ contains
             write(*,*) 'It appears tetgen failed, please check for errors in'
             write(*,*) 'the mesh configuration file'
             write(*,*) 'Aborting'
-            open(52,file="mesh_build.log",action='write',status='old',position='append') 
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else                   
+              open(52,file="mesh_build.log",action='write',status='old',position='append')
+            endif
             write(52,*) 'It appears tetgen failed, please check for errors in'
             write(52,*) 'the mesh configuration file'
             write(52,*) 'Aborting'
@@ -1328,7 +1468,11 @@ contains
          case(26)
             write(*,*) 'A PLC uses control point ',ios, 'which is out of range'
             write(*,*) 'Aborting'
-            open(52,file="mesh_build.log",action='write',status='old',position='append')
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else                   
+              open(52,file="mesh_build.log",action='write',status='old',position='append')
+            endif
             write(52,*) 'A PLC uses control point ',ios, 'which is out of range'
             write(52,*) 'Aborting'
             close(52)
@@ -1343,7 +1487,11 @@ contains
             write(*,*) 'Aborting ...'
             write(*,*)
 
-            open(52,file="mesh_build.log",action='write',status='old',position='append') 
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else                   
+              open(52,file="mesh_build.log",action='write',status='old',position='append')
+            endif
             write(52,*)
             write(52,*) 'ERROR'
             write(52,*) 'There are only ',ios,' boundary points specified in: ',trim(mshfile)
@@ -1352,7 +1500,11 @@ contains
             write(52,*)
             close(52)
 
-            open(52,file="e4d.log",action='write',status='old',position='append') 
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else                   
+              open(52,file="mesh_build.log",action='write',status='old',position='append')
+            endif
             write(*,*)
             write(52,*) 'ERROR'
             write(52,*) 'There are only ',ios,' boundary points specified in: ',trim(mshfile)
@@ -1365,7 +1517,11 @@ contains
 
          case(28)
             if(ios .ne. 0) then
-               open(52,file="mesh_build.log",action='write',status='old',position='append') 
+               if (im_fmm) then
+                  open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+               else                  
+                  open(52,file="mesh_build.log",action='write',status='old',position='append')                  
+               endif               
                write(52,*) 'There was a problem reading the mesh translation option'
                close(52)
                write(*,*) 'There was a problem reading the mesh translation option'
@@ -1373,7 +1529,11 @@ contains
             end if
 
          case(29)
-            open(52,file="mesh_build.log",action='write',status='old',position='append') 
+            if (im_fmm) then
+               open(52,file="mesh_build_fmm.log",action='write',status='old',position='append')
+            else                   
+              open(52,file="mesh_build.log",action='write',status='old',position='append')
+            endif
             write(52,*) 'The mesh translation option must be 0 for no translation'
             write(52,*) 'or 1 for translation.'
             write(52,*) 'You entered: ',ios
@@ -1399,10 +1559,15 @@ contains
     integer :: i,j,nsig,a,b,m,n
     integer, dimension(:), allocatable :: zones
     logical :: ifg
-    
-    write(*,*) "BUILDING "//mshfile(1:npre)//"sig"
+
+    if (im_fmm) then
+       write(*,*) "BUILDING "//mshfile(1:npre)//"vel"
+       open(12,file=mshfile(1:npre)//"vel",status='replace',action='write')
+    else        
+       write(*,*) "BUILDING "//mshfile(1:npre)//"sig"
+       open(12,file=mshfile(1:npre)//"sig",status='replace',action='write')
+    endif    
     open(11,file=mshfile(1:npre)//"1.ele",status='old',action='read')
-    open(12,file=mshfile(1:npre)//"sig",status='replace',action='write')
     
     read(11,*) nsig
     allocate(zones(nsig))
@@ -1427,7 +1592,11 @@ contains
              goto 100
           end if
        end do
-       write(*,*) "While trying to build sigma, "
+       if (im_fmm) then
+          write(*,*) "While trying to build velocity, "
+       else
+          write(*,*) "While trying to build sigma, "
+       endif       
        write(*,*) "could not find a zone match for element ",i
        write(*,*) "setting too 1"
        write(12,*) "1.0 1.0 1.0"
@@ -1441,7 +1610,11 @@ contains
     implicit none
     integer :: nsigs,i
     real*8 :: sigval
-    open(66,file='surface.sig',status='replace',action='write')
+    if (im_fmm) then
+       open(66,file='surface.vel',status='replace',action='write')
+    else
+       open(66,file='surface.sig',status='replace',action='write')
+    endif    
     open(55,file='surface.1.ele',status='old',action='read')
     read(55,*) nsigs
     close(55)
