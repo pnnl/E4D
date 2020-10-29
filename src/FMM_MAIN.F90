@@ -1,6 +1,7 @@
 module fmm_main
 
   use vars
+  use buildmesh
   use fmm_vars
   use master_fmm
   use master
@@ -39,7 +40,26 @@ contains
     
     !Read the inputs ... fmm_read_inp is in the module
     call read_input_fmm
-    
+
+    !fmm requires at least 2 processors except in mesh build modes
+    if (mode_fmm > 1 .and. n_rank < 2) then
+       call nreport_fmm(59)
+       call PetscFinalize(perr)
+       stop
+    end if
+
+    if(mode_fmm == 1) then
+      !build the mesh and exit
+      if(.not. simulate_e4d) then 
+         call build_tetgen4(i_flag)
+      end if
+      call send_command(0)
+      !call get_time
+      !call treport(11)
+      call PetscFinalize(perr)
+      stop
+    end if
+  
     !if the number of sources is smaller than the number of slaves 
     !print an error message and exit
     if(n_rank_fmm-1 .gt. ns) then

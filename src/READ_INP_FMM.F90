@@ -28,11 +28,23 @@ contains
     call check_inp_fmm(0,junk)
     open(10,file='fmm.inp',status='old',action='read') 
     read(10,*,IOSTAT=ios) smode; call check_inp_fmm(101,junk)
-    read(smode,*,IOSTAT=ios) mode_fmm; call check_inp_fmm(1,junk)
 
+    ! check for alpha characters and make them all lower case
+    smode=lcase(smode)
+    select case(trim(adjustl(smode)))
+           case('fmm1')
+              mode_fmm = 1; call check_inp_fmm(1,junk)
+           case('fmm2')
+              mode_fmm = 2; call check_inp_fmm(1,junk)
+           case('fmm3')
+              mode_fmm = 3; call check_inp_fmm(1,junk)
+           case default
+              read(smode,*,IOSTAT=ios) mode_fmm; call check_inp_fmm(1,junk)
+    end select
+    
     !read mesh file
     read(10,*,IOSTAT=ios) mshfile;         call check_inp_fmm(2,junk)
-
+       
     !if mode is > 1 then read the zones to be used in the simulation
     if(mode_fmm > 1) then
        backspace(10)
@@ -50,14 +62,14 @@ contains
              deallocate(zsims)
           end if
        end if
+
+       ! read survey file       
+       read(10,*,IOSTAT=ios) tfile;           call check_inp_fmm(3,junk)       
+       ! read velocity file       
+       read(10,*,IOSTAT=ios) spdfile;         call check_inp_fmm(4,junk)       
+       read(10,*,IOSTAT=ios) outfile_fmm;     call check_inp_fmm(5,junk)              
     end if    
     
-    ! read survey file  
-    read(10,*,IOSTAT=ios) tfile;           call check_inp_fmm(3,junk)
-    ! read velocity file
-    read(10,*,IOSTAT=ios) spdfile;         call check_inp_fmm(4,junk)
-    read(10,*,IOSTAT=ios) outfile_fmm;     call check_inp_fmm(5,junk)
-
     if(mode_fmm == 3) then
        read(10,*,IOSTAT=ios) invfile;      call check_inp(6,junk)
        read(10,*,IOSTAT=ios) refmod_file;  call check_inp(7,junk)
@@ -74,7 +86,23 @@ contains
     end do
     if(mnchar == 0) call check_inp_fmm(21,0)
 
+    !!Check for compatibility between mshfile and mode
+    !!Check for config file
+    if (mode_fmm == 1 ) then
+       if(mshfile(mnchar+1:mnchar+3) == "cfg") then
+          inquire(file=trim(mshfile),exist=exst)
+          if(.not.exst) call check_inp_fmm(21,1)
+       else if(mshfile(mnchar+1:mnchar+3).ne."cfg") then
+          call check_inp_fmm(21,0)
+       end if
 
+       ! Both E4D and FMM can't build mesh file together so
+       if (simulate_e4d) call check_inp_fmm(58,junk)
+       
+       ! return for mesh generation mode       
+       return       
+    end if     
+    
     !!check mesh files
     if (mode_fmm > 1)then 
        call check_inp_fmm(121,mnchar)
@@ -111,8 +139,8 @@ contains
        inquire(file='fmm.inp',exist=exst)
        if(.not. exst) then
           open(51,file='fmm.log',status='old',action='write',position='append')
-          write(51,*) "Cannot find the primary input file fmm.inp: aborting"
-          write(*, *) "Cannot find the primary input file fmm.inp: aborting"
+          write(51,*) "FMM: Cannot find the primary input file fmm.inp: aborting"
+          write(*, *) "FMM: Cannot find the primary input file fmm.inp: aborting"
           close(51)
           call crash_exit_fmm
        end if
@@ -120,8 +148,8 @@ contains
     case(101)
        if(ios .ne. 0) then
           open(51,file='fmm.log',status='old',action='write',position='append')
-          write(51,*) "There was a problem reading the mode in fmm.inp: aborting"
-          write(*, *) "There was a problem reading the mode in fmm.inp: aborting"
+          write(51,*) "FMM: There was a problem reading the mode in fmm.inp: aborting"
+          write(*, *) "FMM: There was a problem reading the mode in fmm.inp: aborting"
           close(51)
           call crash_exit_fmm
        end if
@@ -129,17 +157,18 @@ contains
     case(1)
        if(ios .ne. 0) then
           open(51,file='fmm.log',status='old',action='write',position='append')
-          write(51,*) " There was a problem reading the mode in fmm.inp."
-          write(51,*) " Aborting ..."
-          write(*,*) " There was a problem reading the mode in fmm.inp."
-          write(*,*) " Aborting ..."
+          write(51,*) " FMM: There was a problem reading the mode in fmm.inp."
+          write(51,*) " FMM: Aborting ..."
+          write(*, *) " FMM: There was a problem reading the mode in fmm.inp."
+          write(*, *) " FMM: Aborting ..."
           close(51)
           call crash_exit_fmm
        end if
        mcheck = .false.
        select case(mode_fmm)
        case(0) 
-       case(1) 
+       case(1)
+          mcheck = .true.
        case(2) 
           mcheck = .true.
        case(3)
@@ -153,6 +182,7 @@ contains
           write(51,*)  "---------------------------------------"
           write(51,*)  " -FUNCTION-                      -MODE-"
           write(51,*)  "---------------------------------------"
+          write(51,*)  " FMM Mesh Generation               1"
           write(51,*)  " FMM Forward                       2"
           write(51,*)  " FMM Inversion                     3"
           write(51,*)  "---------------------------------------"
@@ -162,6 +192,7 @@ contains
           write(*, *)  "---------------------------------------"
           write(*, *)  " -FUNCTION-                      -MODE-"
           write(*, *)  "---------------------------------------"
+          write(*, *)  " FMM Mesh Generation               1"
           write(*, *)  " FMM Forward                       2"
           write(*, *)  " FMM Inversion                     3"
           write(*, *)  "---------------------------------------"
@@ -191,11 +222,11 @@ contains
        if(ios .ne. 0) then
 
              open(51,file='fmm.log',status='old',action='write',position='append')
-             write(51,*) "  ERROR: There was a problem reading the mesh file name in fmm.inp"
-             write(51,*) "  Aborting ..."
+             write(51,*) "  FMM: There was a problem reading the mesh file name in fmm.inp"
+             write(51,*) "  FMM: Aborting ..."
              close(51)
-             write(*,*) "  ERROR: There was a problem reading the mesh file name in fmm.inp"
-             write(*,*) "  Aborting ..."
+             write(*, *) "  FMM: There was a problem reading the mesh file name in fmm.inp"
+             write(*, *) "  FMM: Aborting ..."
           call crash_exit_fmm
 
        else
@@ -207,8 +238,8 @@ contains
 
        open(51,file='fmm.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
-          write(51,*) "There was a problem reading the survey file name in fmm.inp: aborting"
-          write(*,*) "There was a problem reading the survey file name in fmm.inp: aborting"
+          write(51,*) "FMM: There was a problem reading the survey file name in fmm.inp: aborting"
+          write(*, *) "FMM: There was a problem reading the survey file name in fmm.inp: aborting"
           close(51)
           call crash_exit_fmm
        else
@@ -219,8 +250,8 @@ contains
     case(4)
        open(51,file='fmm.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
-          write(51,*) "There was a problem reading the velocity file name in fmm.inp: aborting"
-          write(*,*) "There was a problem reading the velocity file name in fmm.inp: aborting"
+          write(51,*) "FMM: There was a problem reading the velocity file name in fmm.inp: aborting"
+          write(*, *) "FMM: There was a problem reading the velocity file name in fmm.inp: aborting"
           close(51)
           call crash_exit_fmm
        else
@@ -232,8 +263,8 @@ contains
       
        open(51,file='fmm.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
-          write(51,*) "There was a problem reading the output options file name in fmm.inp: aborting"
-          write(*,*) "There was a problem reading the output options file name in fmm.inp: aborting"
+          write(51,*) "FMM: There was a problem reading the output options file name in fmm.inp: aborting"
+          write(*, *) "FMM: There was a problem reading the output options file name in fmm.inp: aborting"
           close(51)
           call crash_exit_fmm
        else
@@ -259,11 +290,11 @@ contains
        if(ios .ne. 0) then
           open(51,file='fmm.log',status='old',action='write',position='append')
           write(51,*) 
-          write(51,*) " There was a problem reading the number of sources in the survey file ",trim(tfile)
-          write(51,*) " Aborting ..."
+          write(51,*) " FMM: There was a problem reading the number of sources in the survey file ",trim(tfile)
+          write(51,*) " FMM: Aborting ..."
           write(*,*) 
-          write(*,*) " There was a problem reading the number of sources in the survey file ",trim(tfile)
-          write(*,*) " Aborting ..."
+          write(*,*) " FMM: There was a problem reading the number of sources in the survey file ",trim(tfile)
+          write(*,*) " FMM: Aborting ..."
           
           close(51)
           call crash_exit_fmm
@@ -277,8 +308,8 @@ contains
           open(51,file='fmm.log',status='old',action='write',position='append')
           write(51,*)
           write(51,"(A,I7.7)") "  There was a problem reading source number ",indx
-          write(51,*) " in the survey file file: ",trim(tfile)
-          write(51,*) " Aborting ..."
+          write(51,*) " FMM: in the survey file file: ",trim(tfile)
+          write(51,*) " FMM: Aborting ..."
           if(fresnel) then
              write(51,*) "Running in fresnel mode ... be sure to include the positive"
              write(51,*) "frequency value in the last column"
@@ -286,8 +317,8 @@ contains
           close(51)
           write(*,*)
           write(*,"(A,I7.7)") " There was a problem reading source number ",indx
-          write(*,*) "in the survey file file: ",trim(tfile)
-          write(*,*) "Aborting ..."
+          write(*,*) "FMM: in the survey file file: ",trim(tfile)
+          write(*,*) "FMM: Aborting ..."
           if(fresnel) then
              write(*,*) "Running in fresnel mode ... be sure to include the positive"
              write(*,*) "frequency value in the last column"
@@ -314,13 +345,13 @@ contains
     case(14)
        open(51,file='fmm.log',status='old',action='write',position='append')
        write(51,*) 
-       write(51,*) " The source index specified for source: ",indx
-       write(51,*) " is greater than the total number of sources."
-       write(51,*) " Aborting ..."
-       write(*,*) 
-       write(*,*) " The source index specified for source: ",indx
-       write(*,*) " is greater than the total number of sources."
-       write(*,*) " Aborting ..."
+       write(51,*) " FMM: The source index specified for source: ",indx
+       write(51,*) " FMM: is greater than the total number of sources."
+       write(51,*) " FMM: Aborting ..."
+       write(*, *) 
+       write(*, *) " FMM: The source index specified for source: ",indx
+       write(*, *) " FMM: is greater than the total number of sources."
+       write(*, *) " FMM: Aborting ..."
      
        close(51)
        
@@ -332,11 +363,11 @@ contains
        if(ios .ne. 0) then
           open(51,file='fmm.log',status='old',action='write',position='append')
           write(51,*) 
-          write(51,*) " There was a problem reading the number of receivers in the survey file ",trim(tfile)
-          write(51,*) " Aborting ..."
+          write(51,*) " FMM: There was a problem reading the number of receivers in the survey file ",trim(tfile)
+          write(51,*) " FMM: Aborting ..."
           write(*,*) 
-          write(*,*) " There was a problem reading the number of receivers in the survey file ",trim(tfile)
-          write(*,*) " Aborting ..."
+          write(*,*) " FMM: There was a problem reading the number of receivers in the survey file ",trim(tfile)
+          write(*,*) " FMM: Aborting ..."
           
           close(51)
           call crash_exit_fmm
@@ -363,13 +394,13 @@ contains
     case(114)
        open(51,file='fmm.log',status='old',action='write',position='append')
        write(51,*) 
-       write(51,*) " The receiver index specified for receiver: ",indx
-       write(51,*) " is greater than the total number of receivers."
-       write(51,*) " Aborting ..."
-       write(*,*) 
-       write(*,*) " The receiver index specified for receiver: ",indx
-       write(*,*) " is greater than the total number of receivers."
-       write(*,*) " Aborting ..."
+       write(51,*) " FMM: The receiver index specified for receiver: ",indx
+       write(51,*) " FMM: is greater than the total number of receivers."
+       write(51,*) " FMM: Aborting ..."
+       write(*, *) 
+       write(*, *) " FMM: The receiver index specified for receiver: ",indx
+       write(*, *) " FMM: is greater than the total number of receivers."
+       write(*, *) " FMM: Aborting ..."
      
        close(51)
        
@@ -379,11 +410,11 @@ contains
        if(.not. exst) then
           open(51,file='fmm.log',status='old',action='write',position='append')
           write(51,*)
-          write(51,*) " Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn' 
-          write(51,*) " Aborting..."
-          write(*,*)
-          write(*,*) " Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn' 
-          write(*,*) " Aborting..."
+          write(51,*) " FMM: Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn' 
+          write(51,*) " FMM: Aborting..."
+          write(*, *)
+          write(*, *) " FMM: Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn' 
+          write(*, *) " FMM: Aborting..."
           close(51)
           call crash_exit_fmm
        end if
@@ -392,14 +423,14 @@ contains
        if(ios .ne. 0) then
           open(51,file='fmm.log',status='old',action='write',position='append')
           write(51,*)
-          write(51,*) " There was a problem reading the mesh "
-          write(51,*) " translation numbers in: ",trim(mshfile(1:mnchar))//'trn' 
-          write(51,*) " Aborting ... "
+          write(51,*) " FMM: There was a problem reading the mesh "
+          write(51,*) " FMM: translation numbers in: ",trim(mshfile(1:mnchar))//'trn' 
+          write(51,*) " FMM: Aborting ... "
           close(51)
-          write(*,*)
-          write(*,*) " There was a problem reading the mesh "
-          write(*,*) " translation numbers in: ",trim(mshfile(1:mnchar))//'trn' 
-          write(*,*) " Aborting ... "
+          write(*, *)
+          write(*, *) " FMM: There was a problem reading the mesh "
+          write(*, *) " FMM: translation numbers in: ",trim(mshfile(1:mnchar))//'trn' 
+          write(*, *) " FMM: Aborting ... "
           close(51)
           call crash_exit_fmm
        end if
@@ -409,20 +440,20 @@ contains
        if(ios .ne. 0) then
           open(51,file='fmm.log',status='old',action='write',position='append')
           write(51,*)
-          write(51,*) " There was a problem reading the number of measurements" 
-          write(51,*) " in the survey file: ",trim(tfile)
+          write(51,*) " FMM: There was a problem reading the number of measurements" 
+          write(51,*) " FMM: in the survey file: ",trim(tfile)
           close(51)
           write(*,*)
-          write(*,*) " There was a problem reading the number of measurements" 
-          write(*,*) " in the survey file: ",trim(tfile)
+          write(*,*) " FMM: There was a problem reading the number of measurements" 
+          write(*,*) " FMM: in the survey file: ",trim(tfile)
           close(51)
           call crash_exit_fmm
        elseif(nm_fmm .le. 0) then
-          write(51,*) " The number of measurements is not positive: ",indx
-          write(51,*) " Aborting ..."
+          write(51,*) " FMM: The number of measurements is not positive: ",indx
+          write(51,*) " FMM: Aborting ..."
           write(*,*)
-          write(*,*) " The number of measurements is not positive: ",indx
-          write(*,*) " Aborting ..."
+          write(*,*) " FMM: The number of measurements is not positive: ",indx
+          write(*,*) " FMM: Aborting ..."
           close(51)
           call crash_exit_fmm
        else
@@ -485,22 +516,24 @@ contains
       open(51,file='fmm.log',status='old',action='write',position='append')
       if(indx==0) then
          write(51,*)
-         write(51,*) " In mode > 1 you must provide a node or element file name"
-         write(51,*) " with .*.node or .*.ele file name extension where * is a single letter. "
-         write(51,*) " You provided: ",trim(mshfile)
-         write(51,*) " Aborting ..."
-         write(*,*)
-         write(*,*) " In mode > 1 you must provide a node or element file name"
-         write(*,*) " with .*.node or .*.ele file name extension where * is a single letter. "
-         write(*,*) " You provided: ",trim(mshfile)
-         write(*,*) " Aborting ..."
+         write(51,*) " FMM: In mode = 1 or FMM1 you must provide a mesh configuration (*.cfg) file "
+         write(51,*) " FMM: In all other modes you must provide a node or element file name"
+         write(51,*) " FMM: with .*.node or .*.ele file name extension where * is a single letter. "
+         write(51,*) " FMM: You provided: ",trim(mshfile)
+         write(51,*) " FMM: Aborting ..."
+         write(*, *)
+         write(*, *) " FMM: In mode = 1 or FMM1 you must provide a mesh configuration (*.cfg) file "
+         write(*, *) " FMM: In all other modes you must provide a node or element file name"
+         write(*, *) " FMM: with .*.node or .*.ele file name extension where * is a single letter. "
+         write(*, *) " FMM: You provided: ",trim(mshfile)
+         write(*, *) " FMM: Aborting ..."
       else if(indx==1) then
          write(51,*) 
-         write(51,*) " Cannot find the mesh configuration file: ",trim(mshfile)
-         write(51,*) " Aborting ..."
-         write(*,*) 
-         write(*,*) " Cannot find the mesh configuration file: ",trim(mshfile)
-         write(*,*) " Aborting ..."
+         write(51,*) " FMM: Cannot find the mesh configuration file: ",trim(mshfile)
+         write(51,*) " FMM: Aborting ..."
+         write(*, *) 
+         write(*, *) " FMM: Cannot find the mesh configuration file: ",trim(mshfile)
+         write(*, *) " FMM: Aborting ..."
       end if
       close(51)
       call crash_exit_fmm
@@ -508,9 +541,9 @@ contains
    case(22)
       if(ios .ne. 0) then
          open(51,file='fmm.log',status='old',action='write',position='append')
-         write(51,*) "There was a problem reading the number of velocities in"
-         write(51,*) "in the velocity file: ",trim(spdfile)
-         write(51,*) "aborting."
+         write(51,*) "FMM: There was a problem reading the number of velocities in"
+         write(51,*) "FMM: in the velocity file: ",trim(spdfile)
+         write(51,*) "FMM: aborting."
          close(51)
          call crash_exit_fmm
       end if
@@ -526,14 +559,14 @@ contains
             close(51)
          else
             write(51,*) 
-            write(51,*) " There was a problem reading the number of "
-            write(51,*) " velocity values in ",trim(spdfile)
-            write(51,*) " Aborting ..."
+            write(51,*) " FMM: There was a problem reading the number of "
+            write(51,*) " FMM: velocity values in ",trim(spdfile)
+            write(51,*) " FMM: Aborting ..."
             close(51)
             write(*,*) 
-            write(*,*) " There was a problem reading the number of "
-            write(*,*) " velocity values in ",trim(spdfile)
-            write(*,*) " Aborting ..."
+            write(*,*) " FMM: There was a problem reading the number of "
+            write(*,*) " FMM: velocity values in ",trim(spdfile)
+            write(*,*) " FMM: Aborting ..."
             close(51)
             call crash_exit_fmm
          end if
@@ -557,11 +590,11 @@ contains
      open(51,file='fmm.log',status='old',action='write',position='append')
      if(indx == 0) then
         write(51,*)
-        write(51,*) " Can't find the survey file: ",trim(tfile)
-        write(51,*) " aborting."
+        write(51,*) " FMM: Can't find the survey file: ",trim(tfile)
+        write(51,*) " FMM: aborting."
         write(*,*)
-        write(*,*) " Can't find the survey file: ",trim(tfile)
-        write(*,*) " aborting."
+        write(*,*) " FMM: Can't find the survey file: ",trim(tfile)
+        write(*,*) " FMM: aborting."
         close(51)
         call crash_exit_fmm
      else
@@ -573,12 +606,12 @@ contains
   case(25)
      open(51,file='fmm.log',status='old',action='write',position='append')
      write(51,*) 
-     write(51,*) " Can't find the velocity file: ",trim(spdfile)
-     write(51,*) " Aborting ..."
+     write(51,*) " FMM: Can't find the velocity file: ",trim(spdfile)
+     write(51,*) " FMM: Aborting ..."
      close(51)
      write(*,*) 
-     write(*,*) " Can't find the velocity file: ",trim(spdfile)
-     write(*,*) " Aborting ..."
+     write(*,*) " FMM: Can't find the velocity file: ",trim(spdfile)
+     write(*,*) " FMM: Aborting ..."
      close(51)
      call crash_exit_fmm
       
@@ -590,8 +623,8 @@ contains
            if(.not.exst) then
               write(51,*)
               write(*,*)
-              write(51,*) " Cannot find the specified mesh node file: ",trim(mshfile)
-              write(*,*) " Cannot find the specified mesh node file: ",trim(mshfile)
+              write(51,*) " FMM: Cannot find the specified mesh node file: ",trim(mshfile)
+              write(*, *) " FMM: Cannot find the specified mesh node file: ",trim(mshfile)
               close(51)
               call crash_exit_fmm
            end if
@@ -600,20 +633,20 @@ contains
            if(.not.exst) then
               write(51,*)
               write(*,*)
-              write(51,*) " Cannot find the specified mesh element file: ",trim(mshfile)
-              write(*,*) " Cannot find the specified mesh element file: ",trim(mshfile)
+              write(51,*) " FMM: Cannot find the specified mesh element file: ",trim(mshfile)
+              write(*, *) " FMM: Cannot find the specified mesh element file: ",trim(mshfile)
               close(51)
               call crash_exit_fmm
            end if
         else
            write(51,*)
            write(*,*)
-           write(51,*) " If mode > 1 you must provide the name of the mesh with extension"
-           write(51,*) " node file (.*.node) or mesh element file (.*.ele) where * is a single letter."
-           write(51,*) " You provided: ",trim(mshfile)
-           write(*,*) " If mode > 1 you must provide the name of the mesh with extension"
-           write(*,*) " node file (.*.node) or mesh element file (.*.ele)  where * is a single letter."
-           write(*,*) " You provided: ",trim(mshfile)
+           write(51,*) " FMM: If mode > 1 you must provide the name of the mesh with extension"
+           write(51,*) " FMM: node file (.*.node) or mesh element file (.*.ele) where * is a single letter."
+           write(51,*) " FMM: You provided: ",trim(mshfile)
+           write(*, *) " FMM: If mode > 1 you must provide the name of the mesh with extension"
+           write(*, *) " FMM: node file (.*.node) or mesh element file (.*.ele)  where * is a single letter."
+           write(*, *) " FMM: You provided: ",trim(mshfile)
            close(51)
            call crash_exit_fmm
         end if
@@ -622,37 +655,37 @@ contains
       case(52)
          if(ios.ne.0 .or. indx .ne. 0 .or. indx .ne. 1) then
             open(51,file='fmm.log',status='old',action='write',position='append')
-            write(51,*) "There was a problem reading the first line of the "
-            write(51,*) "fmm survey file ",trim(tfile)
-            write(51,*) "In fmm mode, the first line of the survey file"
-            write(51,*) "should contain two integers: the number of source positions "
-            write(51,*) "and the fresnel volume flag"
-            write(51,*) "0 for ray-based and 1 for fresnel volume"
-            write(51,*) "Using ray-based by default "
-            write(51,*) "Aborting ..."
+            write(51,*) "FMM: There was a problem reading the first line of the "
+            write(51,*) "FMM: fmm survey file ",trim(tfile)
+            write(51,*) "FMM: In fmm mode, the first line of the survey file"
+            write(51,*) "FMM: should contain two integers: the number of source positions "
+            write(51,*) "FMM: and the fresnel volume flag"
+            write(51,*) "FMM: 0 for ray-based and 1 for fresnel volume"
+            write(51,*) "FMM: Using ray-based by default "
+            write(51,*) "FMM: Aborting ..."
             close(51)
             write(*,*)
-            write(*,*) "There was a problem reading the first line of the "
-            write(*,*) "fmm survey file ",trim(tfile)
-            write(*,*) "In fmm mode, the first line of the survey file"
-            write(*,*) "should contain two integers: the number of source positions "
-            write(*,*) "and the fresnel volume flag"
-            write(*,*) "0 for ray-based and 1 for fresnel volume"
-            write(*,*) "Aborting ..."
+            write(*,*) "FMM: There was a problem reading the first line of the "
+            write(*,*) "FMM: fmm survey file ",trim(tfile)
+            write(*,*) "FMM: In fmm mode, the first line of the survey file"
+            write(*,*) "FMM: should contain two integers: the number of source positions "
+            write(*,*) "FMM: and the fresnel volume flag"
+            write(*,*) "FMM: 0 for ray-based and 1 for fresnel volume"
+            write(*,*) "FMM: Aborting ..."
             call crash_exit_fmm
          end if
 
          case(53)
              open(51,file='fmm.log',status='old',action='write',position='append')
-             write(51,*) "The frequency for source number: ",indx
-             write(51,*) "Is less than or equal to zero. Specified frequencies"
-             write(51,*) "must be positive."
-             write(51,*) "Aborting..."
+             write(51,*) "FMM: The frequency for source number: ",indx
+             write(51,*) "FMM: Is less than or equal to zero. Specified frequencies"
+             write(51,*) "FMM: must be positive."
+             write(51,*) "FMM: Aborting..."
              close(51)
-             write(*,*) "The frequency for source number: ",indx
-             write(*,*) "Is less than or equal to zero. Specified frequencies"
-             write(*,*) "must be positive."
-             write(*,*) "Aborting..."
+             write(*,*) "FMM: The frequency for source number: ",indx
+             write(*,*) "FMM: Is less than or equal to zero. Specified frequencies"
+             write(*,*) "FMM: must be positive."
+             write(*,*) "FMM: Aborting..."
              call crash_exit_fmm
 
           case(54)
@@ -735,6 +768,18 @@ contains
              if (indx.eq.1) write(*, *) "NB: Problem could be with the last source position/frequency."
              write(*, *) "Aborting..."
              write(*, *) '-----------------------------------------------------------------------'
+             call crash_exit_fmm
+          case(58)
+             open(51,file='fmm.log',status='old',action='write',position='append')
+             write(51,*)
+             write(51,*) "FMM: E4D and FMM cannot build mesh files together."
+             write(51,*) "FMM: Please build mesh files either using E4D or FMM."
+             write(51,*) "FMM: Aborting ..."
+             write(*, *)
+             write(*, *) "FMM: E4D and FMM cannot build mesh files together."
+             write(*, *) "FMM: Please build mesh files either using E4D or FMM."
+             write(*, *) "FMM: Aborting ..."
+             close(51)
              call crash_exit_fmm
              
     case DEFAULT
