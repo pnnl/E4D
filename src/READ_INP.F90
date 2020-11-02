@@ -1944,14 +1944,14 @@ contains
            write(51,*) " in the survey file: ",trim(efile)
            write(51,"(A,I8.8)") "  The data for measurement number ",indx
            write(51,*) " is zero. THIS IS NOT ALLOWED. "
-           write(51,*) " Please make sure to include only non-zero data in the surevy file. "
+           write(51,*) " Please make sure to include only non-zero data in the survey file. "
            write(51,*) " Aborting ..."
            write(*,*)
            write(*, "(A,I8.8)") "  There was a problem reading measurement number ",indx             
            write(*, *) " in the survey file: ",trim(efile)
            write(*, "(A,I8.8)") "  The data for measurement number ",indx
            write(*, *) " is zero. THIS IS NOT ALLOWED. "
-           write(*, *) " Please make sure to include only non-zero data in the surevy file. "
+           write(*, *) " Please make sure to include only non-zero data in the survey file. "
            write(*, *) " Aborting ..."
         else
            write(51,*)
@@ -1959,14 +1959,14 @@ contains
            write(51,*) " in the survey file: ",trim(efile)
            write(51,"(A,I8.8)") "  The data for measurement number ",indx
            write(51,*) " is zero. THIS IS NOT ALLOWED. "
-           write(51,*) " Please make sure to include only non-zero data in the surevy file. "
+           write(51,*) " Please make sure to include only non-zero data in the survey file. "
            write(51,*) " Aborting ..."
            write(*,*)
            write(*, "(A,I8.8)") "  There was a problem reading measurement number ",indx             
            write(*, *) " in the survey file: ",trim(efile)
            write(*, "(A,I8.8)") "  The data for measurement number ",indx
            write(*, *) " is zero. THIS IS NOT ALLOWED. "
-           write(*, *) " Please make sure to include only non-zero data in the surevy file. "
+           write(*, *) " Please make sure to include only non-zero data in the survey file. "
            write(*, *) " Aborting ..."
         end if
         close(51)
