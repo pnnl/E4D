@@ -2099,39 +2099,86 @@ contains
         write(*, *) '======================================================================='      
      elseif (cgmin_flag(1).and..not.cgmin_flag(2)) then
         open(51,file='e4d.log',status='old',action='write',position='append')
-        write(51,*) '=============================== WARNING ==============================='
+        !write(51,*) '=============================== WARNING ==============================='
+        !write(51,*) ' E4D inverse option file ',trim(invfile),' requests joint inversion'
+        !write(51,*) ' but FMM inverse option file does not request joint inversion!     '
+        !write(51,*) ' NO JOINT INVERSION WILL BE PERFORMED.'
+        !write(51,*) '                  E4D: RUNNING IN SEPARATE INVERSION MODE ... '
+        !write(51,*) '======================================================================='
+
+        write(51,*) '================================ ERROR ================================'
         write(51,*) ' E4D inverse option file ',trim(invfile),' requests joint inversion'
         write(51,*) ' but FMM inverse option file does not request joint inversion!     '
-        write(51,*) ' NO JOINT INVERSION WILL BE PERFORMED.'
-        write(51,*) '                  E4D: RUNNING IN SEPARATE INVERSION MODE ... '
+        write(51,*) ' NO INVERSION WILL BE PERFORMED...'        
+        write(51,*) ' Please make sure BOTH inverse option files have joint inversion '
+        write(51,*) ' constraint using structural metric code (s_met) = 12 or 13 for'
+        write(51,*) ' running in joint inversion mode. Otherwise, no inverse option file'
+        write(51,*) ' should have s_met = 12 or 13 to rather run in seperate inversion mode.'
+        write(51,*) ' E4D: Aborting ... '
         write(51,*) '======================================================================='
         close(51)
-        write(*, *) '=============================== WARNING ==============================='
+        !write(*, *) '=============================== WARNING ==============================='
+        !write(*, *) ' E4D inverse option file ',trim(invfile),' requests joint inversion'
+        !write(*, *) ' but FMM inverse option file does not request joint inversion!     '
+        !write(*, *) ' NO JOINT INVERSION WILL BE PERFORMED.'
+        !write(*, *) '                  E4D: RUNNING IN SEPARATE INVERSION MODE ... '
+        !write(*, *) '======================================================================='        
+
+        write(*, *) '================================ ERROR ================================'
         write(*, *) ' E4D inverse option file ',trim(invfile),' requests joint inversion'
         write(*, *) ' but FMM inverse option file does not request joint inversion!     '
-        write(*, *) ' NO JOINT INVERSION WILL BE PERFORMED.'
-        write(*, *) '                  E4D: RUNNING IN SEPARATE INVERSION MODE ... '
+        write(*, *) ' NO INVERSION WILL BE PERFORMED...'        
+        write(*, *) ' Please make sure BOTH inverse option files have joint inversion '
+        write(*, *) ' constraint using structural metric code (s_met) = 12 or 13 for'
+        write(*, *) ' running in joint inversion mode. Otherwise, no inverse option file'
+        write(*, *) ' should have s_met = 12 or 13 to rather run in seperate inversion mode.'
+        write(*, *) ' E4D: Aborting ... '
         write(*, *) '======================================================================='
-
+        call crash_exit
+        
         !reset cgmin_flag
         cgmin_flag = .false.        
         
      elseif (.not.cgmin_flag(1).and.cgmin_flag(2)) then
         open(51,file='e4d.log',status='old',action='write',position='append')
-        write(51,*) '=============================== WARNING ==============================='
-        write(51,*) ' E4D inverse option file ',trim(invfile),' does not requests joint'
+        ! write(51,*) '=============================== WARNING ==============================='
+        ! write(51,*) ' E4D inverse option file ',trim(invfile),' does not request joint'
+        ! write(51,*) ' inversion but FMM inverse option file requests joint inversion. '
+        ! write(51,*) ' NO JOINT INVERSION WILL BE PERFORMED.'
+        ! write(51,*) '                  E4D: RUNNING IN SEPARATE INVERSION MODE ... '
+        ! write(51,*) '======================================================================='
+
+        write(51,*) '================================ ERROR ================================'
+        write(51,*) ' E4D inverse option file ',trim(invfile),' does not request joint'
         write(51,*) ' inversion but FMM inverse option file requests joint inversion. '
-        write(51,*) ' NO JOINT INVERSION WILL BE PERFORMED.'
-        write(51,*) '                  E4D: RUNNING IN SEPARATE INVERSION MODE ... '
+        write(51,*) ' NO INVERSION WILL BE PERFORMED...'
+        write(51,*) ' Please make sure BOTH inverse option files have joint inversion '
+        write(51,*) ' constraint using structural metric code (s_met) = 12 or 13 for'
+        write(51,*) ' running in joint inversion mode. Otherwise, no inverse option file'
+        write(51,*) ' should have s_met = 12 or 13 to rather run in seperate inversion mode.'
+        write(51,*) ' E4D: Aborting ... '
         write(51,*) '======================================================================='
         close(51)
-        write(*, *) '=============================== WARNING ==============================='
-        write(*, *) ' E4D inverse option file ',trim(invfile),' does not requests joint'
-        write(*, *) ' inversion but FMM inverse option file requests joint inversion. '
-        write(*, *) ' NO JOINT INVERSION WILL BE PERFORMED.'
-        write(*, *) '                  E4D: RUNNING IN SEPARATE INVERSION MODE ... '
-        write(*, *) '======================================================================='
 
+        ! write(*, *) '=============================== WARNING ==============================='
+        ! write(*, *) ' E4D inverse option file ',trim(invfile),' does not request joint'
+        ! write(*, *) ' inversion but FMM inverse option file requests joint inversion. '
+        ! write(*, *) ' NO JOINT INVERSION WILL BE PERFORMED.'
+        ! write(*, *) '                  E4D: RUNNING IN SEPARATE INVERSION MODE ... '
+        ! write(*, *) '======================================================================='
+
+        write(*, *) '================================ ERROR ================================'
+        write(*, *) ' E4D inverse option file ',trim(invfile),' does not request joint'
+        write(*, *) ' inversion but FMM inverse option file requests joint inversion. '
+        write(*, *) ' NO INVERSION WILL BE PERFORMED...'
+        write(*, *) ' Please make sure BOTH inverse option files have joint inversion '
+        write(*, *) ' constraint using structural metric code (s_met) = 12 or 13 for'
+        write(*, *) ' running in joint inversion mode. Otherwise, no inverse option file'
+        write(*, *) ' should have s_met = 12 or 13 to rather run in seperate inversion mode.'
+        write(*, *) ' E4D: Aborting ... '
+        write(*, *) '======================================================================='
+        call crash_exit
+        
         !reset cgmin_flag
         cgmin_flag = .false.
         

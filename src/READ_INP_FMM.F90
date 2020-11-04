@@ -71,8 +71,8 @@ contains
     end if    
     
     if(mode_fmm == 3) then
-       read(10,*,IOSTAT=ios) invfile;      call check_inp(6,junk)
-       read(10,*,IOSTAT=ios) refmod_file;  call check_inp(7,junk)
+       read(10,*,IOSTAT=ios) invfile;         call check_inp_fmm(6,junk)
+       read(10,*,IOSTAT=ios) refmod_file;     call check_inp_fmm(7,junk)
     end if
     close(10)
 
@@ -106,6 +106,7 @@ contains
     !!check mesh files
     if (mode_fmm > 1)then 
        call check_inp_fmm(121,mnchar)
+       call check_inp_fmm(122,mnchar)
     end if
     
     !!Allocate/read the source positions and survey configuration
@@ -273,8 +274,28 @@ contains
        close(51)
 
     case(6)
+       open(51,file='fmm.log',status='old',action='write',position='append')
+       if(ios .ne. 0) then
+          write(51,*) "FMM: There was a problem reading the inverse options file name in fmm.inp: aborting"
+          write(*, *) "FMM: There was a problem reading the inverse options file name in fmm.inp: aborting"
+          close(51)
+          call crash_exit_fmm
+       else
+          write(51,*) " Inverse options file:             ",trim(invfile)
+       endif
+       close(51)
 
     case(7)
+       open(51,file='fmm.log',status='old',action='write',position='append')      
+       if (ios .ne. 0) then
+          write(51,*) "FMM: There was a problem reading the reference model file name in fmm.inp: aborting"
+          close(51)
+          write(*, *) "FMM: There was a problem reading the reference model file name in fmm.inp: aborting"
+          call crash_exit          
+       else
+          write(51,*) " Reference model file:             ",trim(refmod_file)
+       end if        
+       close(51) 
 
     case(8)
 
@@ -586,205 +607,249 @@ contains
          call crash_exit_fmm
       end if
 
-  case(24)
-     open(51,file='fmm.log',status='old',action='write',position='append')
-     if(indx == 0) then
-        write(51,*)
-        write(51,*) " FMM: Can't find the survey file: ",trim(tfile)
-        write(51,*) " FMM: aborting."
-        write(*,*)
-        write(*,*) " FMM: Can't find the survey file: ",trim(tfile)
-        write(*,*) " FMM: aborting."
-        close(51)
-        call crash_exit_fmm
-     else
-        write(51,*) 
-        write(51,*) " SURVEY FILE SUMMARY"
-     end if
-    close(51)
+   case(24)
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      if(indx == 0) then
+         write(51,*)
+         write(51,*) " FMM: Can't find the survey file: ",trim(tfile)
+         write(51,*) " FMM: aborting."
+         write(*,*)
+         write(*,*) " FMM: Can't find the survey file: ",trim(tfile)
+         write(*,*) " FMM: aborting."
+         close(51)
+         call crash_exit_fmm
+      else         
+         write(51,*) 
+         write(51,*) " SURVEY FILE SUMMARY"
+      end if
+      close(51)
       
-  case(25)
-     open(51,file='fmm.log',status='old',action='write',position='append')
-     write(51,*) 
-     write(51,*) " FMM: Can't find the velocity file: ",trim(spdfile)
-     write(51,*) " FMM: Aborting ..."
-     close(51)
-     write(*,*) 
-     write(*,*) " FMM: Can't find the velocity file: ",trim(spdfile)
-     write(*,*) " FMM: Aborting ..."
-     close(51)
-     call crash_exit_fmm
-      
+   case(25)     
+      open(51,file='fmm.log',status='old',action='write',position='append')      
+      write(51,*) 
+      write(51,*) " FMM: Can't find the velocity file: ",trim(spdfile)
+      write(51,*) " FMM: Aborting ..."
+      close(51)
+      write(*,*) 
+      write(*,*) " FMM: Can't find the velocity file: ",trim(spdfile)
+      write(*,*) " FMM: Aborting ..."
+      close(51)
+      call crash_exit_fmm
 
-     case(121)
-        open(51,file='fmm.log',status='old',action='write',position='append')
-        if(mshfile(mnchar+2:mnchar+6) == ".node") then
-           inquire(file=trim(mshfile),exist=exst)
-           if(.not.exst) then
-              write(51,*)
-              write(*,*)
-              write(51,*) " FMM: Cannot find the specified mesh node file: ",trim(mshfile)
-              write(*, *) " FMM: Cannot find the specified mesh node file: ",trim(mshfile)
-              close(51)
-              call crash_exit_fmm
-           end if
-        elseif(mshfile(mnchar+2:mnchar+5) == ".ele") then
-           inquire(file=trim(mshfile),exist=exst)
-           if(.not.exst) then
-              write(51,*)
-              write(*,*)
-              write(51,*) " FMM: Cannot find the specified mesh element file: ",trim(mshfile)
-              write(*, *) " FMM: Cannot find the specified mesh element file: ",trim(mshfile)
-              close(51)
-              call crash_exit_fmm
-           end if
-        else
-           write(51,*)
-           write(*,*)
-           write(51,*) " FMM: If mode > 1 you must provide the name of the mesh with extension"
-           write(51,*) " FMM: node file (.*.node) or mesh element file (.*.ele) where * is a single letter."
-           write(51,*) " FMM: You provided: ",trim(mshfile)
-           write(*, *) " FMM: If mode > 1 you must provide the name of the mesh with extension"
-           write(*, *) " FMM: node file (.*.node) or mesh element file (.*.ele)  where * is a single letter."
-           write(*, *) " FMM: You provided: ",trim(mshfile)
-           close(51)
-           call crash_exit_fmm
-        end if
-        close(51)
+   case(52)      
+      if(ios.ne.0 .or. indx .ne. 0 .or. indx .ne. 1) then
+         open(51,file='fmm.log',status='old',action='write',position='append')
+         write(51,*) "FMM: There was a problem reading the first line of the "
+         write(51,*) "FMM: fmm survey file ",trim(tfile)
+         write(51,*) "FMM: In fmm mode, the first line of the survey file"
+         write(51,*) "FMM: should contain two integers: the number of source positions "
+         write(51,*) "FMM: and the fresnel volume flag"
+         write(51,*) "FMM: 0 for ray-based and 1 for fresnel volume"
+         write(51,*) "FMM: Using ray-based by default "
+         write(51,*) "FMM: Aborting ..."
+         close(51)
+         write(*,*)
+         write(*,*) "FMM: There was a problem reading the first line of the "
+         write(*,*) "FMM: fmm survey file ",trim(tfile)
+         write(*,*) "FMM: In fmm mode, the first line of the survey file"
+         write(*,*) "FMM: should contain two integers: the number of source positions "
+         write(*,*) "FMM: and the fresnel volume flag"
+         write(*,*) "FMM: 0 for ray-based and 1 for fresnel volume"
+         write(*,*) "FMM: Aborting ..."
+         call crash_exit_fmm
+      end if
+                
+   case(53)      
+      open(51,file='fmm.log',status='old',action='write',position='append')      
+      write(51,*) "FMM: The frequency for source number: ",indx      
+      write(51,*) "FMM: Is less than or equal to zero. Specified frequencies"      
+      write(51,*) "FMM: must be positive."      
+      write(51,*) "FMM: Aborting..."      
+      close(51)
+      write(*,*) "FMM: The frequency for source number: ",indx
+      write(*,*) "FMM: Is less than or equal to zero. Specified frequencies"
+      write(*,*) "FMM: must be positive."
+      write(*,*) "FMM: Aborting..."
+      call crash_exit_fmm
+
+   case(54)      
+      if(ios .ne. 0) then         
+         open(51,file='fmm.log',status='old',action='write',position='append')         
+         write(51,*)         
+         write(51,*) '------------------------------- WARNING -------------------------------'         
+         write(51,*) "There was a problem reading the number of zones to include"         
+         write(51,*) "in the forward travel time simulation after the mesh file name."         
+         write(51,*) "Using all zones."         
+         write(51,*) '-----------------------------------------------------------------------'         
+         write(51,*)         
+         write(*, *)         
+         write(*, *) '------------------------------- WARNING -------------------------------'        
+         write(*, *) "There was a problem reading the number of zones to include"         
+         write(*, *) "in the forward travel time simulation after the mesh file name."         
+         write(*, *) "Using all zones."         
+         write(*, *) '-----------------------------------------------------------------------'         
+         write(*, *)         
+      end if      
+
+   case(55)      
+      if(ios .ne. 0) then
+         open(51,file='fmm.log',status='old',action='write',position='append')
+         write(51,*)
+         write(51,*) '------------------------------- WARNING -------------------------------'  
+         write(51,*) "There was a problem reading which zones to include"
+         write(51,*) "in the forward travel time simulation."
+         write(51,*) "Using all zones" 
+         write(51,*) '-----------------------------------------------------------------------'
+         write(51,*)
+         write(*, *)
+         write(*, *) '------------------------------- WARNING -------------------------------'              
+         write(*, *) "There was a problem reading which zones to include"
+         write(*, *) "in the forward travel time simulation."
+         write(*, *) "Using all zones"
+         write(*, *) '-----------------------------------------------------------------------'
+         write(*, *)
+      end if      
+
+   case(56)
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      write(51,*) '-------------------------------- ERROR --------------------------------'
+      write(51,*) "There was a problem reading the source position and/or the dominant"
+      write(51,'(2(A,I8.5))') " frequency for source number: ",indx-1,"   or ",indx
+      write(51,*) "Please make sure the x-, y-, and z-positions and frequency for "
+      write(51,'(2(A,I8.5))') " for source number: ",indx-1,"   or ", indx
+      write(51,*) "are specified correctly in fmm survey file: ",trim(tfile)
+      write(51,*) "Aborting..."
+      write(51,*) '-----------------------------------------------------------------------'
+      close(51)
+      write(*, *) '-------------------------------- ERROR --------------------------------'
+      write(*, *) "There was a problem reading the source position and/or the dominant"
+      write(*, '(2(A,I8.5))') " frequency for source number: ",indx-1,"   or ",indx
+      write(*, *) "Please make sure the x-, y-, and z-positions and frequency for "
+      write(*, '(2(A,I8.5))') " for source number: ",indx-1,"   or ", indx
+      write(*, *) "are specified correctly in fmm survey file: ",trim(tfile)
+      write(*, *) "Aborting..."      
+      write(*, *) '-----------------------------------------------------------------------'      
+      call crash_exit_fmm      
+             
+   case(57)      
+      open(51,file='fmm.log',status='old',action='write',position='append')      
+      write(51,*) '-------------------------------- ERROR --------------------------------'      
+      write(51,*) "There was a problem reading the receiver position and/or data"      
+      write(51,'(2(A,I8.5))') " for receiver number: ",indx-1,"   or ",indx      
+      write(51,*) "Please make sure the x-, y-, and z-positions and/or data for "      
+      write(51,'(2(A,I8.5))') " for receiver number: ",indx-1,"   or ", indx      
+      write(51,*) "are specified correctly in fmm survey file: ",trim(tfile)      
+      if (indx.eq.1) write(51,*) "NB: Problem could be with the last source position/frequency."      
+      write(51,*) "Aborting..."      
+      write(51,*) '-----------------------------------------------------------------------'      
+      close(51)
       
-      case(52)
-         if(ios.ne.0 .or. indx .ne. 0 .or. indx .ne. 1) then
-            open(51,file='fmm.log',status='old',action='write',position='append')
-            write(51,*) "FMM: There was a problem reading the first line of the "
-            write(51,*) "FMM: fmm survey file ",trim(tfile)
-            write(51,*) "FMM: In fmm mode, the first line of the survey file"
-            write(51,*) "FMM: should contain two integers: the number of source positions "
-            write(51,*) "FMM: and the fresnel volume flag"
-            write(51,*) "FMM: 0 for ray-based and 1 for fresnel volume"
-            write(51,*) "FMM: Using ray-based by default "
-            write(51,*) "FMM: Aborting ..."
-            close(51)
+      write(*, *) '-------------------------------- ERROR --------------------------------'      
+      write(*, *) "There was a problem reading the receiver position and/or data"      
+      write(*, '(2(A,I8.5))') " for receiver number: ",indx-1,"   or ",indx      
+      write(*, *) "Please make sure the x-, y-, and z-positions and/or data for "      
+      write(*, '(2(A,I8.5))') " for receiver number: ",indx-1,"   or ", indx     
+      write(*, *) "are specified correctly in fmm survey file: ",trim(tfile)      
+      if (indx.eq.1) write(*, *) "NB: Problem could be with the last source position/frequency."      
+      write(*, *) "Aborting..."      
+      write(*, *) '-----------------------------------------------------------------------'      
+      call crash_exit_fmm      
+
+   case(58)
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      write(51,*)
+      write(51,*) "FMM: E4D and FMM cannot build mesh files together."
+      write(51,*) "FMM: Please build mesh files either using E4D or FMM."
+      write(51,*) "FMM: Aborting ..."
+      write(*, *)
+      write(*, *) "FMM: E4D and FMM cannot build mesh files together."
+      write(*, *) "FMM: Please build mesh files either using E4D or FMM."
+      write(*, *) "FMM: Aborting ..."
+      close(51)
+      call crash_exit_fmm
+
+   case(121)
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      if(mshfile(mnchar+2:mnchar+6) == ".node") then
+         inquire(file=trim(mshfile),exist=exst)
+         if(.not.exst) then
+            write(51,*)
             write(*,*)
-            write(*,*) "FMM: There was a problem reading the first line of the "
-            write(*,*) "FMM: fmm survey file ",trim(tfile)
-            write(*,*) "FMM: In fmm mode, the first line of the survey file"
-            write(*,*) "FMM: should contain two integers: the number of source positions "
-            write(*,*) "FMM: and the fresnel volume flag"
-            write(*,*) "FMM: 0 for ray-based and 1 for fresnel volume"
-            write(*,*) "FMM: Aborting ..."
+            write(51,*) "FMM: Cannot find the specified mesh node file: ",trim(mshfile)
+            write(*, *) "FMM: Cannot find the specified mesh node file: ",trim(mshfile)
+            close(51)
             call crash_exit_fmm
          end if
+      elseif(mshfile(mnchar+2:mnchar+5) == ".ele") then
+         inquire(file=trim(mshfile),exist=exst)
+         if(.not.exst) then
+            write(51,*)
+            write(*,*)
+            write(51,*) "FMM: Cannot find the specified mesh element file: ",trim(mshfile)
+            write(*, *) "FMM: Cannot find the specified mesh element file: ",trim(mshfile)
+            close(51)
+            call crash_exit_fmm
+         end if         
+      else
+         write(51,*)
+         write(*,*)
+         write(51,*) "FMM: If mode > 1 you must provide the name of the mesh with extension"
+         write(51,*) "FMM: node file (.*.node) or mesh element file (.*.ele) where * is a single letter."
+         write(51,*) "FMM: You provided: ",trim(mshfile)
+         write(*, *) "FMM: If mode > 1 you must provide the name of the mesh with extension"
+         write(*, *) "FMM: node file (.*.node) or mesh element file (.*.ele)  where * is a single letter."
+         write(*, *) "FMM: You provided: ",trim(mshfile)
+         close(51)
+         call crash_exit_fmm
+      end if      
+      close(51)
 
-         case(53)
-             open(51,file='fmm.log',status='old',action='write',position='append')
-             write(51,*) "FMM: The frequency for source number: ",indx
-             write(51,*) "FMM: Is less than or equal to zero. Specified frequencies"
-             write(51,*) "FMM: must be positive."
-             write(51,*) "FMM: Aborting..."
-             close(51)
-             write(*,*) "FMM: The frequency for source number: ",indx
-             write(*,*) "FMM: Is less than or equal to zero. Specified frequencies"
-             write(*,*) "FMM: must be positive."
-             write(*,*) "FMM: Aborting..."
-             call crash_exit_fmm
+   case(122)
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      inquire(file=trim(mshfile(1:mnchar))//'1.node',exist=exst)
+      if (.not.exst) then
+         write(51,*) "FMM: Cannot find the mesh node file: ",trim(mshfile(1:mnchar))//'1.node'
+         write(*, *) "FMM: Cannot find the mesh node file: ",trim(mshfile(1:mnchar))//'1.node'
+         close(51)
+         call crash_exit_fmm
+      endif
 
-          case(54)
-             if(ios .ne. 0) then
-                open(51,file='fmm.log',status='old',action='write',position='append')
-                write(51,*)
-                write(51,*) '------------------------------- WARNING -------------------------------'  
-                write(51,*) "There was a problem reading the number of zones to include"
-                write(51,*) "in the forward travel time simulation after the mesh file name."
-                write(51,*) "Using all zones."
-                write(51,*) '-----------------------------------------------------------------------'
-                write(51,*)
-                write(*, *) 
-                write(*, *) '------------------------------- WARNING -------------------------------'               
-                write(*, *) "There was a problem reading the number of zones to include"
-                write(*, *) "in the forward travel time simulation after the mesh file name."
-                write(*, *) "Using all zones."
-                write(*, *) '-----------------------------------------------------------------------'
-                write(*, *)
-             end if
+      inquire(file=trim(mshfile(1:mnchar))//'1.ele',exist=exst)
+      if (.not.exst) then
+         write(51,*) "FMM: Cannot find the mesh element file: ",trim(mshfile(1:mnchar))//'1.ele'
+         write(*, *) "FMM: Cannot find the mesh element file: ",trim(mshfile(1:mnchar))//'1.ele'
+         close(51)
+         call crash_exit_fmm
+      endif
 
-          case(55)
-             if(ios .ne. 0) then
-                open(51,file='fmm.log',status='old',action='write',position='append')
-                write(51,*)
-                write(51,*) '------------------------------- WARNING -------------------------------'  
-                write(51,*) "There was a problem reading which zones to include"
-                write(51,*) "in the forward travel time simulation."
-                write(51,*) "Using all zones" 
-                write(51,*) '-----------------------------------------------------------------------'
-                write(51,*)
-                write(*, *)
-                write(*, *) '------------------------------- WARNING -------------------------------'              
-                write(*, *) "There was a problem reading which zones to include"
-                write(*, *) "in the forward travel time simulation."
-                write(*, *) "Using all zones"
-                write(*, *) '-----------------------------------------------------------------------'
-                write(*, *)
-             end if
+      inquire(file=trim(mshfile(1:mnchar))//'1.neigh',exist=exst)
+      if (.not.exst) then
+         write(51,*) "FMM: Cannot find the mesh neighbor file: ",trim(mshfile(1:mnchar))//'1.neigh'
+         write(*, *) "FMM: Cannot find the mesh neighbor file: ",trim(mshfile(1:mnchar))//'1.neigh'
+         close(51)
+         call crash_exit_fmm
+      endif
 
-          case(56)
-             open(51,file='fmm.log',status='old',action='write',position='append')
-             write(51,*) '-------------------------------- ERROR --------------------------------'
-             write(51,*) "There was a problem reading the source position and/or the dominant"
-             write(51,'(2(A,I8.5))') " frequency for source number: ",indx-1,"   or ",indx
-             write(51,*) "Please make sure the x-, y-, and z-positions and frequency for "
-             write(51,'(2(A,I8.5))') " for source number: ",indx-1,"   or ", indx
-             write(51,*) "are specified correctly in fmm survey file: ",trim(tfile)
-             write(51,*) "Aborting..."
-             write(51,*) '-----------------------------------------------------------------------'
-             close(51)
-             write(*, *) '-------------------------------- ERROR --------------------------------'
-             write(*, *) "There was a problem reading the source position and/or the dominant"
-             write(*, '(2(A,I8.5))') " frequency for source number: ",indx-1,"   or ",indx
-             write(*, *) "Please make sure the x-, y-, and z-positions and frequency for "
-             write(*, '(2(A,I8.5))') " for source number: ",indx-1,"   or ", indx
-             write(*, *) "are specified correctly in fmm survey file: ",trim(tfile)
-             write(*, *) "Aborting..."
-             write(*, *) '-----------------------------------------------------------------------'
-             call crash_exit_fmm
-             
-          case(57)             
-             open(51,file='fmm.log',status='old',action='write',position='append')
-             write(51,*) '-------------------------------- ERROR --------------------------------'
-             write(51,*) "There was a problem reading the receiver position and/or data"
-             write(51,'(2(A,I8.5))') " for receiver number: ",indx-1,"   or ",indx
-             write(51,*) "Please make sure the x-, y-, and z-positions and/or data for "
-             write(51,'(2(A,I8.5))') " for receiver number: ",indx-1,"   or ", indx
-             write(51,*) "are specified correctly in fmm survey file: ",trim(tfile)
-             if (indx.eq.1) write(51,*) "NB: Problem could be with the last source position/frequency."
-             write(51,*) "Aborting..."
-             write(51,*) '-----------------------------------------------------------------------'
-             close(51)
-             write(*, *) '-------------------------------- ERROR --------------------------------'
-             write(*, *) "There was a problem reading the receiver position and/or data"
-             write(*, '(2(A,I8.5))') " for receiver number: ",indx-1,"   or ",indx
-             write(*, *) "Please make sure the x-, y-, and z-positions and/or data for "
-             write(*, '(2(A,I8.5))') " for receiver number: ",indx-1,"   or ", indx
-             write(*, *) "are specified correctly in fmm survey file: ",trim(tfile)
-             if (indx.eq.1) write(*, *) "NB: Problem could be with the last source position/frequency."
-             write(*, *) "Aborting..."
-             write(*, *) '-----------------------------------------------------------------------'
-             call crash_exit_fmm
-          case(58)
-             open(51,file='fmm.log',status='old',action='write',position='append')
-             write(51,*)
-             write(51,*) "FMM: E4D and FMM cannot build mesh files together."
-             write(51,*) "FMM: Please build mesh files either using E4D or FMM."
-             write(51,*) "FMM: Aborting ..."
-             write(*, *)
-             write(*, *) "FMM: E4D and FMM cannot build mesh files together."
-             write(*, *) "FMM: Please build mesh files either using E4D or FMM."
-             write(*, *) "FMM: Aborting ..."
-             close(51)
-             call crash_exit_fmm
-             
-    case DEFAULT
+      inquire(file=trim(mshfile(1:mnchar))//'1.face',exist=exst)
+      if (.not.exst) then
+         write(51,*) "FMM: Cannot find the mesh face file: ",trim(mshfile(1:mnchar))//'1.face'
+         write(*, *) "FMM: Cannot find the mesh face file: ",trim(mshfile(1:mnchar))//'1.face'
+         close(51)
+         call crash_exit_fmm
+      endif
 
-    end select
+      inquire(file=trim(mshfile(1:mnchar))//'trn',exist=exst)
+      if (.not.exst) then
+         write(51,*) "FMM: Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn'
+         write(*, *) "FMM: Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn'
+         close(51)
+         call crash_exit_fmm
+      endif
+      
+   case DEFAULT
+
+   end select
+   
   end subroutine check_inp_fmm
   !_________________________________________________________________________
   
