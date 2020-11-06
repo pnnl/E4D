@@ -313,6 +313,7 @@ contains
     !!check mesh files
     if (mode > 1)then 
        call check_inp(121,mnchar)
+       call check_inp(122,mnchar)
     end if
     
     !!Allocate/read the electrode positions and survey configuration
@@ -1354,7 +1355,7 @@ contains
        open(51,file='e4d.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
           write(51,*) "E4D: There was a problem reading the conductivity file name in e4d.inp: aborting"
-          write(*,*) "E4D: There was a problem reading the conductivity file name in e4d.inp: aborting"
+          write(*, *) "E4D: There was a problem reading the conductivity file name in e4d.inp: aborting"
           close(51)
           call crash_exit
        else
@@ -1380,75 +1381,57 @@ contains
        close(51)
 
     case(6)
-    	if(im_fmm) then
-    	   open(51,file='fmm.log',status='old',action='write',position='append')
-    	else	
-       	   open(51,file='e4d.log',status='old',action='write',position='append')
-       	end if
+       
+       open(51,file='e4d.log',status='old',action='write',position='append')
        	
        if(ios .ne. 0) then
-         if(im_fmm) then
-            write(51,*) "E4D: There was a problem reading the inverse options file name in fmm.inp: aborting"
-            write(*,*) "E4D: There was a problem reading the inverse options file name in fmm.inp: aborting"
-            close(51)
-            call crash_exit
-         else
-            if(mode == 22 .or. mode == 23) then
-                write(51,*) "E4D: There was a problem reading the two SIP inverse option file names in e4d.inp: aborting"
-                write(*,*) "E4D: There was a problem reading the two SIP inverse option file names in e4d.inp: aborting"
-             else if (mode==0) then
-                if (i_flag) then
-					write(51,*) "E4D: No ERT or SIP inverse options file name specified in e4d.inp."
-					write(*,*) "E4D: No ERT or SIP inverse options file name specified in e4d.inp."
-				else
-					write(51,*) "E4D: No ERT inverse options file name specified in e4d.inp."
-					write(*,*) "E4D: No ERT inverse options file name specified in e4d.inp."				
-				end if
-                inv_opt_flag=.false.
-                return
-             else
-                write(51,*) "E4D: There was a problem reading the inverse options file name in e4d.inp: aborting"
-                write(*,*) "E4D: There was a problem reading the inverse options file name in e4d.inp: aborting"
-             end if
-             close(51)
-             call crash_exit
-         end if
-       
-       else
-         
+          if(mode == 22 .or. mode == 23) then             
+             write(51,*) "E4D: There was a problem reading the two SIP inverse option file names in e4d.inp: aborting"             
+             write(*, *) "E4D: There was a problem reading the two SIP inverse option file names in e4d.inp: aborting"             
+          else if (mode==0) then             
+             if (i_flag) then                
+                write(51,*) "E4D: No ERT or SIP inverse options file name specified in e4d.inp."               
+                write(*, *) "E4D: No ERT or SIP inverse options file name specified in e4d.inp."                
+             else                
+                write(51,*) "E4D: No ERT inverse options file name specified in e4d.inp."                
+                write(*, *) "E4D: No ERT inverse options file name specified in e4d.inp."                
+             end if             
+             inv_opt_flag=.false.             
+             return             
+          else             
+             write(51,*) "E4D: There was a problem reading the inverse options file name in e4d.inp: aborting"
+             write(*, *) "E4D: There was a problem reading the inverse options file name in e4d.inp: aborting"
+          end if
+          close(51)
+          call crash_exit
+       else          
          if(mode == 22 .or. mode == 23) then
              write(51,*) " Inverse options file (amp.):      ",trim(invfile)
              write(51,*) " Inverse options file (phase):     ",trim(iinvfile)
           else
              write(51,*) " Inverse options file:             ",trim(invfile)
-          end if
-          
-       end if
+          end if          
+       end if       
        close(51)
-
-    case(7)
-        if(im_fmm) then
-    	   open(51,file='fmm.log',status='old',action='write',position='append')
-    	else	
-       	   open(51,file='e4d.log',status='old',action='write',position='append')
-       	end if
        
-       if(ios .ne. 0) then
+    case(7)
+       
+       open(51,file='e4d.log',status='old',action='write',position='append')      
+
+       if (ios .ne. 0) then
           if (mode==0) then
-			  write(51,*) "E4D: No reference model file name specified in e4d.inp."
-			  write(*,*) "E4D: No reference model file name specified in e4d.inp."
-		  else
-			  write(51,*) "E4D: There was a problem reading the reference model file name in e4d.inp: aborting"
-			  write(*,*) "E4D: There was a problem reading the reference model file name in e4d.inp: aborting"
-			  call crash_exit
-		  end if
-          close(51)
-          
+             write(51,*) "E4D: No reference model file name specified in e4d.inp."
+             write(*, *) "E4D: No reference model file name specified in e4d.inp."
+          else
+             write(51,*) "E4D: There was a problem reading the reference model file name in e4d.inp: aborting"
+             close(51)             
+             write(*, *) "E4D: There was a problem reading the reference model file name in e4d.inp: aborting"
+             call crash_exit
+          end if
        else
           write(51,*) " Reference model file:             ",trim(refmod_file)
-       end if
-       close(51)
-
+       end if        
+       close(51)        
 
     case(8)
 
@@ -1992,8 +1975,8 @@ contains
            if(.not.exst) then
               write(51,*)
               write(*,*)
-              write(51,*) " E4D: Cannot find the specified mesh node file: ",trim(mshfile)
-              write(*,*) " E4D: Cannot find the specified mesh node file: ",trim(mshfile)
+              write(51,*) "E4D: Cannot find the specified mesh node file: ",trim(mshfile)
+              write(*, *) "E4D: Cannot find the specified mesh node file: ",trim(mshfile)
               close(51)
               call crash_exit
            end if
@@ -2002,24 +1985,66 @@ contains
            if(.not.exst) then
               write(51,*)
               write(*,*)
-              write(51,*) " E4D: Cannot find the specified mesh element file: ",trim(mshfile)
-              write(*,*) " E4D: Cannot find the specified mesh element file: ",trim(mshfile)
+              write(51,*) "E4D: Cannot find the specified mesh element file: ",trim(mshfile)
+              write(*, *) "E4D: Cannot find the specified mesh element file: ",trim(mshfile)
               close(51)
               call crash_exit
            end if
         else
            write(51,*)
            write(*,*)
-           write(51,*) " E4D: If mode > 1 you must provide the name of the mesh"
-           write(51,*) " E4D: node file (*.node) or mesh element file (*.ele) ."
-           write(51,*) " E4D: You provided: ",trim(mshfile)
-           write(*,*) " E4D: If mode > 1 you must provide the name of the mesh"
-           write(*,*) " E4D: node file (*.node) or mesh element file (*.ele) ."
-           write(*,*) " E4D: You provided: ",trim(mshfile)
+           write(51,*) "E4D: If mode > 1 you must provide the name of the mesh"
+           write(51,*) "E4D: node file (*.node) or mesh element file (*.ele) ."
+           write(51,*) "E4D: You provided: ",trim(mshfile)
+           write(*, *) "E4D: If mode > 1 you must provide the name of the mesh"
+           write(*, *) "E4D: node file (*.node) or mesh element file (*.ele) ."
+           write(*, *) "E4D: You provided: ",trim(mshfile)
            close(51)
            call crash_exit
         end if
         close(51)
+
+     case(122)
+        open(51,file='e4d.log',status='old',action='write',position='append')
+        inquire(file=trim(mshfile(1:mnchar))//'1.node',exist=exst)
+        if (.not.exst) then
+           write(51,*) "E4D: Cannot find the mesh node file: ",trim(mshfile(1:mnchar))//'1.node'
+           write(*, *) "E4D: Cannot find the mesh node file: ",trim(mshfile(1:mnchar))//'1.node'
+           close(51)
+           call crash_exit
+        endif
+
+        inquire(file=trim(mshfile(1:mnchar))//'1.ele',exist=exst)
+        if (.not.exst) then
+           write(51,*) "E4D: Cannot find the mesh element file: ",trim(mshfile(1:mnchar))//'1.ele'
+           write(*, *) "E4D: Cannot find the mesh element file: ",trim(mshfile(1:mnchar))//'1.ele'
+           close(51)
+           call crash_exit
+        endif
+
+        inquire(file=trim(mshfile(1:mnchar))//'1.neigh',exist=exst)
+        if (.not.exst) then
+           write(51,*) "E4D: Cannot find the mesh neighbor file: ",trim(mshfile(1:mnchar))//'1.neigh'
+           write(*, *) "E4D: Cannot find the mesh neighbor file: ",trim(mshfile(1:mnchar))//'1.neigh'
+           close(51)
+           call crash_exit
+        endif
+
+        inquire(file=trim(mshfile(1:mnchar))//'1.face',exist=exst)
+        if (.not.exst) then
+           write(51,*) "E4D: Cannot find the mesh face file: ",trim(mshfile(1:mnchar))//'1.face'
+           write(*, *) "E4D: Cannot find the mesh face file: ",trim(mshfile(1:mnchar))//'1.face'
+           close(51)
+           call crash_exit
+        endif
+
+        inquire(file=trim(mshfile(1:mnchar))//'trn',exist=exst)
+        if (.not.exst) then
+           write(51,*) "E4D: Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn'
+           write(*, *) "E4D: Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn'
+           close(51)
+           call crash_exit
+        endif     
        
     case DEFAULT
 
