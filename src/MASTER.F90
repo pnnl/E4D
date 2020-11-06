@@ -1436,39 +1436,48 @@ contains
        implicit none
        integer :: ierr,i
        integer :: status(MPI_STATUS_SIZE)
-       real :: xor,yor,zor
+       !real :: xor,yor,zor
        real, dimension(:),allocatable :: sens
        real, dimension(:),allocatable :: jtmp
        
        call send_command(24)
-       write(*,*) 'COMPUTING J_TRANS_J'
-       allocate(sens(nsig),jtmp(nsig))
+       if (im_fmm) then
+          write(*,*) ' FMM: COMPUTING J_TRANS_J'
+       else
+          write(*,*) ' E4D: COMPUTING J_TRANS_J'
+       endif
+       
+       allocate(sens(nelem),jtmp(nelem))
        sens=0
        jtmp=0
 
        if(im_fmm) then
-          do i=1,n_rank_fmm-1
-             
-             call MPI_RECV(jtmp,nsig,MPI_REAL,i,0,FMM_COMM,status,ierr)
-             sens=sens+jtmp
-             
+          do i=1,n_rank_fmm-1             
+             call MPI_RECV(jtmp,nelem,MPI_REAL,i,0,FMM_COMM,status,ierr)
+             sens=sens+jtmp             
           end do
        else
-          do i=1,n_rank-1
-             
-             call MPI_RECV(jtmp,nsig,MPI_REAL,i,0,E4D_COMM,status,ierr)
-             sens=sens+jtmp
-             
+          do i=1,n_rank-1             
+             call MPI_RECV(jtmp,nelem,MPI_REAL,i,0,E4D_COMM,status,ierr)
+             sens=sens+jtmp             
           end do
        end if
 
-       open(10,file='sensitivity.txt',action='write',status='replace')
-       write(10,*) nsig
-       do i=1,nsig
+       deallocate(jtmp)
+
+       if (im_fmm) then
+          open(10,file='sensitivity_fmm.txt',action='write',status='replace')
+       else
+          open(10,file='sensitivity.txt',action='write',status='replace')
+       endif
+       
+       write(10,*) nelem
+       do i=1,nelem
           write(10,*) sens(i)
        end do
        close(10)
-          
+
+       deallocate(sens)
        
      end subroutine record_sens
      !__________________________________________________________________________
