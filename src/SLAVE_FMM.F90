@@ -18,7 +18,7 @@ module slave_fmm
 100   continue
       !Recieve a command from master
       call MPI_BCAST(command,1,MPI_INTEGER,0,FMM_COMM,ierr)
-
+   
       select case(command)
 
       case(-1) 
@@ -71,7 +71,7 @@ module slave_fmm
         call send_ttpred 
         goto 100
 
-     case(10) 
+     case(10)
         if(fresnel) then
            call build_jaco_fresnel
         else
@@ -157,6 +157,10 @@ module slave_fmm
 
      case(52)
         call print_mysens
+        goto 100
+
+     case(53)
+        call print_myfres
         goto 100
         
      case DEFAULT 
@@ -352,8 +356,34 @@ module slave_fmm
        !end if
      end subroutine print_mysens
      !__________________________________________________________________
-     
-    
+
+     !__________________________________________________________________
+     subroutine print_myfres
+       implicit none
+       integer :: i,nfres,indx,j
+       integer, dimension(:,:), allocatable :: ifres
+       character(len=10) :: sindx
+       
+       call MPI_BCAST(nfres,1,MPI_INTEGER,0,FMM_COMM,ierr)
+       allocate(ifres(nfres,2))
+       call MPI_BCAST(ifres,nfres*2,MPI_INTEGER,0,FMM_COMM,ierr)
+
+       do i=1,nfres
+          if( (ifres(i,1) >= jind(my_rank_fmm,1)) .and. (ifres(i,1)) <= jind(my_rank_fmm,2)) then
+             indx = ifres(i,1)-jind(my_rank_fmm,1)+1
+             write(sindx,'(I6.6)') ifres(i,1)
+             open(13,file='fresnel_volume_'//trim(sindx)//'.txt',status='replace',action='write')
+             write(13,*) nelem,1
+             do j=1,nelem
+                write(13,*) Jaco(indx,j)
+             end do
+             close(13)
+          end if
+       end do
+       deallocate(ifres)
+       
+     end subroutine print_myfres
+     !__________________________________________________________________
 
    
 end module slave_fmm

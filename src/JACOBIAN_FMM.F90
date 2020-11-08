@@ -27,7 +27,8 @@ contains
        allocate(Jaco(nj_rows,nelem))
     end if
     Jaco = 0  
-
+    
+    
     allocate(att(nnodes,tns))
     do i=1,tns
        do crank = 1,n_rank_fmm-1
@@ -40,9 +41,10 @@ contains
           end if
        end do
     end do
-    
+   
     jrow = 0
     do mn=jind(my_rank_fmm,1),jind(my_rank_fmm,2)
+      
        fzon = .false.
        a = s_conf_fmm(mn,1)
        m = s_conf_fmm(mn,2)
@@ -103,7 +105,7 @@ contains
 !!$          return
 !!$       end if
     end do
- 
+    
     deallocate(att)
     if(my_rank_fmm==1) then
        open(13,file='jaco_fmm.txt',status='replace',action='write')
@@ -113,6 +115,7 @@ contains
        end do
     end if
     close(13)
+   
     !Jaco = 0
   end subroutine build_jaco_fresnel
   !_____________________________________________________________________________
@@ -448,19 +451,19 @@ contains
 end subroutine build_jaco_raytrace
 !_____________________________________________________________________________
 
-!_____________________________________________________________________________
-subroutine trep(spot)
-  implicit none
-  integer :: spot
-  if(my_rank_fmm .eq. 1) write(21,*),spot
- if(my_rank_fmm .eq. 2) write(22,*),spot
-if(my_rank_fmm .eq. 3) write(23,*),spot
-if(my_rank_fmm .eq. 4) write(24,*),spot
-if(my_rank_fmm .eq. 5) write(25,*),spot
-if(my_rank_fmm .eq. 6) write(26,*),spot
-if(my_rank_fmm .eq. 7) write(27,*),spot
-end subroutine trep
-!_____________________________________________________________________________
+!!$!_____________________________________________________________________________
+!!$subroutine trep(spot)
+!!$  implicit none
+!!$  integer :: spot
+!!$  if(my_rank_fmm .eq. 1) write(21,*) spot
+!!$ if(my_rank_fmm .eq. 2) write(22,*) spot
+!!$if(my_rank_fmm .eq. 3) write(23,*) spot
+!!$if(my_rank_fmm .eq. 4) write(24,*) spot
+!!$if(my_rank_fmm .eq. 5) write(25,*) spot
+!!$if(my_rank_fmm .eq. 6) write(26,*) spot
+!!$if(my_rank_fmm .eq. 7) write(27,*) spot
+!!$end subroutine trep
+!!$!_____________________________________________________________________________
 !_____________________________________________________________________________
 subroutine interp_tt(pt,el,src,tt)
   implicit none

@@ -13,6 +13,7 @@ implicit none
   real, parameter :: tt_max = 1e12
   logical :: simulate_fmm = .false.
   logical :: fresnel = .false.                                !!flag for fresnel volume sensitivities
+  logical :: fresnel_out = .false.                            !!flage to output fresnel volumes
   logical, dimension(:), allocatable :: clos
   logical, dimension(:), allocatable :: upstream
   logical, dimension(:), allocatable :: use_ele

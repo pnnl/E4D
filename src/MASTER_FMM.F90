@@ -736,7 +736,7 @@ contains
        close(67)
 
     else
-
+      
 
     end if
 
@@ -982,7 +982,29 @@ contains
      endif ! cgmin(1) and cgmin(2) -> true
              
    end subroutine validate_jointInv_fmm
+   !___________________________________________________________________________________________________
+
+   !___________________________________________________________________________________________________
+   subroutine check_fresnel_output
+     implicit none
+     integer :: nfres
+    
+     call check_fout
      
+     if(fresnel_out) then
+        if(iter==0) then
+           call make_jaco_fmm
+        end if
+        nfres = size(itt(:,1))
+        call send_command_fmm(53)
+        call MPI_BCAST(nfres,1,MPI_INTEGER,0,FMM_COMM,ierr)
+        call MPI_BCAST(itt,nfres*2,MPI_INTEGER,0,FMM_COMM,ierr)
+     end if
+     return
+     
+   end subroutine check_fresnel_output
+   !___________________________________________________________________________________________________
+   
 
 end module master_fmm
 

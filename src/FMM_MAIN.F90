@@ -139,7 +139,7 @@ contains
        iter = iter+1
        call nreport(67)
        
-       !do the ray tracing to compute the Jacobian
+       !compute the Jacobian
        call nreport_fmm(72)
        call make_jaco_fmm
        !call print_sens_fmm
@@ -205,9 +205,13 @@ contains
 
         call nreport(73)
      end do
-     call make_jaco_fmm
-     !call print_sens_fmm
-     call send_command(0)
+     
+     
+
+     !check to see if fresnel volume outputs are requested.
+     call check_fresnel_output
+    
+     call send_command_fmm(0)
     return
     
   end subroutine fmm
