@@ -1471,7 +1471,7 @@ contains
           open(10,file='sensitivity.txt',action='write',status='replace')
        endif
        
-       write(10,*) nelem
+       write(10,*) nelem,' 1'
        do i=1,nelem
           write(10,*) sens(i)
        end do
