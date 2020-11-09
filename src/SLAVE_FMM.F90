@@ -135,7 +135,7 @@ module slave_fmm
         goto 100
 
      case(24)
-        write(*,*) "FMM_Sending"
+        !write(*,*) "FMM_Sending"
         call send_sens
         goto 100
 

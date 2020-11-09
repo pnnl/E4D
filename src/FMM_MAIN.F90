@@ -143,6 +143,7 @@ contains
        call nreport_fmm(72)
        call make_jaco_fmm
        !call print_sens_fmm
+       !call record_sens
        
        !instruct the slave to go into the e4d slave subroutine from
        !slave_fmm
@@ -205,14 +206,23 @@ contains
 
         call nreport(73)
      end do
+
      
      
 
      !check to see if fresnel volume outputs are requested.
      call check_fresnel_output
     
+     !print the sum of squared sensitivities if required
+     if(mode_fmm == 3 .and. jprnt) then
+        call make_jaco_fmm
+        call record_sens
+     end if     
+
+     ! clean up and exit
      call send_command_fmm(0)
-    return
+     return     
+
     
   end subroutine fmm
 
