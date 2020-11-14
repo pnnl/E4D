@@ -512,8 +512,15 @@ contains
           read(str1,*,IOSTAT=ios) C_targ(i);  call check_inv_opts(14,i)
           if(smetric(i,2).eq.3 .or. smetric(i,2).eq.4 .or. smetric(i,2).eq.7 .or. smetric(i,2).eq.8) then
              if(C_targ(i) .le. 0)                call check_inv_opts(31,i)
-             C_targ(i) = log(C_targ(i))
+             if(im_fmm) then
+                !convert ref velocity to slowness
+                C_targ(i) = 1/C_targ(i)
+             else
+                !convert conductivity to log conductivity
+                C_targ(i) = log(C_targ(i))
+             end if
           end if
+         
        end if
                                            
        read(10,*,IOSTAT=ios) zwts(i,1)  ;     call check_inv_opts(15,i)
@@ -1518,7 +1525,7 @@ contains
 				write(51,*) " Index     Time-Lapse Survey File       Time Stamp"
 			end if
          end if
-         write(51,"(I6,A28,g17.5)"),indx,trim(tl_dfils(indx)),tlt(indx)
+         write(51,"(I6,A28,g17.5)") indx,trim(tl_dfils(indx)),tlt(indx)
        end if
       close(51)
 
@@ -2566,7 +2573,7 @@ contains
              do j=1,zone_links(indx,1)
                 if(smetric(indx,1)==zone_links(indx,j+1)) then
                    write(51,"(A6,I5,A21,I5,A1)") " Zone ",smetric(indx,1)," is linked with zone ",zone_links(indx,j+1),"."
-                   write(51,*)," A zone may not be linked with itself"
+                   write(51,*) " A zone may not be linked with itself"
                    write(51,*) " Aborting"
                    close(51)
                    call crash_exit

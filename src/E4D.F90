@@ -487,6 +487,8 @@ program main
      call record_sens
    end if
 
+   !check to see if specific measurement sensitivity outputs are requested.
+   call check_jaco_row_output
   
   !clean up and exit
    call send_command(0)

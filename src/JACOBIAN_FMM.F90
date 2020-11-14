@@ -95,26 +95,10 @@ contains
           end if
        end do
 
-!!$       if(my_rank_fmm .eq.6) then
-!!$          open(20,file='jaco_test.txt',status='replace',action='write')
-!!$          write(20,*) nelem,' 1'
-!!$          do i=1,nelem
-!!$             write(20,*) Jaco(jrow,i)
-!!$          end do
-!!$          close(20)
-!!$          return
-!!$       end if
+
     end do
     
-    deallocate(att)
-    if(my_rank_fmm==1) then
-       open(13,file='jaco_fmm.txt',status='replace',action='write')
-       write(13,*) nelem,' 1'
-       do i=1,nelem
-          write(13,*) Jaco(1,i)
-       end do
-    end if
-    close(13)
+ 
    
     !Jaco = 0
   end subroutine build_jaco_fresnel
@@ -451,19 +435,6 @@ contains
 end subroutine build_jaco_raytrace
 !_____________________________________________________________________________
 
-!!$!_____________________________________________________________________________
-!!$subroutine trep(spot)
-!!$  implicit none
-!!$  integer :: spot
-!!$  if(my_rank_fmm .eq. 1) write(21,*) spot
-!!$ if(my_rank_fmm .eq. 2) write(22,*) spot
-!!$if(my_rank_fmm .eq. 3) write(23,*) spot
-!!$if(my_rank_fmm .eq. 4) write(24,*) spot
-!!$if(my_rank_fmm .eq. 5) write(25,*) spot
-!!$if(my_rank_fmm .eq. 6) write(26,*) spot
-!!$if(my_rank_fmm .eq. 7) write(27,*) spot
-!!$end subroutine trep
-!!$!_____________________________________________________________________________
 !_____________________________________________________________________________
 subroutine interp_tt(pt,el,src,tt)
   implicit none

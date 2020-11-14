@@ -142,8 +142,7 @@ contains
        !compute the Jacobian
        call nreport_fmm(72)
        call make_jaco_fmm
-       !call print_sens_fmm
-       !call record_sens
+    
        
        !instruct the slave to go into the e4d slave subroutine from
        !slave_fmm
