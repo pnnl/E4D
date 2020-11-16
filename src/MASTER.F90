@@ -2342,6 +2342,23 @@ contains
    subroutine check_jaco_row_output
      implicit none
 
+     integer :: nfres
+    
+     call check_jrows_out
+     
+     if(print_jaco_rows) then
+        if(iter==0) then
+           write(*,*) 'Building ERT Jacobian for row outputs'
+           call mjaco
+        end if
+       
+        call send_command(124)
+        call MPI_BCAST(njrows_out,1,MPI_INTEGER,0,E4D_COMM,ierr)
+        call MPI_BCAST(jrows_out,njrows_out,MPI_INTEGER,0,E4D_COMM,ierr)
+     end if
+     return
+     
+
    end subroutine check_jaco_row_output
    !________________________________________________________________________________________________
    

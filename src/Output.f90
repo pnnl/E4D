@@ -6,6 +6,9 @@ module output
 
   integer, dimension(:,:), allocatable :: ipot
   real, dimension(:,:), allocatable :: pot
+  integer :: njrows_out
+  integer, dimension(:), allocatable :: jrows_out
+  logical :: print_jaco_rows = .false.
   
 contains
  
@@ -574,6 +577,128 @@ contains
 
   end subroutine write_sigiter
   !_______________________________________________________________________________________
+
+   !_______________________________________________________________________________________
+  subroutine check_jrows_out
+    implicit none
+    integer :: ttp_flag,ntt,o_opt,ist,nfres,junk
+    logical :: fcheck
+    character*80 :: ttp_file
+    character*20 :: fname
+    integer :: i,a,j,smin,smax,ra
+    integer, dimension(2) :: spack
+    real, dimension(nnodes) :: pa
+    integer ::  status(MPI_STATUS_SIZE)
+
+    
+    inquire(file=trim(outfile),exist=fcheck); if(.not.fcheck) goto 10
+    
+    !call nreport_fmm(21)
+    open(15,file=outfile,status='old',action='read')
+    read(15,*,IOSTAT=ist) ttp_flag; if(ist.ne.0) goto 11
+    read(15,*,IOSTAT=ist) ttp_file; if(ist.ne.0) goto 12
+    read(15,*,IOSTAT=ist) ntt   ; if(ist.ne.0) goto 13
+    
+    if(ntt>0) then
+       do i=1,ntt
+          read(15,*,IOSTAT=ist) junk; if(ist.ne.0) goto 14
+       end do
+    end if
+    
+    !this is the flag to print JTJ
+    read(15,*,IOSTAT=ist) junk; if(ist.ne.0) goto 17
+ 
+    read(15,*,IOSTAT=ist) njrows_out;  if(ist.ne.0) goto 15
+    
+    if(njrows_out>0) then
+       allocate(jrows_out(njrows_out))
+       do i=1,njrows_out
+          read(15,*,IOSTAT=ist) jrows_out(i); if(ist.ne.0) goto 16
+       end do
+       print_jaco_rows = .true.
+    end if
+    
+    close(15)
+   
+    
+    
+    return
+    
+10  continue
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      write(51,*) 
+      write(51,*) ' FMM: Cannot find the output options file: ',trim(outfile)
+      close(51)
+      write(*,*) 
+      write(*,*) ' FMM: Cannot find the output options file: ',trim(outfile)
+      return
+      
+11    continue
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      write(51,*) 
+      write(51,*) ' The was a problem reading the first line in the output file: ',trim(outfile)
+      close(51)
+      write(*,*) 
+      write(*,*) ' There was a problem reading the first line in the output file: ',trim(outfile)
+      return
+
+12    continue
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      write(51,*) 
+      write(51,*) 'There was a problem reading the predicted data file name in: ',trim(outfile)
+      close(51)
+      write(*,*) 
+      write(*,*) 'The was a problem reading the predicted data file in: ',trim(outfile)
+      return
+
+13    continue
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      write(51,*) 
+      write(51,*) ' There was a problem reading the number of travel time fields to write in: ',trim(outfile)
+      close(51)
+      write(*,*) 
+      write(*,*) ' There was a problem reading the number of travel time fields to write in: ',trim(outfile)
+      return
+
+14    continue
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      write(51,*) ' There was a problem reading travel time field index: ',i,' in: ',trim(outfile_fmm)
+      close(51)
+      write(*,*)
+      write(*,*) ' There was a problem reading travel time field index: ',i,' in: ',trim(outfile)
+      return 
+      
+15    continue
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      write(51,*) ' There was a problem reading the number of fresnel volume outputs in: ',trim(outfile)
+      write(51,*) ' Skipping fresnel volume outputs.'
+      close(51)
+      write(*,*)
+      write(*,*) ' There was a problem reading the number of fresnel volume outputs in: ',trim(outfile)
+      write(*,*) ' Skipping fresnel volume outputs.'
+      return
+
+16    continue
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      write(51,*) ' There was a problem reading fresnel volume output index: ',i,' in: ',trim(outfile)
+      close(51)
+      write(*,*)
+      write(*,*) ' There was a problem reading fresnel volume output index: ',i,' in: ',trim(outfile)
+      return
+
+17    continue
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      write(51,*) ' There was a problem reading JTJ output option in: ',trim(outfile)
+      write(51,*) ' Not printing Jacobian rows.'
+      close(51)
+      write(*,*)
+      write(*,*) ' There was a problem reading JTJ output option in: ',trim(outfile)
+      write(*,*) ' Not printing JTJ rows.'
+      return
+            
+    end subroutine check_jrows_out
+  !_______________________________________________________________________________________
+
 
   !_____________________________________________________________________
   subroutine send_commando(com)

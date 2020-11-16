@@ -220,6 +220,10 @@ module slave
         call send_poti
         goto 100
 
+     case(124)
+        call slave_print_jaco_rows
+        goto 100
+        
      case(213) 
         call compute_pmatvec2_dbl
         goto 100
@@ -1170,4 +1174,35 @@ module slave
      end subroutine send_full_jaco
     !__________________________________________________________________
 
+
+     !__________________________________________________________________
+     subroutine slave_print_jaco_rows
+       implicit none
+       integer :: i,njrows,indx,j
+       integer, dimension(:), allocatable :: ifres
+       character(len=10) :: sindx
+       
+       call MPI_BCAST(njrows,1,MPI_INTEGER,0,E4D_COMM,ierr)
+      
+       allocate(ifres(njrows))
+       call MPI_BCAST(ifres,njrows,MPI_INTEGER,0,E4D_COMM,ierr)
+    
+   
+       do i=1,njrows
+          if( (ifres(i) >= jind(my_rank,1)) .and. (ifres(i)) <= jind(my_rank,2)) then
+             indx = ifres(i)-jind(my_rank,1)+1
+             write(sindx,'(I6.6)') ifres(i)
+
+             open(13,file='jacobian_row_'//trim(sindx)//'.txt',status='replace',action='write')
+             write(13,*) nelem,1
+             do j=1,nelem
+                write(13,*) Jaco(indx,j)
+             end do
+             close(13)
+          end if
+       end do
+       deallocate(ifres)
+       
+     end subroutine slave_print_jaco_rows
+     !__________________________________________________________________
 end module slave

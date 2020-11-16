@@ -280,6 +280,9 @@ contains
           read(15,*,IOSTAT=ist) junk; if(ist.ne.0) goto 14
        end do
     end if
+
+    !this is the flag to print JTJ
+    read(15,*,IOSTAT=ist) junk; if(ist.ne.0) goto 17
  
     read(15,*,IOSTAT=ist) nfres;  if(ist.ne.0) goto 15
     
@@ -355,7 +358,17 @@ contains
       close(51)
       write(*,*)
       write(*,*) ' There was a problem reading fresnel volume output index: ',i,' in: ',trim(outfile_fmm)
-      return 
+      return
+
+17    continue
+      open(51,file='fmm.log',status='old',action='write',position='append')
+      write(51,*) ' There was a problem reading JTJ output option in: ',trim(outfile_fmm)
+      write(51,*) ' Not printing fresnel volumes.'
+      close(51)
+      write(*,*)
+      write(*,*) ' There was a problem reading JTJ output option in: ',trim(outfile_fmm)
+      write(*,*) ' Not printing fresnel volumes.'
+      return
             
   end subroutine check_fout
   !_______________________________________________________________________________________

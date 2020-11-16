@@ -377,7 +377,7 @@ contains
        select case(smetric(rbi,3))
        case(0)
           if(im_fmm) then
-             X=sqrt(velocity(rblock(indx,1)))-(C_targ(rbi))
+             X=sqrt(velocity(rblock(indx,1)))- (C_targ(rbi))
           else
              if(invi) then
                 X=log(phase(rblock(indx,1)))-(C_targ(rbi))

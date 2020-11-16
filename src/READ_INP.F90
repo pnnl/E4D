@@ -513,8 +513,8 @@ contains
           if(smetric(i,2).eq.3 .or. smetric(i,2).eq.4 .or. smetric(i,2).eq.7 .or. smetric(i,2).eq.8) then
              if(C_targ(i) .le. 0)                call check_inv_opts(31,i)
              if(im_fmm) then
-                !convert ref velocity to slowness
-                C_targ(i) = 1/C_targ(i)
+                !Constraints should be specified in slowness not velocity 
+                !C_targ(i) = 1/C_targ(i)
              else
                 !convert conductivity to log conductivity
                 C_targ(i) = log(C_targ(i))
