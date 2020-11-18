@@ -1087,7 +1087,8 @@ contains
        do i=1,ns
           read(11,*,IOSTAT=ios) junk,etp
           if(ios .ne. 0) goto 104
-          if(abs(etp(1)-s_pos(i,1)-xorig)>perr .or. abs(etp(2)-s_pos(i,2)-yorig)>perr .or. abs(etp(3)-s_pos(i,3)-zorig)>perr) goto 101
+          if(abs(etp(1)-s_pos(i,1)-xorig)>perr .or. abs(etp(2)-s_pos(i,2)-yorig)>perr &
+               .or. abs(etp(3)-s_pos(i,3)-zorig)>perr) goto 101
        enddo
 
        ! read receiver locations    
@@ -1097,14 +1098,16 @@ contains
        do i=1,nrc          
           read(11,*,IOSTAT=ios) junk,etp
           if(ios .ne. 0) goto 106
-          if(abs(etp(1)-rc_pos(i,1)-xorig)>perr .or. abs(etp(2)-rc_pos(i,2)-yorig)>perr .or. abs(etp(3)-rc_pos(i,3)-zorig)>perr) goto 107
+          if(abs(etp(1)-rc_pos(i,1)-xorig)>perr .or. abs(etp(2)-rc_pos(i,2)-yorig)>perr &
+               .or. abs(etp(3)-rc_pos(i,3)-zorig)>perr) goto 107
        enddo       
     else
        ! read source locations       
        do i=1,ns
           read(11,*,IOSTAT=ios) junk,etp,frq_test
           if(ios .ne. 0) goto 104
-          if(abs(etp(1)-s_pos(i,1)-xorig)>perr .or. abs(etp(2)-s_pos(i,2)-yorig)>perr .or. abs(etp(3)-s_pos(i,3)-zorig)>perr) goto 101
+          if(abs(etp(1)-s_pos(i,1)-xorig)>perr .or. abs(etp(2)-s_pos(i,2)-yorig)>perr &
+               .or. abs(etp(3)-s_pos(i,3)-zorig)>perr) goto 101
           if (frq_test.ne.frq(i)) goto 108
        enddo       
     endif
