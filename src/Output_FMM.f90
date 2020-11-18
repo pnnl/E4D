@@ -254,6 +254,53 @@ contains
   end subroutine write_velocity
   !_______________________________________________________________________________________
 
+  !=======================================================================================
+  ! Write velocity file for each time step outer iteration
+  !=======================================================================================
+
+  subroutine write_veliter
+    implicit none
+
+    character*40 :: fiter
+    integer :: i
+
+    write(fiter,"(A,I0)") "ve.",iter
+    open(23,file=trim(fiter),status='replace',action='write')
+    write(23,*) nelem," 1"
+    do i=1,nelem
+       write(23,*) sqrt(1/velocity(i))
+    end do
+
+    close(23)    
+    
+  end subroutine write_veliter
+
+  !=======================================================================================
+  ! Write velocity file for each time step 
+  !=======================================================================================
+
+  subroutine write_velocity_tl(tm)
+    implicit none
+
+    real, intent(in) :: tm
+    
+    ! local vars
+    integer       :: i
+    character(8)  :: ts
+    character(20) :: fname=""
+
+    
+    write(ts,'(f8.3)') tm
+    write(fname,"(A6,A8)") "tl_velocity_",adjustl(ts)
+    open(12,file=fname,status='replace',action='write')    
+    write(12,*) nelem," 1"
+    do i=1,nelem
+       write(12,*) sqrt(1/velocity(i))
+    end do
+
+    close(12)
+
+  end subroutine write_velocity_tl    
   !_______________________________________________________________________________________
   subroutine check_fout
     implicit none

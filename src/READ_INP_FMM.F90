@@ -9,8 +9,8 @@ module input_fmm
   !integer :: ios                                           !!io status
   !integer :: mnchar                                        !!used to record number of character in a string
   !real :: xorig,yorig,zorig                                !!x,y,z mesh translation values
-  integer :: i_tl_fmm                                       !!current time lapse file index
-  real, dimension(:) , allocatable :: tlt_fmm               !!time lapse data time markers
+  !integer :: i_tl_fmm                                       !!current time lapse file index
+  !real, dimension(:) , allocatable :: tlt_fmm               !!time lapse data time markers
   integer, dimension(:,:), allocatable :: nbrs             
 
 contains
@@ -38,6 +38,8 @@ contains
               mode_fmm = 2; call check_inp_fmm(1,junk)
            case('fmm3')
               mode_fmm = 3; call check_inp_fmm(1,junk)
+           case('fmm4')
+              mode_fmm = 4; call check_inp_fmm(1,junk)
            case default
               read(smode,*,IOSTAT=ios) mode_fmm; call check_inp_fmm(1,junk)
     end select
@@ -70,10 +72,39 @@ contains
        read(10,*,IOSTAT=ios) outfile_fmm;     call check_inp_fmm(5,junk)              
     end if    
     
-    if(mode_fmm == 3) then
+    if(mode_fmm == 3 .or. mode_fmm == 4) then
        read(10,*,IOSTAT=ios) invfile;         call check_inp_fmm(6,junk)
        read(10,*,IOSTAT=ios) refmod_file;     call check_inp_fmm(7,junk)
     end if
+
+    ! Time-lapse
+    if(mode_fmm == 4) tl_ly = .true.
+        
+    !!read the time lapse data list file
+    if (tl_ly) then
+       mode_fmm = 3
+       check = 0
+
+       read(10,*,IOSTAT=ios) tl_file,check;   call check_inp_fmm(8,check)
+       if(check == 2) r_last = .true.
+      
+       if(rt_flag) then
+          ntl=1 
+          allocate(tl_dfils(ntl),tlt(ntl))   
+       else
+          open(21,file=trim(tl_file),status='old',action='read',IOSTAT=ios)  
+          read(21,*,IOSTAT=ios) ntl; call check_inp_fmm(9,junk)
+          allocate(tl_dfils(ntl),tlt(ntl))
+          
+          do i=1,ntl
+             read(21,*,IOSTAT=ios) tl_dfils(i), tlt(i); call check_inp_fmm(10,i)
+             inquire(file=trim(tl_dfils(i)),exist=exst)
+             if(.not. exst) call check_inp_fmm(11,i)
+          end do
+          close(21)
+       end if
+    endif    
+    
     close(10)
 
     !!Determine if the mesh file is a .cfg file or if meshfiles are provided
@@ -174,6 +205,8 @@ contains
           mcheck = .true.
        case(3)
           mcheck = .true.
+       case(4)
+          mcheck = .true.
        end select
 
        if(.not.mcheck) then
@@ -183,9 +216,10 @@ contains
           write(51,*)  "---------------------------------------"
           write(51,*)  " -FUNCTION-                      -MODE-"
           write(51,*)  "---------------------------------------"
-          write(51,*)  " FMM Mesh Generation               1"
-          write(51,*)  " FMM Forward                       2"
-          write(51,*)  " FMM Inversion                     3"
+          write(51,*)  " FMM Mesh Generation          1 or FMM1"
+          write(51,*)  " FMM Forward                  2 or FMM2"
+          write(51,*)  " FMM Inversion                3 or FMM3"
+          write(51,*)  " FMM Time-lapse Inversion     4 or FMM4"
           write(51,*)  "---------------------------------------"
           write(51,*)  " Aborting ..."
           write(*,"(A33,I3,A19)") "The mode selected in fmm.inp is ",mode_fmm,", which is invalid."
@@ -193,9 +227,10 @@ contains
           write(*, *)  "---------------------------------------"
           write(*, *)  " -FUNCTION-                      -MODE-"
           write(*, *)  "---------------------------------------"
-          write(*, *)  " FMM Mesh Generation               1"
-          write(*, *)  " FMM Forward                       2"
-          write(*, *)  " FMM Inversion                     3"
+          write(*, *)  " FMM Mesh Generation          1 or FMM1"
+          write(*, *)  " FMM Forward                  2 or FMM2"
+          write(*, *)  " FMM Inversion                3 or FMM3"
+          write(*, *)  " FMM Time-lapse Inversion     4 or FMM4"
           write(*, *)  "---------------------------------------"
           write(*, *)  " Aborting ..."
           close(51)
@@ -209,10 +244,13 @@ contains
              case(0) 
              case(1) 
              case(2) 
-                write(51,*) "***************** RUNNING IN FMM FORWARD MODE ******************"
+                write(51,*) "***************** RUNNING IN FMM FORWARD MODE *******************"
                 write(51,"(A,I3.3)") "  Mode:                             ",mode_fmm
              case(3)
-             	write(51,*) "***************** RUNNING IN FMM INVERSE MODE *******************"
+             	write(51,*) "**************** RUNNING IN FMM INVERSION MODE ******************"
+                write(51,"(A,I3.3)") "  Mode:                             ",mode_fmm
+             case(4)                
+             	write(51,*) "********** RUNNING IN FMM Time-lapse INVERSION MODE *************"
              	write(51,"(A,I3.3)") "  Mode:                             ",mode_fmm
              end select
           close(51)
@@ -291,20 +329,85 @@ contains
           write(51,*) "FMM: There was a problem reading the reference model file name in fmm.inp: aborting"
           close(51)
           write(*, *) "FMM: There was a problem reading the reference model file name in fmm.inp: aborting"
-          call crash_exit          
+          call crash_exit_fmm          
        else
           write(51,*) " Reference model file:             ",trim(refmod_file)
        end if        
        close(51) 
 
     case(8)
+       open(51,file='fmm.log',status='old',action='write',position='append')       
+       if (ios .ne. 0) then
+          write(51,*) "FMM: There was a problem reading the time-lapse survey file name "
+          write(51,*) "FMM: and/or reference model update option in fmm.inp: Aborting ..."
+          close(51)
+          write(*, *) "FMM: There was a problem reading the time-lapse survey file name "
+          write(*, *) "FMM: and/or reference model update option in fmm.inp: Aborting ..."
+          call crash_exit_fmm          
+       else
+          write(51,*) " Time-lapse survey file:           ",trim(tl_file)
+       end if
 
+       if (indx==2) then
+          write(51,*) " Reference model update option:    previous solution"
+       else
+          write(51,*) " Reference model update option:    baseline solution"
+       end if
+
+       inquire(file=trim(tl_file),exist=exst)       
+       if (.not.exst .and. .not. rt_flag) then
+          write(*, *) 
+          write(51,*) "FMM: Cannot find the time lapse survey list file: ",trim(tl_file)," ... aborting"
+          write(*, *) "FMM: Cannot find the time lapse survey list file: ",trim(tl_file)," ... aborting"
+          close(51)
+          call crash_exit_fmm
+       end if
+       
+       close(51) 
 
     case(9)
-
+       open(51,file='fmm.log',status='old',action='write',position='append')
+       if (ios .ne. 0) then
+          write(51,*) "FMM: There was a problem reading the number of survey files in ",trim(tl_file)," :aborting"
+          write(*, *) "FMM: There was a problem reading the number of survey files in ",trim(tl_file)," :aborting"
+          close(51)
+          call crash_exit_fmm
+       else
+          write(51,*)
+          write(51,*) " Time-lapse survey list file:      ",trim(tl_file)
+          write(51,*) " Num. of time-lapse survey files:  ",ntl            
+       end if       
+       close(51)
+              
     case(10)
-    case(11)
+       open(51,file='fmm.log',status='old',action='write',position='append')
+       if (ios .ne. 0) then
+          write(51,*) "FMM: There was a problem reading time-lapse file at time ",indx
+          write(51,*) "FMM: in the time lapse survey file: ",trim(tl_file)
+          write(51,*) "FMM: Aborting ... "
+          write(*, *) "FMM: There was a problem reading time-lapse file at time ",indx
+          write(*, *) "FMM: in the time lapse survey file: ",trim(tl_file)
+          write(*, *) "FMM: Aborting ... "
+          close(51)
+          call crash_exit_fmm
+       else         
+          if (indx==1) then
+             write(51,*) " Index     Time-Lapse Survey File       Time Stamp"            
+          end if          
+          write(51,"(I6,A28,g17.5)"),indx,trim(tl_dfils(indx)),tlt(indx)          
+       end if       
       
+       close(51)       
+       
+    case(11)
+       open(51,file='fmm.log',status='old',action='write',position='append')
+       write(51,*) "FMM: There was a problem finding the time-lapse file: ",trim(tl_dfils(indx))
+       write(51,*) "FMM: aborting ..."
+       write(*, *) "FMM: There was a problem finding the time-lapse file: ",trim(tl_dfils(indx))
+       write(*, *) "FMM: aborting ..."
+       close(51)
+       call crash_exit_fmm
+              
     case(12)
 
        open(51,file='fmm.log',status='old',action='write',position='append')
@@ -934,10 +1037,10 @@ contains
              Wd_fmm(i)=1e15
              if( wdwarn) call check_inp_fmm(19,i)
              wdwarn = .false.
-          else
-             Wd_fmm(i) = 1/Wd_fmm(i)
-          end if
-          
+          endif
+
+          Wd_fmm(i) = 1/Wd_fmm(i)
+                    
           if(.not.fresnel) then
              do j=1,2
                 !             if(s_conf_fmm(i,j)>ns .or. s_conf_fmm(i,j)<0) call check_inp_fmm(20,i)
@@ -957,6 +1060,211 @@ contains
   end subroutine read_survey_fmm
   !_________________________________________________________________________
 
+  !=========================================================================
+  ! Subroutine to read time-lapse FMM data
+  !=========================================================================
+  subroutine get_dobs_tl_fmm(ind)
+    implicit none
+
+    integer, intent(in) :: ind
+
+    ! local variables
+    integer :: ns_test,i,j,nmt,junk,nrc_test
+    real , dimension(3) :: etp
+    real :: frq_test
+    real :: perr=0.001
+    real :: dobst,Wdt
+    integer, dimension(2) :: ab
+
+    open(11,file=trim(tl_dfils(ind)),status='old',action='read')
+    read(11,*,IOSTAT=ios) ns_test,junk
+    if(ios .ne. 0) goto 99
+    if(ns_test .ne. ns) goto 100
+    if (junk.ne.1.and.fresnel) goto 103
+
+    if(.not. fresnel) then
+       ! read source locations
+       do i=1,ns
+          read(11,*,IOSTAT=ios) junk,etp
+          if(ios .ne. 0) goto 104
+          if(abs(etp(1)-s_pos(i,1)-xorig)>perr .or. abs(etp(2)-s_pos(i,2)-yorig)>perr .or. abs(etp(3)-s_pos(i,3)-zorig)>perr) goto 101
+       enddo
+
+       ! read receiver locations    
+       read(11,*,IOSTAT=ios) nrc_test
+       if(nrc_test .ne. nrc) goto 105
+       
+       do i=1,nrc          
+          read(11,*,IOSTAT=ios) junk,etp
+          if(ios .ne. 0) goto 106
+          if(abs(etp(1)-rc_pos(i,1)-xorig)>perr .or. abs(etp(2)-rc_pos(i,2)-yorig)>perr .or. abs(etp(3)-rc_pos(i,3)-zorig)>perr) goto 107
+       enddo       
+    else
+       ! read source locations       
+       do i=1,ns
+          read(11,*,IOSTAT=ios) junk,etp,frq_test
+          if(ios .ne. 0) goto 104
+          if(abs(etp(1)-s_pos(i,1)-xorig)>perr .or. abs(etp(2)-s_pos(i,2)-yorig)>perr .or. abs(etp(3)-s_pos(i,3)-zorig)>perr) goto 101
+          if (frq_test.ne.frq(i)) goto 108
+       enddo       
+    endif
+
+    ! read the survey
+    read(11,*,IOSTAT=ios) nmt  
+    if(ios .ne. 0) goto 109
+    if(nmt .ne. nm_fmm) goto 102
+    
+    do i=1,nm_fmm
+       read(11,*,IOSTAT=ios) junk,ab,dobst,Wdt
+       if(ios .ne. 0) goto 110
+       if(Wdt.le.0) Wdt=1e9
+
+       do j=1,2
+          if(ab(j) .ne. s_conf_fmm(i,j)) goto 111
+       enddo
+
+       dobs_fmm(i) = dobst
+       Wd_fmm(i)   = 1/Wdt
+       
+    enddo
+            
+    close(11)
+
+    dobs=dobs_fmm
+    Wd=Wd_fmm
+
+    return
+        
+ 99 continue
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "There was an error reading number of source or fresnel option in: ",trim(tl_dfils(ind))
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+100 continue
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"  
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "The number of sources in: ",trim(tl_dfils(ind))," is: ",ns_test
+    write(51,*) "The number of sources in the base survey is: ",ns
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+101 continue 
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"  
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "The source position in: ",trim(tl_dfils(ind))," for source: ",i
+    write(51,*) "is different than the same baseline source position."
+    write(51,*) trim(tl_dfils(ind))," gives: ",etp
+    write(51,*) "The baseline file gives: ",s_pos(i,1)-xorig,s_pos(i,2)-yorig,s_pos(i,3)-zorig
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+102 continue
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"  
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "The number of measurements in: ",trim(tl_dfils(ind))," is: ",nmt
+    write(51,*) "The number of measurements in the base survey is: ",nm_fmm
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+103 continue
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"  
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "The fresnel option in: ",trim(tl_dfils(ind))," is not 1"
+    write(51,*) "The fresnel option in the base survey is 1"
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+104 continue
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "There was an error reading ",i,"th source position in: ",trim(tl_dfils(ind))
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+105 continue
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"  
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "The number of receivers in: ",trim(tl_dfils(ind))," is: ",nrc_test
+    write(51,*) "The number of receivers in the base survey is: ",nrc
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+106 continue
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "There was an error reading ",i,"th receiver position in: ",trim(tl_dfils(ind))
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+107 continue 
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"  
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "The receiver position in: ",trim(tl_dfils(ind))," for receiver: ",i
+    write(51,*) "is different than the same baseline receiver position."
+    write(51,*) trim(tl_dfils(ind))," gives: ",etp
+    write(51,*) "The baseline file gives: ",rc_pos(i,1)-xorig,rc_pos(i,2)-yorig,rc_pos(i,3)-zorig
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+108 continue 
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"  
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "The dominant frequency for source: ",i," in: ",trim(tl_dfils(ind))," is: ",frq_test
+    write(51,*) "The dominant frequency for source: ",i," in the baseline survey is: ",frq(i)
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+109 continue
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "There was an error reading number of measurements in: ",trim(tl_dfils(ind))
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+110 continue
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "There was an error reading ",i,"th measurement in: ",trim(tl_dfils(ind))
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return
+
+111 continue
+    write(*,*) "FMM: INPUT ERROR: See fmm.log"  
+    open(51,file='fmm.log',status='old',action='write',position='append')
+    write(51,*) "A B for measurement: ",i," in: ",trim(tl_dfils(ind))," is: ",ab
+    write(51,*) "The baseline A B is: ",s_conf_fmm(i,:)
+    write(51,*) "Aborting ...."
+    close(51)
+    call crash_exit_fmm
+    return    
+
+  end subroutine get_dobs_tl_fmm  
   !_________________________________________________________________________
   subroutine translate_source
     implicit none

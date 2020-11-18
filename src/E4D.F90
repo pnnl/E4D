@@ -628,7 +628,7 @@ contains
        !if specified. Otherwise the previous solution
        !will be used (i.e. sigma is currently the previous
        !solution)
-       if(.not.r_last) then 
+       if(.not.r_last) then  ! use baseline sol as start 
          sigma=refsig          
        end if
        
@@ -655,12 +655,22 @@ contains
        do while (.not. con_flag)
           
           iter = iter+1
+
+          ! print iteration number
+          call nreport(67)
           
           call treport(0)
           call mjaco
           call get_jtimes
           call treport(3)
-          call pcgls       
+
+          !do the inversion
+          if(cgmin_flag(1)) then
+             call joint_pcgls             
+          else             
+             call pcgls
+          endif
+          
           call treport(4)
           call update_sigma
           call send_sigma
@@ -675,6 +685,13 @@ contains
           call send_command(3)             
           call send_command(5)
           call run_forward          
+
+          !get and send the slowness update if this is a joint inversion
+          if(cgmin_flag(1) .and. cgmin_flag(2)) then
+             write(*,*) " E4D: waiting to trade with FMM"
+             call get_other_dists
+          end if
+          
           call build_WmII
           
           call get_abtimes
@@ -691,62 +708,73 @@ contains
           
           call check_convergence
           call nreport(1)
-          call check_beta
+          call check_beta                    
           call write_sigiter
+
+          if(cgmin_flag(1) .and. cgmin_flag(2)) then             
+             !call sync_convergence             
+             cgmin_flag(1) = .not. con_flag             
+             call sync_joint             
+             call sync_beta             
+          end if
+
+          ! print end iteration
+          call nreport(73)
           
-    end do
-    
-    
-    if(iter>0) then
+       end do
+               
+       if(iter>0) then          
        
-       call nreport(52)
-       call nreport(53)
+          call nreport(52)          
+          call nreport(53)          
 
-       !!final solution adjustment
-       call sadjust(2)
-       call send_sigma
+          !!final solution adjustment
+          call sadjust(2)
+          call send_sigma
        
-       if(i_flag) then
-         call update_sigi
-         call send_sigmai
+          if(i_flag) then
+            call update_sigi
+            call send_sigmai
+          end if
+       
+          call send_command(3)              
+          call send_command(5)
+          call run_forward
+       
+          call get_abtimes
+          call treport(7)
+          call get_ksptimes
+          call treport(8)
+          call get_frtimes
+          call treport(6)
+       
+          call get_time; etm1=etm
+          call get_dpred
+          call get_time; etm=etm-etm1
+          call treport(2)
+       
+          !call map_sigma_par
+          call check_convergence
+          call nreport(55)
        end if
-       
-       call send_command(3)              
-       call send_command(5)
-       call run_forward
-       
-       call get_abtimes
-       call treport(7)
-       call get_ksptimes
-       call treport(8)
-       call get_frtimes
-       call treport(6)
-       
-       call get_time; etm1=etm
-       call get_dpred
-       call get_time; etm=etm-etm1
-       call treport(2)
-       
-       !call map_sigma_par
-       call check_convergence
-       call nreport(55)
-    end if
+          
+      !invert the complex data if this is a sip inversion
+      if(i_flag) then
+        call complex_inv
+      end if
    
-   !invert the complex data if this is a sip inversion
-   if(i_flag) then
-     call complex_inv
-   end if
-   
-    if(rt_flag) then
-       call write_sigma_rttl(tl_dfils(1))
-    else
-       call write_sigma_tl(tlt(i_tl))
-    end if
+      if(rt_flag) then         
+         call write_sigma_rttl(tl_dfils(1))         
+      else         
+         call write_sigma_tl(tlt(i_tl))         
+      end if      
        
- end do
+   end do   
 
- return
-end subroutine time_lapse_1
+   return
+   
+ end subroutine time_lapse_1
+ 
 !____________________________________________________________________
 
 !____________________________________________________________________

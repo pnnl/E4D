@@ -505,11 +505,15 @@ contains
              if(invi) then
                 prefsig = phase
              else
-                prefsig = sigma
+                if (im_fmm) then
+                   prefsig = sqrt(velocity)
+                else                   
+                   prefsig = sigma
+                endif                
              end if
           end if
        else
-          read(str1,*,IOSTAT=ios) C_targ(i);  call check_inv_opts(14,i)
+          read(str1,*,IOSTAT=ios) C_targ(i);  call check_inv_opts(14,i)          
           if(smetric(i,2).eq.3 .or. smetric(i,2).eq.4 .or. smetric(i,2).eq.7 .or. smetric(i,2).eq.8) then
              if(C_targ(i) .le. 0)                call check_inv_opts(31,i)
              if(im_fmm) then
@@ -1049,7 +1053,7 @@ contains
 
     return
 99 continue
-    write(*,*) "INPUT ERROR: See e4d.log"
+    write(*,*) "E4D: INPUT ERROR: See e4d.log"
     open(51,file='e4d.log',status='old',action='write',position='append')
     write(51,*) "There was an error reading: ",trim(tl_dfils(ind))
     write(51,*) "Aborting ...."
@@ -1058,7 +1062,7 @@ contains
     return
 
 100 continue
-    write(*,*) "INPUT ERROR: See e4d.log"  
+    write(*,*) "E4D: INPUT ERROR: See e4d.log"  
     open(51,file='e4d.log',status='old',action='write',position='append')
     write(51,*) "The number of electrodes in: ",trim(tl_dfils(ind))," is: ",ne_test
     write(51,*) "The number of electrodes in the base survey is: ",ne
@@ -1068,7 +1072,7 @@ contains
     return
 
 101 continue 
-    write(*,*) "INPUT ERROR: See e4d.log"  
+    write(*,*) "E4D:INPUT ERROR: See e4d.log"  
     open(51,file='e4d.log',status='old',action='write',position='append')
     write(51,*) "The electrode position in: ",trim(tl_dfils(ind))," for electrode: ",i
     write(51,*) "is different than the same baseline electrode position."
@@ -1080,7 +1084,7 @@ contains
     return
 
 102 continue
-    write(*,*) "INPUT ERROR: See e4d.log"  
+    write(*,*) "E4D: INPUT ERROR: See e4d.log"  
     open(51,file='e4d.log',status='old',action='write',position='append')
     write(51,*) "The number of measurements in: ",trim(tl_dfils(ind))," is: ",nmt
     write(51,*) "The number of measurements in the base survey is: ",nm
@@ -1090,10 +1094,10 @@ contains
     return
 
 103 continue
-    write(*,*) "INPUT ERROR: See e4d.log"  
+    write(*,*) "E4D: INPUT ERROR: See e4d.log"  
     open(51,file='e4d.log',status='old',action='write',position='append')
     write(51,*) "ABMN for meas.: ",i," in: ",trim(tl_dfils(ind))," is: ",abmn
-    write(51,*) "The baseline abmn is: ",abmn
+    write(51,*) "The baseline abmn is: ",s_conf(i,:)
     write(51,*) "Aborting ...."
     close(51)
     call crash_exit

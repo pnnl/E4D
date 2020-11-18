@@ -26,9 +26,9 @@ contains
 
     call send_command(20)
     if(im_fmm) then
-       write(*,*) "FMM: STARTING INVERSION"
+       write(*,*) " FMM: STARTING INVERSION"
     else
-       write(*,*) "E4D: STARTING INVERSION"
+       write(*,*) " E4D: STARTING INVERSION"
     end if
 
     !ncon=ccount !maxval(wrows)   
