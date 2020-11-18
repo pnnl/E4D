@@ -196,7 +196,9 @@ module report
           open(67,file='e4d.log',status='old',action='write',position='append')
           write(67,*)
           write(67,*)
-          write(67,*) "______________STARTING TIME-LAPSE_INVERSIONS____________"
+          write(67,*) "======================================================================="
+          write(67,*) "++++++++++++++++++++ STARTING TIME-LAPSE_INVERSIONS +++++++++++++++++++"
+          write(67,*) "======================================================================="
           close(67)
        end if
 
@@ -205,7 +207,10 @@ module report
           write(67,*)
           write(67,*)
           write(67,*)
-          write(67,*) "_____________SURVEY TIME: ",tlt(i_tl)
+          write(67,*) "------------------------------------    SURVEY TIME: ",tlt(i_tl)
+          write(67,*)
+          write(67,*)
+          write(67,*)
           close(67)
        end if
 
@@ -397,7 +402,7 @@ module report
 
       if(tag==67) then
          write(*,*)             
-         write(*,"(A,I3.3,A)") " ---------------------------- ITERATION ",iter," ----------------------------"
+         write(*,"(A,I3.3,A)") " ------------------------- E4D: ITERATION ",iter," --------------------------"
       end if
 
       if(tag==68) then
@@ -429,7 +434,7 @@ module report
        end if
 
        if(tag==73) then
-          write(*,"(A,I3.3,A)") " ------------------------ END ITERATION ",iter," ----------------------------"
+          write(*,"(A,I3.3,A)") " --------------------- E4D: END ITERATION ",iter," --------------------------"
        end if
 
       ! 100

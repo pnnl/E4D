@@ -137,7 +137,7 @@ contains
     do while(.not. con_flag) 
        call alloc_sigup
        iter = iter+1
-       call nreport(67)
+       call nreport_fmm(67)
        
        !compute the Jacobian
        call nreport_fmm(72)
@@ -158,8 +158,7 @@ contains
        !instruct slaves to leave the e4d slave subroutine
        call send_command(0) 
 
-       !update the slowness field
-    
+       !update the slowness field    
        call update_sigma
      
 
@@ -204,12 +203,13 @@ contains
         !!   write(*,*) betalist
         end if
 
-        call nreport(73)
+        call nreport_fmm(73)
      end do
 
-     
-     
-
+     ! The baseline inversion is done. If this is a time-lapse
+     ! inversion, invert the time lapse data files.     
+     if (tl_ly) call time_lapse_1_fmm
+          
      !check to see if fresnel volume outputs are requested.
      call check_fresnel_output
     
@@ -222,9 +222,163 @@ contains
      ! clean up and exit
      call send_command_fmm(0)
      return     
-
     
   end subroutine fmm
 
+  !==========================================================================================
+  ! Time-Lapse Inversion
+  ! Author: Piyoosh Jaysaval
+  ! email : piyoosh.jaysaval@pnnl.gov
+  !
+  ! Descriptions: This subroutine executes the time-lapse inversion for seismic tomogrpahy
+  ! Adopted from time_lapse_1 for ERT
+  !==========================================================================================
+
+  subroutine time_lapse_1_fmm
+    implicit none
+
+    !allocate the update vector if needed
+    if(.not.allocated(Jaco)) then
+       call alloc_sigup
+    end if
+
+    call nreport_fmm(50)
+
+    !set the time lapse flag to true
+    tl_flag = .true.
+
+    ! Real time -> ntl=1e6
+    if(rt_flag) ntl=1e6
+
+    !!iterate over the survey files
+    do i_tl=1,ntl
+
+       call nreport_fmm(51)
+       
+       !reset the beta value
+       if(r_last .and. conv_opt .ne. 2) then
+          beta = beta/beta_red
+       else
+          beta=beta_s
+       end if
+
+       !set the starting model to the reference model (i.e. baseline model) if specified.
+       !Otherwise the previous solution will be used as starting model.
+       !(i.e. velocity is currently the previous solution)
+       !NB. velocity=1/velocity^2 & refsig = 1/velocity
+       if(.not.r_last) then         ! start model is the baseline sol in ref model 
+          !velocity = refsig*refsig
+          velocity = 1/4.0          ! TMP    <------------ REMOVE      
+       end if       
+
+       !set the previous solution 
+       if(allocated(prefsig)) prefsig = sqrt(velocity)       ! use last/ref velocity model as a ref model if pref
+       con_flag = .false.
+       iter = 0
+
+       !get the observed data for this time step
+       if(rt_flag) then
+          stop 1500
+          !call get_dobs_rt_fmm(i_tl)
+       else
+          call get_dobs_tl_fmm(i_tl)
+       end if       
+
+       !!--------- TMP ----------------
+       call send_slowness
+       call run_forward_fmm
+       call build_WmII
+       call get_ttpred
+       !!------------------------------
+       
+       !check convergence
+       call check_convergence           
+
+       !write the current solution to file
+       call write_veliter
+       call nreport(1)
+
+       !!these are the outer iterations for this data set       
+       !if(rt_flag) con_flag = .false.
+       do while(.not. con_flag)
+
+          iter = iter+1
+
+          ! print iteration number
+          call nreport_fmm(67)  
+
+          !compute the Jacobian          
+          call make_jaco_fmm
+
+          !instruct the slave to go into the e4d slave subroutine from
+          !slave_fmm          
+          call send_command(-1)
+          
+          !do the inversion          
+          if(cgmin_flag(1)) then             
+             call joint_pcgls             
+          else             
+             call pcgls             
+          end if
+
+          !instruct slaves to leave the e4d slave subroutine
+          call send_command(0)
+
+          !update the slowness field          
+          call update_sigma
+
+          !send the updated velocity/slowness to the slave
+          call send_slowness
+
+          !update the travel times (i.e. run fmm)
+          call run_forward_fmm
+
+          !get conductivity and send slowness to E4D if
+          !this is a joint inversion
+          if(cgmin_flag(1) .and. cgmin_flag(2)) then
+             write(*,*) " FMM: waiting to trade with E4D"             
+             call get_other_dists             
+          end if
+
+          !update the constraints
+          call build_WmII          
+
+          !assemble the simulated data          
+          call get_ttpred
+
+          !check for convergence          
+          call check_convergence          
+          call nreport(1)          
+             
+          !see if we need to reduce beta
+          call check_beta
+          
+          !write the solution to file
+          call write_veliter
+
+          if(cgmin_flag(1) .and. cgmin_flag(2)) then             
+             !call sync_convergence             
+             cgmin_flag(1) = .not. con_flag             
+             call sync_joint             
+             call sync_beta             
+          end if
+
+          ! print end iteration
+          call nreport_fmm(73)
+          
+       enddo
+
+       if(rt_flag) then         
+          !call write_velocity_rttl(tl_dfils(1))          
+       else          
+          call write_velocity_tl(tlt(i_tl))          
+       end if
+              
+    enddo
+
+    return
+    
+  end subroutine time_lapse_1_fmm  
+  
   
 end module fmm_main

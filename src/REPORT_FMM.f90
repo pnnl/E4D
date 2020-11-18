@@ -137,14 +137,25 @@ module report_fmm
           write(*,*) " WRITING TRAVEL TIME FILES"
        end if
 
-
+       if(tag==50) then
+          open(67,file='fmm.log',status='old',action='write',position='append')
+          write(67,*)
+          write(67,*)
+          write(67,*) "======================================================================="
+          write(67,*) "++++++++++++++++++++ STARTING TIME-LAPSE_INVERSIONS +++++++++++++++++++"
+          write(67,*) "======================================================================="
+          close(67)
+       end if       
 
        if(tag==51) then
           open(67,file='fmm.log',status='old',action='write',position='append')
           write(67,*)
           write(67,*)
           write(67,*)
-          write(67,*) "_____________SURVEY TIME: ",tlt_fmm(i_tl_fmm)
+          write(67,*) "------------------------------------    SURVEY TIME: ",tlt(i_tl)
+          write(67,*)
+          write(67,*)
+          write(67,*)
           close(67)
        end if
 
@@ -228,6 +239,10 @@ module report_fmm
          close(67)
       end if
 
+      if(tag==67) then
+         write(*,*)             
+         write(*,"(A,I3.3,A)") " ------------------------- FMM: ITERATION ",iter," --------------------------"
+      end if
 
       if(tag==68) then
          write(*,*) " FMM: EXECUTING FORWARD RUN ..."
@@ -258,7 +273,7 @@ module report_fmm
        end if
 
        if(tag==73) then
-          write(*,"(A,I3.3,A)") "---------------------- END ITERATION ",iter," ----------------------"
+          write(*,"(A,I3.3,A)") "------------------- FMM: END ITERATION ",iter," --------------------"
        end if
 
        if(tag==74) then
