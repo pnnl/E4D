@@ -256,7 +256,7 @@ contains
        
        !reset the beta value
        if(r_last .and. conv_opt .ne. 2) then
-          beta = beta/beta_red
+          beta = beta/beta_red                    ! ASK??
        else
           beta=beta_s
        end if
@@ -266,8 +266,8 @@ contains
        !(i.e. velocity is currently the previous solution)
        !NB. velocity=1/velocity^2 & refsig = 1/velocity
        if(.not.r_last) then         ! start model is the baseline sol in ref model 
-          !velocity = refsig*refsig
-          velocity = 1/4.0          ! TMP    <------------ REMOVE      
+          velocity = refsig*refsig
+          !!velocity = 1/4.0                                          ! TMP    <------------ REMOVE      
        end if       
 
        !set the previous solution 
@@ -284,10 +284,12 @@ contains
        end if       
 
        !!--------- TMP ----------------
-       call send_slowness
-       call run_forward_fmm
-       call build_WmII
-       call get_ttpred
+       !!====================================
+       !!call send_slowness
+       !!call run_forward_fmm
+       !!call build_WmII
+       !!call get_ttpred
+       !!====================================
        !!------------------------------
        
        !check convergence
