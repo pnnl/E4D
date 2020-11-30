@@ -37,43 +37,43 @@ contains
       open(51,file='fmm.log',status='old',action='write',position='append')
       write(51,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       close(51)
-      write(*,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
+      write(*, *) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       return
       
 11    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) 'The was a problem reading the first line in the output file: ',trim(outfile_fmm)
-      write(51,*) 'aborting'
+      write(51,*) ' FMM: The was a problem reading the first line in the output file: ',trim(outfile_fmm)
+      write(51,*) ' FMM: aborting'
       close(51)
-      write(*,*) 'The was a problem reading the first line in the output file: ',trim(outfile_fmm)
-      write(*,*) 'aborting'
+      write(*, *) ' FMM: The was a problem reading the first line in the output file: ',trim(outfile_fmm)
+      write(*, *) ' FMM: aborting'
       return
 
 12    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) 'The was a problem reading the predicted data file in: ',trim(outfile_fmm)
-      write(51,*) 'aborting'
+      write(51,*) ' FMM: The was a problem reading the predicted data file in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: aborting'
       close(51)
-      write(*,*) 'The was a problem reading the predicted data file in: ',trim(outfile_fmm)
-      write(*,*) 'aborting'
+      write(*, *) ' FMM: The was a problem reading the predicted data file in: ',trim(outfile_fmm)
+      write(*, *) ' FMM: aborting'
       return
 
 13    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) 'The was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
-      write(51,*) 'aborting'
+      write(51,*) ' FMM: The was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: aborting'
       close(51)
-      write(*,*) 'The was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
-      write(*,*) 'aborting'
+      write(*, *) ' FMM: The was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
+      write(*, *) ' FMM: aborting'
       return
 
 14    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) 'The was a problem reading travel time index: ',i,' in: ',trim(outfile_fmm)
-      write(51,*) 'aborting'
+      write(51,*) ' FMM: The was a problem reading travel time index: ',i,' in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: aborting'
       close(51)
-      write(*,*) 'The was a problem reading travel time index: ',i,' in: ',trim(outfile_fmm)
-      write(*,*) 'aborting'
+      write(*, *) ' FMM: The was a problem reading travel time index: ',i,' in: ',trim(outfile_fmm)
+      write(*, *) ' FMM: aborting'
 
       return
 
@@ -193,36 +193,36 @@ contains
 11    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' The was a problem reading the first line in the output file: ',trim(outfile_fmm)
+      write(51,*) ' FMM: The was a problem reading the first line in the output file: ',trim(outfile_fmm)
       close(51)
       write(*,*) 
-      write(*,*) ' There was a problem reading the first line in the output file: ',trim(outfile_fmm)
+      write(*, *) ' FMM: There was a problem reading the first line in the output file: ',trim(outfile_fmm)
       return
 
 12    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) 'There was a problem reading the predicted data file name in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: There was a problem reading the predicted data file name in: ',trim(outfile_fmm)
       close(51)
       write(*,*) 
-      write(*,*) 'The was a problem reading the predicted data file in: ',trim(outfile_fmm)
+      write(*, *) ' FMM: The was a problem reading the predicted data file in: ',trim(outfile_fmm)
       return
 
 13    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' There was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: There was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
       close(51)
       write(*,*) 
-      write(*,*) ' There was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
+      write(*, *) ' FMM: There was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
       return
 
 14    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) ' There was a problem reading travel time field index: ',i,' in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: There was a problem reading travel time field index: ',i,' in: ',trim(outfile_fmm)
       close(51)
       write(*,*)
-      write(*,*) ' There was a problem reading travel time field index: ',i,' in: ',trim(outfile_fmm)
+      write(*, *) ' FMM: There was a problem reading travel time field index: ',i,' in: ',trim(outfile_fmm)
       return
 
   end subroutine write_tt
@@ -351,70 +351,70 @@ contains
       write(51,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       close(51)
       write(*,*) 
-      write(*,*) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
+      write(*, *) ' FMM: Cannot find the output options file: ',trim(outfile_fmm)
       return
       
 11    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' The was a problem reading the first line in the output file: ',trim(outfile_fmm)
+      write(51,*) ' FMM: The was a problem reading the first line in the output file: ',trim(outfile_fmm)
       close(51)
-      write(*,*) 
-      write(*,*) ' There was a problem reading the first line in the output file: ',trim(outfile_fmm)
+      write(*, *) 
+      write(*, *) ' FMM: There was a problem reading the first line in the output file: ',trim(outfile_fmm)
       return
 
 12    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) 'There was a problem reading the predicted data file name in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: There was a problem reading the predicted data file name in: ',trim(outfile_fmm)
       close(51)
-      write(*,*) 
-      write(*,*) 'The was a problem reading the predicted data file in: ',trim(outfile_fmm)
+      write(*, *) 
+      write(*, *) ' FMM: The was a problem reading the predicted data file in: ',trim(outfile_fmm)
       return
 
 13    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' There was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: There was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
       close(51)
-      write(*,*) 
-      write(*,*) ' There was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
+      write(*, *) 
+      write(*, *) ' FMM: There was a problem reading the number of travel time fields to write in: ',trim(outfile_fmm)
       return
 
 14    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) ' There was a problem reading travel time field index: ',i,' in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: There was a problem reading travel time field index: ',i,' in: ',trim(outfile_fmm)
       close(51)
-      write(*,*)
-      write(*,*) ' There was a problem reading travel time field index: ',i,' in: ',trim(outfile_fmm)
+      write(*, *)
+      write(*, *) ' FMM: There was a problem reading travel time field index: ',i,' in: ',trim(outfile_fmm)
       return 
       
 15    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) ' There was a problem reading the number of fresnel volume outputs in: ',trim(outfile_fmm)
-      write(51,*) ' Skipping fresnel volume outputs.'
+      write(51,*) ' FMM: There was a problem reading the number of fresnel volume outputs in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: Skipping fresnel volume outputs.'
       close(51)
       write(*,*)
-      write(*,*) ' There was a problem reading the number of fresnel volume outputs in: ',trim(outfile_fmm)
-      write(*,*) ' Skipping fresnel volume outputs.'
+      write(*, *) ' FMM: There was a problem reading the number of fresnel volume outputs in: ',trim(outfile_fmm)
+      write(*, *) ' FMM: Skipping fresnel volume outputs.'
       return
 
 16    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) ' There was a problem reading fresnel volume output index: ',i,' in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: There was a problem reading fresnel volume output index: ',i,' in: ',trim(outfile_fmm)
       close(51)
-      write(*,*)
-      write(*,*) ' There was a problem reading fresnel volume output index: ',i,' in: ',trim(outfile_fmm)
+      write(*, *)
+      write(*, *) ' FMM: There was a problem reading fresnel volume output index: ',i,' in: ',trim(outfile_fmm)
       return
 
 17    continue
       open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) ' There was a problem reading JTJ output option in: ',trim(outfile_fmm)
-      write(51,*) ' Not printing fresnel volumes.'
+      write(51,*) ' FMM: There was a problem reading JTJ output option in: ',trim(outfile_fmm)
+      write(51,*) ' FMM: Not printing fresnel volumes.'
       close(51)
       write(*,*)
-      write(*,*) ' There was a problem reading JTJ output option in: ',trim(outfile_fmm)
-      write(*,*) ' Not printing fresnel volumes.'
+      write(*, *) ' FMM: There was a problem reading JTJ output option in: ',trim(outfile_fmm)
+      write(*, *) ' FMM: Not printing fresnel volumes.'
       return
             
   end subroutine check_fout

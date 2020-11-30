@@ -96,6 +96,9 @@ contains
        
        ! validate joint inversion run
        call validate_jointInv_fmm
+
+       ! save the cgmin_flag values
+       cgmin_flag_start = cgmin_flag
        
        if(cgmin_flag(1) .and. cgmin_flag(2)) then
        	  write(*,*) " FMM: waiting to trade with E4D"
@@ -109,8 +112,8 @@ contains
        !call nreport(2)                                  !see module: report
        call build_WmII                                  !see module: mod_con
        call send_J_on_off       
-   end if
-   
+    end if
+       
     !assemble the simulated data
     call get_ttpred
   
@@ -185,45 +188,45 @@ contains
        
     
        !check for convergence
-        call check_convergence
-        call nreport(1)
+       call check_convergence
+       call nreport(1)
         
      
-        !see if we need to reduce beta
-        call check_beta
+       !see if we need to reduce beta
+       call check_beta
 
-        if(cgmin_flag(1) .and. cgmin_flag(2)) then
-           !call sync_convergence
-           cgmin_flag(1) = .not. con_flag
-           call sync_joint
-           call sync_beta
+       if(cgmin_flag(1) .and. cgmin_flag(2)) then
+          !call sync_convergence
+          cgmin_flag(1) = .not. con_flag
+          call sync_joint
+          call sync_beta
         !!else
         !!   betalist(2) = beta
         !!   write(*,*) betalist
-        end if
+       end if       
 
-        call nreport_fmm(73)
-     end do
-
-     ! The baseline inversion is done. If this is a time-lapse
-     ! inversion, invert the time lapse data files.     
-     if (tl_ly) call time_lapse_1_fmm
-          
-     !check to see if fresnel volume outputs are requested.
-     call check_fresnel_output
+       call nreport_fmm(73)       
+    end do
     
-     !print the sum of squared sensitivities if required
-     if(mode_fmm == 3 .and. jprnt) then
-        call make_jaco_fmm
-        call record_sens
-     end if     
+    ! The baseline inversion is done. If this is a time-lapse
+    ! inversion, invert the time lapse data files.     
+    if (tl_ly) call time_lapse_1_fmm
+          
+    !check to see if fresnel volume outputs are requested.
+    call check_fresnel_output
+    
+    !print the sum of squared sensitivities if required
+    if(mode_fmm == 3 .and. jprnt) then
+       call make_jaco_fmm
+       call record_sens
+    end if     
 
-     ! clean up and exit
-     call send_command_fmm(0)
-     return     
+    ! clean up and exit
+    call send_command_fmm(0)
+    return     
     
   end subroutine fmm
-
+  
   !==========================================================================================
   ! Time-Lapse Inversion
   ! Author: Piyoosh Jaysaval
@@ -260,7 +263,7 @@ contains
        else
           beta=beta_s
        end if
-
+      
        !set the starting model to the reference model (i.e. baseline model) if specified.
        !Otherwise the previous solution will be used as starting model.
        !(i.e. velocity is currently the previous solution)
@@ -283,6 +286,15 @@ contains
           call get_dobs_tl_fmm(i_tl)
        end if       
 
+       ! reset cgmin_flag       
+       cgmin_flag = cgmin_flag_start
+       if(cgmin_flag(1) .and. cgmin_flag(2)) then
+          write(*,*) " FMM: waiting to trade with E4D"             
+          call get_other_dists
+          call sync_zwts
+          call sync_beta
+       end if       
+       
        !!--------- TMP ----------------
        !!====================================
        !!call send_slowness

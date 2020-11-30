@@ -101,6 +101,7 @@ implicit none
   logical :: ave_sig = .false.                             !!flag to use average apparent conductivity as starting model 
   logical :: im_fmm = .false.                              !!true if I'm a node running on the fmm side
   logical, dimension(10) :: cgmin_flag = .false.           !!cross grad joint inversion on/off flags
+  logical, dimension(10) :: cgmin_flag_start = .false.     !!cross grad joint inversion on/off flags
   logical :: jaco_out_opt = .false.                        !!flag for outputting the jacobian matrix in mode 2
   logical :: jaco_ascii_opt = .false.                      !!jaco output format flag
   

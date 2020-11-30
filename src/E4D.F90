@@ -281,8 +281,10 @@ program main
      ! validate joint inversion run
      call validate_jointInv
 
-     !send and/or get parmeters needed for cross gradient constraints
+     ! save the cgmin_flag values
+     cgmin_flag_start = cgmin_flag     
      
+     !send and/or get parmeters needed for cross gradient constraints     
      if(cgmin_flag(1) .and. cgmin_flag(2)) then
         write(*,*) " E4D: waiting to trade with FMM"
         call get_other_dists
@@ -488,7 +490,7 @@ program main
    end if
 
    !check to see if specific measurement sensitivity outputs are requested.
-   call check_jaco_row_output
+   !call check_jaco_row_output
   
   !clean up and exit
    call send_command(0)
@@ -623,7 +625,7 @@ contains
        else
           beta=beta_s
        end if
-   
+             
        !set the starting model to the reference model 
        !if specified. Otherwise the previous solution
        !will be used (i.e. sigma is currently the previous
@@ -643,6 +645,15 @@ contains
        else
           call get_dobs_tl(i_tl)
        end if
+
+       ! reset cgmin_flag and betalist
+       cgmin_flag = cgmin_flag_start
+       if(cgmin_flag(1) .and. cgmin_flag(2)) then                 
+          write(*,*) " E4D: waiting to trade with FMM"          
+          call get_other_dists          
+          call sync_zwts          
+          call sync_beta
+       endif              
 
        !check convergence
        call check_convergence
