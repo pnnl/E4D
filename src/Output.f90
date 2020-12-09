@@ -68,43 +68,43 @@ contains
       open(51,file='e4d.log',status='old',action='write',position='append')
       write(51,*) ' E4D: Cannot find the output options file: ',trim(outfile)
       close(51)
-      write(*,*) ' E4D: Cannot find the output options file: ',trim(outfile)
+      write(*, *) ' E4D: Cannot find the output options file: ',trim(outfile)
       return
       
 11    continue
       open(51,file='e4d.log',status='old',action='write',position='append')
-      write(51,*) 'The was a problem reading the first line in the output file: ',trim(outfile)
-      write(51,*) 'aborting'
+      write(51,*) ' E4D: The was a problem reading the first line in the output file: ',trim(outfile)
+      write(51,*) ' E4D: aborting'
       close(51)
-      write(*,*) 'The was a problem reading the first line in the output file: ',trim(outfile)
-      write(*,*) 'aborting'
+      write(*, *) ' E4D: The was a problem reading the first line in the output file: ',trim(outfile)
+      write(*, *) ' E4D: aborting'
       return
 
 12    continue
       open(51,file='e4d.log',status='old',action='write',position='append')
-      write(51,*) 'The was a problem reading the predicted data file in: ',trim(outfile)
-      write(51,*) 'aborting'
+      write(51,*) ' E4D: The was a problem reading the predicted data file in: ',trim(outfile)
+      write(51,*) ' E4D: aborting'
       close(51)
-      write(*,*) 'The was a problem reading the predicted data file in: ',trim(outfile)
-      write(*,*) 'aborting'
+      write(*, *) ' E4D: The was a problem reading the predicted data file in: ',trim(outfile)
+      write(*, *) ' E4D: aborting'
       return
 
 13    continue
       open(51,file='e4d.log',status='old',action='write',position='append')
-      write(51,*) 'The was a problem reading the number of potential fields to write in: ',trim(outfile)
-      write(51,*) 'aborting'
+      write(51,*) ' E4D: The was a problem reading the number of potential fields to write in: ',trim(outfile)
+      write(51,*) ' E4D: aborting'
       close(51)
-      write(*,*) 'The was a problem reading the number of potential fields to write in: ',trim(outfile)
-      write(*,*) 'aborting'
+      write(*, *) ' E4D: The was a problem reading the number of potential fields to write in: ',trim(outfile)
+      write(*, *) ' E4D: aborting'
       return
 
 14    continue
       open(51,file='e4d.log',status='old',action='write',position='append')
-      write(51,*) 'The was a problem reading potential index: ',i,' in: ',trim(outfile)
-      write(51,*) 'aborting'
+      write(51,*) ' E4D: The was a problem reading potential index: ',i,' in: ',trim(outfile)
+      write(51,*) ' E4D: aborting'
       close(51)
-      write(*,*) 'The was a problem reading potential index: ',i,' in: ',trim(outfile)
-      write(*,*) 'aborting'
+      write(*, *) ' E4D: The was a problem reading potential index: ',i,' in: ',trim(outfile)
+      write(*, *) ' E4D: aborting'
 
       return
 
@@ -351,8 +351,8 @@ contains
        write(51,*) ' Not printing the Jacobian matrix.'
        close(51)
        write(*,*)
-       write(*,*) ' There was a problem Jacobian matrix output option: ',i,' in: ',trim(outfile)
-       write(*,*) ' Not printing the Jacobian matrix.'
+       write(*, *) ' There was a problem Jacobian matrix output option: ',i,' in: ',trim(outfile)
+       write(*, *) ' Not printing the Jacobian matrix.'
        goto 9
     end if
     read(15,*,IOSTAT=ist) jformat
@@ -362,8 +362,8 @@ contains
        write(51,*) ' Printing in binary format'
        close(51)
        write(*,*)
-       write(*,*) ' There was a problem Jacobian matrix output option: ',i,' in: ',trim(outfile)
-       write(*,*) ' Printing in binary format'
+       write(*, *) ' There was a problem Jacobian matrix output option: ',i,' in: ',trim(outfile)
+       write(*, *) ' Printing in binary format'
       
     end if
   
@@ -372,23 +372,23 @@ contains
        jaco_ascii_opt = .true.
        open(51,file='e4d.log',status='old',action='write',position='append')
        write(51,*) ' Printing Jacobian matrix in '
-       write(*,*) ' Printing Jacobian matrix in '
+       write(*, *) ' Printing Jacobian matrix in '
 
        if(trim(jformat)=='ASCII'.or.trim(jformat)=='ascii') then
           jaco_ascii_opt = .true.
           write(51,*) ' ascii format'
-          write(*,*) ' ascii format'
+          write(*, *) ' ascii format'
        else
           jaco_ascii_opt = .false.
           write(51,*) ' binary format'
-          write(*,*) ' binary format'
+          write(*, *) ' binary format'
        end if
        close(51)
     else
        jaco_out_opt = .false.
         open(51,file='e4d.log',status='old',action='write',position='append')
        write(51,*) ' Not printing Jacobian matrix'
-       write(*,*) ' Not printing Jacobian matrix'
+       write(*, *) ' Not printing Jacobian matrix'
        close(51)
     end if
 
@@ -503,45 +503,45 @@ contains
 10  continue
       open(51,file='e4d.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' Cannot find the output options file: ',trim(outfile)
+      write(51,*) ' E4D: Cannot find the output options file: ',trim(outfile)
       close(51)
       write(*,*) 
-      write(*,*) ' Cannot find the output options file: ',trim(outfile)
+      write(*, *) ' E4D: Cannot find the output options file: ',trim(outfile)
       return
       
 11    continue
       open(51,file='e4d.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' The was a problem reading the first line in the output file: ',trim(outfile)
+      write(51,*) ' E4D: The was a problem reading the first line in the output file: ',trim(outfile)
       close(51)
       write(*,*) 
-      write(*,*) ' There was a problem reading the first line in the output file: ',trim(outfile)
+      write(*, *) ' E4D: There was a problem reading the first line in the output file: ',trim(outfile)
       return
 
 12    continue
       open(51,file='e4d.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) 'There was a problem reading the predicted data file name in: ',trim(outfile)
+      write(51,*) ' E4D: There was a problem reading the predicted data file name in: ',trim(outfile)
       close(51)
       write(*,*) 
-      write(*,*) 'The was a problem reading the predicted data file in: ',trim(outfile)
+      write(*, *) ' E4D: The was a problem reading the predicted data file in: ',trim(outfile)
       return
 
 13    continue
       open(51,file='e4d.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' There was a problem reading the number of potential fields to write in: ',trim(outfile)
+      write(51,*) ' E4D: There was a problem reading the number of potential fields to write in: ',trim(outfile)
       close(51)
       write(*,*) 
-      write(*,*) ' There was a problem reading the number of potential fields to write in: ',trim(outfile)
+      write(*, *) ' E4D: There was a problem reading the number of potential fields to write in: ',trim(outfile)
       return
 
 14    continue
       open(51,file='e4d.log',status='old',action='write',position='append')
-      write(51,*) ' There was a problem reading potential field index: ',i,' in: ',trim(outfile)
+      write(51,*) ' E4D: There was a problem reading potential field index: ',i,' in: ',trim(outfile)
       close(51)
       write(*,*)
-      write(*,*) ' There was a problem reading potential field index: ',i,' in: ',trim(outfile)
+      write(*, *) ' E4D: There was a problem reading potential field index: ',i,' in: ',trim(outfile)
       return
 
 
@@ -581,9 +581,9 @@ contains
    !_______________________________________________________________________________________
   subroutine check_jrows_out
     implicit none
-    integer :: ttp_flag,ntt,o_opt,ist,nfres,junk
+    integer :: dp_flag,npot,o_opt,ist,nfres,junk
     logical :: fcheck
-    character*80 :: ttp_file
+    character*80 :: dp_file
     character*20 :: fname
     integer :: i,a,j,smin,smax,ra
     integer, dimension(2) :: spack
@@ -595,12 +595,12 @@ contains
     
     !call nreport_fmm(21)
     open(15,file=outfile,status='old',action='read')
-    read(15,*,IOSTAT=ist) ttp_flag; if(ist.ne.0) goto 11
-    read(15,*,IOSTAT=ist) ttp_file; if(ist.ne.0) goto 12
-    read(15,*,IOSTAT=ist) ntt   ; if(ist.ne.0) goto 13
+    read(15,*,IOSTAT=ist) dp_flag; if(ist.ne.0) goto 11
+    read(15,*,IOSTAT=ist) dp_file; if(ist.ne.0) goto 12
+    read(15,*,IOSTAT=ist) npot   ; if(ist.ne.0) goto 13
     
-    if(ntt>0) then
-       do i=1,ntt
+    if(npot>0) then
+       do i=1,npot
           read(15,*,IOSTAT=ist) junk; if(ist.ne.0) goto 14
        end do
     end if
@@ -625,75 +625,73 @@ contains
     return
     
 10  continue
-      open(51,file='fmm.log',status='old',action='write',position='append')
+      open(51,file='e4d.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' FMM: Cannot find the output options file: ',trim(outfile)
+      write(51,*) ' E4D: Cannot find the output options file: ',trim(outfile)
       close(51)
-      write(*,*) 
-      write(*,*) ' FMM: Cannot find the output options file: ',trim(outfile)
+      write(*, *) 
+      write(*, *) ' E4D: Cannot find the output options file: ',trim(outfile)
       return
       
 11    continue
-      open(51,file='fmm.log',status='old',action='write',position='append')
+      open(51,file='e4d.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' The was a problem reading the first line in the output file: ',trim(outfile)
+      write(51,*) ' E4D: The was a problem reading the first line in the output file: ',trim(outfile)
       close(51)
-      write(*,*) 
-      write(*,*) ' There was a problem reading the first line in the output file: ',trim(outfile)
+      write(*, *) 
+      write(*, *) ' E4D: There was a problem reading the first line in the output file: ',trim(outfile)
       return
 
 12    continue
-      open(51,file='fmm.log',status='old',action='write',position='append')
+      open(51,file='e4d.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) 'There was a problem reading the predicted data file name in: ',trim(outfile)
+      write(51,*) ' E4D: There was a problem reading the predicted data file name in: ',trim(outfile)
       close(51)
-      write(*,*) 
-      write(*,*) 'The was a problem reading the predicted data file in: ',trim(outfile)
+      write(*, *) 
+      write(*, *) ' E4D: The was a problem reading the predicted data file in: ',trim(outfile)
       return
 
 13    continue
-      open(51,file='fmm.log',status='old',action='write',position='append')
+      open(51,file='e4d.log',status='old',action='write',position='append')
       write(51,*) 
-      write(51,*) ' There was a problem reading the number of travel time fields to write in: ',trim(outfile)
+      write(51,*) ' E4D: There was a problem reading the number of potential fields to write in: ',trim(outfile)
       close(51)
-      write(*,*) 
-      write(*,*) ' There was a problem reading the number of travel time fields to write in: ',trim(outfile)
+      write(*, *) 
+      write(*, *) ' E4D: There was a problem reading the number of potential fields to write in: ',trim(outfile)
       return
 
 14    continue
-      open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) ' There was a problem reading travel time field index: ',i,' in: ',trim(outfile_fmm)
+      open(51,file='e4d.log',status='old',action='write',position='append')
+      write(51,*) ' E4D: There was a problem reading potential field index: ',i,' in: ',trim(outfile)
       close(51)
       write(*,*)
-      write(*,*) ' There was a problem reading travel time field index: ',i,' in: ',trim(outfile)
+      write(*, *) ' E4D: There was a problem reading potential field index: ',i,' in: ',trim(outfile)
       return 
       
 15    continue
-      open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) ' There was a problem reading the number of fresnel volume outputs in: ',trim(outfile)
-      write(51,*) ' Skipping fresnel volume outputs.'
+      open(51,file='e4d.log',status='old',action='write',position='append')
+      write(51,*) ' E4D: There was a problem reading the number of rows of JTJ matrix outputs in: ',trim(outfile)
       close(51)
       write(*,*)
-      write(*,*) ' There was a problem reading the number of fresnel volume outputs in: ',trim(outfile)
-      write(*,*) ' Skipping fresnel volume outputs.'
+      write(*, *) ' E4D: There was a problem reading the number of rows of JTJ matrix outputs in: ',trim(outfile)
       return
 
 16    continue
-      open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) ' There was a problem reading fresnel volume output index: ',i,' in: ',trim(outfile)
+      open(51,file='e4d.log',status='old',action='write',position='append')
+      write(51,*) ' E4D: There was a problem reading the row index of JTJ matrix for measurement: ',i,' in: ',trim(outfile)
       close(51)
-      write(*,*)
-      write(*,*) ' There was a problem reading fresnel volume output index: ',i,' in: ',trim(outfile)
+      write(*, *)
+      write(*, *) ' E4D: There was a problem reading the row index of JTJ matrix for measurement: ',i,' in: ',trim(outfile)
       return
 
 17    continue
-      open(51,file='fmm.log',status='old',action='write',position='append')
-      write(51,*) ' There was a problem reading JTJ output option in: ',trim(outfile)
-      write(51,*) ' Not printing Jacobian rows.'
+      open(51,file='e4d.log',status='old',action='write',position='append')
+      write(51,*) ' E4D: There was a problem reading JTJ output option in: ',trim(outfile)
+      write(51,*) ' E4D: Not printing Jacobian rows.'
       close(51)
-      write(*,*)
-      write(*,*) ' There was a problem reading JTJ output option in: ',trim(outfile)
-      write(*,*) ' Not printing JTJ rows.'
+      write(*, *)
+      write(*, *) ' E4D: There was a problem reading JTJ output option in: ',trim(outfile)
+      write(*, *) ' E4D: Not printing JTJ rows.'
       return
             
     end subroutine check_jrows_out

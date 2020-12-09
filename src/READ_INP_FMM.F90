@@ -1163,7 +1163,7 @@ contains
     write(51,*) "The source position in: ",trim(tl_dfils(ind))," for source: ",i
     write(51,*) "is different than the same baseline source position."
     write(51,*) trim(tl_dfils(ind))," gives: ",etp
-    write(51,*) "The baseline file gives: ",s_pos(i,1)-xorig,s_pos(i,2)-yorig,s_pos(i,3)-zorig
+    write(51,*) "The baseline file gives: ",s_pos(i,1)+xorig,s_pos(i,2)+yorig,s_pos(i,3)+zorig
     write(51,*) "Aborting ...."
     close(51)
     call crash_exit_fmm
@@ -1223,7 +1223,7 @@ contains
     write(51,*) "The receiver position in: ",trim(tl_dfils(ind))," for receiver: ",i
     write(51,*) "is different than the same baseline receiver position."
     write(51,*) trim(tl_dfils(ind))," gives: ",etp
-    write(51,*) "The baseline file gives: ",rc_pos(i,1)-xorig,rc_pos(i,2)-yorig,rc_pos(i,3)-zorig
+    write(51,*) "The baseline file gives: ",rc_pos(i,1)+xorig,rc_pos(i,2)+yorig,rc_pos(i,3)+zorig
     write(51,*) "Aborting ...."
     close(51)
     call crash_exit_fmm

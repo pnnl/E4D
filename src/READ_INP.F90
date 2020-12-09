@@ -1077,7 +1077,7 @@ contains
     write(51,*) "The electrode position in: ",trim(tl_dfils(ind))," for electrode: ",i
     write(51,*) "is different than the same baseline electrode position."
     write(51,*) trim(tl_dfils(ind))," gives: ",etp
-    write(51,*) "The baseline file gives: ",e_pos(i,1)-xorig,e_pos(i,2)-yorig,e_pos(i,3)-zorig
+    write(51,*) "The baseline file gives: ",e_pos(i,1)+xorig,e_pos(i,2)+yorig,e_pos(i,3)+zorig
     write(51,*) "Aborting ...."
     close(51)
     call crash_exit
