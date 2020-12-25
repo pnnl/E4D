@@ -657,6 +657,12 @@ contains
 
        !check convergence
        call check_convergence
+
+       !if we've converged at the previous solution then adjust beta so that it
+       !maintains it's current value after being increased (see line 624) in the next iteration
+       if(con_flag .and. r_last .and. (conv_opt .ne. 2) ) then
+         beta = beta*beta_red
+       end if
        !write the current solution to file
        call write_sigiter
        call nreport(1)      
@@ -719,7 +725,9 @@ contains
           
           call check_convergence
           call nreport(1)
-          call check_beta                    
+          if(.not. con_flag) then
+            call check_beta
+          end if                    
           call write_sigiter
 
           if(cgmin_flag(1) .and. cgmin_flag(2)) then             
