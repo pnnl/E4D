@@ -120,7 +120,7 @@ contains
          mxphz=0
          cc=0
          do i=1,nm
-            phzi= -dobsi(i)/dobs(i)
+            phzi= -dobsi(i)
            
             if(phzi>0) then
                if(phzi>mxphz) mxphz=phz
