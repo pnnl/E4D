@@ -6,7 +6,7 @@ e4d_dev directory.
 
 2) Make sure the m4 utility is installed (http://www.gnu.org/software/m4/m4.html)
 
-3) Clone petsc by entering: git clone -b maint https://gitlab.com/petsc/petsc.git petsc
+3) Clone petsc by entering: git clone -b release https://gitlab.com/petsc/petsc.git petsc
 
 
 4) Go to the newly created petsc directory (petsc-*) and compile petsc. E4D needs
