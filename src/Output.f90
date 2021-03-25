@@ -608,7 +608,7 @@ contains
     
     !this is the flag to print JTJ
     read(15,*,IOSTAT=ist) junk; if(ist.ne.0) goto 17
-    read(15,*,IOSTAT=ist) sjunk; if(ist.ne.0) goto 17
+    read(15,*,IOSTAT=ist) sjunk; if(ist.ne.0) goto 18
     read(15,*,IOSTAT=ist) njrows_out;  if(ist.ne.0) goto 15
     
     if(njrows_out>0) then
