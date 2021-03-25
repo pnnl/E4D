@@ -325,9 +325,12 @@ program main
         call build_rrseq
         call send_rrseq
         call mjaco
-        call print_jaco                               !see module master
+        !call print_jaco                               !see module master
      end if
 
+     !check to see if specific measurement sensitivity outputs are requested.
+     call check_jaco_row_output     
+     
      !instruct slaves to clean up and exit
      !clean up and exit
      call send_command(0)
@@ -490,7 +493,7 @@ program main
    end if
 
    !check to see if specific measurement sensitivity outputs are requested.
-   !call check_jaco_row_output
+   call check_jaco_row_output
   
   !clean up and exit
    call send_command(0)

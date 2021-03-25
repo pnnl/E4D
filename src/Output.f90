@@ -585,6 +585,7 @@ contains
     logical :: fcheck
     character*80 :: dp_file
     character*20 :: fname
+    character*20 :: sjunk
     integer :: i,a,j,smin,smax,ra
     integer, dimension(2) :: spack
     real, dimension(nnodes) :: pa
@@ -607,7 +608,7 @@ contains
     
     !this is the flag to print JTJ
     read(15,*,IOSTAT=ist) junk; if(ist.ne.0) goto 17
- 
+    read(15,*,IOSTAT=ist) sjunk; if(ist.ne.0) goto 17
     read(15,*,IOSTAT=ist) njrows_out;  if(ist.ne.0) goto 15
     
     if(njrows_out>0) then
@@ -693,7 +694,17 @@ contains
       write(*, *) ' E4D: There was a problem reading JTJ output option in: ',trim(outfile)
       write(*, *) ' E4D: Not printing JTJ rows.'
       return
-            
+
+18    continue
+      open(51,file='e4d.log',status='old',action='write',position='append')
+      write(51,*) ' E4D: There was a problem reading JTJ output format in: ',trim(outfile)
+      write(51,*) ' E4D: Not printing Jacobian rows.'
+      close(51)
+      write(*, *)
+      write(*, *) ' E4D: There was a problem reading JTJ output format in: ',trim(outfile)
+      write(*, *) ' E4D: Not printing JTJ rows.'
+      return      
+      
     end subroutine check_jrows_out
   !_______________________________________________________________________________________
 
