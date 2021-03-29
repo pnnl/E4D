@@ -202,7 +202,6 @@ contains
        else
           
           !!I don't own this measurement, so I'll send poles if they belong to me
-          
           if(.not. pcheck(1)) then
              if(ra==my_rank) then
                 pa = poles(:,a-eind(my_rank,1)+1)
