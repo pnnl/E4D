@@ -1119,8 +1119,7 @@ contains
 
     if(im_fmm) then
        !at this point velocity is 1/(velocity**2) (i.e slowness**2)
-   
-       
+ 
        do ii=1,nelem
           !change velocity to slowness and update (note sig_up is the update delta
           !in terms of slowness
@@ -1131,7 +1130,7 @@ contains
 
        !change velocity back to slowness squared for the forward computations
        velocity = velocity**2
- 
+     
     else
        
        if (hemstiching) then

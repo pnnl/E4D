@@ -151,8 +151,7 @@ contains
     do i=1,ntt
        pa=0
        if(itt(i,1)>ns) goto 100
-       !       a=s_conf_fmm(itt(i,1),1)
-       write(*,*) "Printing traveltime distribution for source number: ",itt(i,1)
+!       a=s_conf_fmm(itt(i,1),1)
        a = itt(i,1)
        do j=1,n_rank_fmm-1
           smin=sind(j,1); smax=sind(j,2)
