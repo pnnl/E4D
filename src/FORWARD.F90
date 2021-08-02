@@ -132,7 +132,8 @@ implicit none
           end do
           if(tank_flag) then
              eindx(1)=e_nods(tne)
-             call VecSetValues(B,p_int,eindx(1)-1,-val,ADD_VALUES,perr)
+             val = -1.0
+             call VecSetValues(B,p_int,eindx(1)-1,val,ADD_VALUES,perr)
           end if
        end if
 #else
@@ -145,7 +146,8 @@ implicit none
        end do
        if(tank_flag) then
           eindx(1)=e_nods(tne)
-          call VecSetValues(B,p_int,eindx(1)-1,-val,ADD_VALUES,perr)
+          val = -1.0
+          call VecSetValues(B,p_int,eindx(1)-1,val,ADD_VALUES,perr)
        end if
 #endif
        
