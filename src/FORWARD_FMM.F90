@@ -9,13 +9,15 @@ contains
   !____________________________________________________________________
   subroutine forward_run_fmm
     implicit none
-    integer :: cur_src,s,i,j,k,snod,dpos,ndi,nring,cur_ele,tnode,nct
+    integer :: cur_src,s,i,j,k,snod,dpos,ndi,nring,cur_ele,tnode,nct,negtt
     integer, dimension(4) :: cur_nd_ups
     logical :: rec_done_flag
     real :: pd
     integer :: heap_map_tmp, heap_tmp
-!    real, dimension(1,1) :: tt_test
+    !    real, dimension(1,1) :: tt_test
+    ttimes = 0
     do s=1,my_ns
+       
        cur_src = sind(my_rank_fmm,1)+s-1
        snod = s_nods(cur_src)
        call init_heap(snod)
@@ -113,6 +115,18 @@ contains
 !     end do
      end do
      ttimes(:,s) = tt(:)
+
+     if (minval(tt)<0) then
+        negtt = 0
+        do i=1,nnodes
+           if(tt(i)<0) then
+              negtt = negtt+1
+              ttimes(i,s) = 0
+           end if
+        end do
+        write(*,*) "WARNTING: Process ",my_rank," simulated ",negtt, "negative travel times for source ",cur_src    
+     end if
+     
 !check if there are nodes not reached
 !     do cur_ele = 1,nelem 
 !        i = 0
