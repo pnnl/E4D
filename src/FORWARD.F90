@@ -132,20 +132,22 @@ implicit none
           end do
           if(tank_flag) then
              eindx(1)=e_nods(tne)
-             call VecSetValues(B,p_int,eindx(1)-1,-val,ADD_VALUES,perr)
+             val = -1.0
+             call VecSetValues(B,p_int,eindx(1)-1,val,ADD_VALUES,perr)
           end if
        end if
 #else
        p_int = 1
        !call VecSetValues(B,p_int,eindx(1)-1,val,ADD_VALUES,perr)
        do j=1,4
-          eindx(1) = source_nodes(enum,j)
+          eindx(1) = source_nodes(enum,j) 
           val = source_currents(enum,j)
           call VecSetValues(B,p_int,eindx(1)-1,val,ADD_VALUES,perr)
        end do
        if(tank_flag) then
           eindx(1)=e_nods(tne)
-          call VecSetValues(B,p_int,eindx(1)-1,-val,ADD_VALUES,perr)
+          val = -1.0
+          call VecSetValues(B,p_int,eindx(1)-1,val,ADD_VALUES,perr)
        end if
 #endif
        
