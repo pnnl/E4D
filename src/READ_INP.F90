@@ -99,7 +99,14 @@ contains
     ! check for alpha characters and make them all lower case
     smode=lcase(smode)
     
-    if(trim(adjustl(smode))=='analytic' .or. trim(adjustl(smode))=='ertanalytic') then
+    
+    ! initialize multisource flag
+    ms_flag=0 
+    if(trim(adjustl(smode))=='analytic' .or. trim(adjustl(smode))=='ertanalytic' .or. trim(adjustl(smode))=='ertmsanalytic') then
+       if (trim(adjustl(smode))=='ertmsanalytic') then
+          ms_flag=1
+       end if
+       
        analytic = .true.
        mode = 2; call check_inp(1,junk)
     else    
@@ -154,12 +161,23 @@ contains
 			   case('siptank3') 
 				  mode=43; call check_inp(1,junk)
 			   case('siptank4') 
-				  mode=44; call check_inp(1,junk)	   
+				  mode=44; call check_inp(1,junk)	
+			  
+			   case('ertms1') 
+				  mode=61; call check_inp(1,junk)
+			   case('ertms2') 
+				  mode=62; call check_inp(1,junk)
+			   case('ertms3') 
+				  mode=63; call check_inp(1,junk)
+			   case('ertms4') 
+				  mode=64; call check_inp(1,junk)				  
+				     
 			   case DEFAULT
 				  read(smode,*,IOSTAT=ios) mode; call check_inp(1,junk)
 		   end select
+		   
     end if
-    
+
     !! if running in mode zero attempt the read the input files, report, and exit
     if(mode == 0) then
        !call test_read
@@ -168,7 +186,7 @@ contains
     
     read(10,*,IOSTAT=ios) mshfile;  call check_inp(2,junk)
   
-    if(mode>1 .and. mode .ne. 21 .and. mode .ne. 31 .and. mode .ne.41) then
+    if(mode>1 .and. mode .ne. 21 .and. mode .ne. 31 .and. mode .ne.41 .and. mode .ne.61) then
        read(10,*,IOSTAT=ios) efile;    call check_inp(3,junk)
        read(10,*,IOSTAT=ios) sigfile;  call check_inp(4,junk)
        
@@ -191,6 +209,8 @@ contains
     if(mode == 3 .or. mode == 4 &
          .or. mode == 33 &
          .or. mode == 34 &
+         .or. mode == 63 &
+         .or. mode == 64 &         
          .or. mode .ge. 100) then
        
        read(10,*,IOSTAT=ios) invfile;      call check_inp(6,junk)
@@ -204,7 +224,7 @@ contains
     end if
     
 
-    if(mode==4 ) tl_ly = .true.
+    if(mode==4 .or. mode == 64) tl_ly = .true.
 
     if(mode==21) then
        mode=1
@@ -218,7 +238,23 @@ contains
     elseif(mode==24 ) then
        i_flag = .true.
        tl_ly = .true.
-    end if
+    elseif(mode==61) then
+       mode=1
+    end if       
+    
+    ! multisource flag initialize above
+    if (mode==62) then
+		mode=2
+		ms_flag=1
+	elseif (mode==63) then
+	    mode=3
+	    ms_flag=1
+	elseif (mode==64) then
+	    mode=4
+	    ms_flag=1
+	end if
+	   
+    
     
     if( (mode.ge.31 .and. mode.le.34) .or. (mode .ge. 41 .and. mode .le. 44) ) then 
        tank_flag = .true.
@@ -318,7 +354,11 @@ contains
     
     !!Allocate/read the electrode positions and survey configuration
     if(mode>1) then
-       call read_survey
+       if(ms_flag==1) then
+	        call read_ms_survey
+	   else
+            call read_survey
+       end if
        call translate_electrodes
     end if
     
@@ -327,7 +367,7 @@ contains
     !!all of the files exist and set the multi_forward flag to 
     !!true. 
     if(.not. ave_sig) then
-       if(mode==2 .or. mode==22 .or. mode==32 .or. mode==42 .or. mode==52) then
+       if(mode==2 .or. mode==22 .or. mode==32 .or. mode==42 .or. mode==52 .or. mode==62) then
           multi_forward = .false.
           call check_for_list
        end if
@@ -1188,6 +1228,14 @@ contains
        case(44) 
           mcheck = .true.
 
+       case(61) 
+          mcheck = .true.
+       case(62) 
+          mcheck = .true.
+       case(63) 
+          mcheck = .true.
+       case(64) 
+          mcheck = .true.
 #endif
 #ifdef resmode
        case(101)
@@ -1224,6 +1272,11 @@ contains
           write(51,*)  " Tank SIP Inverse Multi-frequency 44"
           write(51,*)
 #endif
+          write(51,*)  " ERT Multisource Mesh Generation  61"
+          write(51,*)  " ERT Multisource Forward          62"
+          write(51,*)  " ERT Multisource Inverse Static   63"
+          write(51,*)  " ERT Multisource Time-lapse       64"
+          write(51,*)
 #ifdef resmode
           write(51,*)  " Data Deficiency Survey Opt.     101"
 #endif 
@@ -1253,6 +1306,12 @@ contains
           write(*,*)  " Tank SIP Forward                 42"
           write(*,*)  " Tank SIP Inverse Static          43"
           write(*,*)  " Tank SIP Inverse Multi-frequency 44"
+
+          write(*,*)  " ERT Multisource Mesh Generation  61"
+          write(*,*)  " ERT Multisource Forward          62"
+          write(*,*)  " ERT Multisource Inverse Static   63"
+          write(*,*)  " ERt Multisource Time-lapse       64"
+
           write(*,*)
 #endif
 #ifdef resmode
@@ -1312,6 +1371,14 @@ contains
                 write(51,*) "************* RUNNING IN SIP INVERSION MODE (TANK) *************"
              case(44) 
                 write(51,*) "**************** RUNNING IN SIP MULTI-FREQUENCY INVERSION MODE (TANK) *****************"
+             case(61)
+                write(51,*) "********** RUNNING IN ERT MULTISOURCE MESH GENERATION MODE  **********"
+             case(62)
+                write(51,*) "************** RUNNING IN ERT MULTISOURCE FORWARD MODE  **************"
+             case(63)
+                write(51,*) "************* RUNNING IN ERT MULTISOURCE INVERSION MODE  *************"
+             case(64) 
+                write(51,*) "**************** RUNNING IN TIME-LAPSE ERT MULTISOURCE INVERSION MODE  *****************"                
              case(101)
                 write(51,*) "*******RUNNING IN DATA DEFICIENCY SURVEY OPTIMIZATION MODE******"
               end select
@@ -1324,7 +1391,7 @@ contains
        open(51,file='e4d.log',status='old',action='write',position='append')
        if(ios .ne. 0) then
 
-          if(mode == 1 .or. mode == 21 .or. mode == 31) then
+          if(mode == 1 .or. mode == 21 .or. mode == 31 .or. mode == 61) then
              write(51,*) "  E4D:  There was a problem reading the mesh config. file name in e4d.inp"
              write(51,*) "  E4D: Aborting ..."
              close(51)
@@ -1341,7 +1408,7 @@ contains
           call crash_exit
 
        else
-          if(mode == 1 .or. mode == 21 .or. mode == 31) then
+          if(mode == 1 .or. mode == 21 .or. mode == 31 .or. mode == 61) then
              write(51,*) " Mesh configuration file:          ",trim(mshfile)
           else
              write(51,*) " Mesh file:                        ",trim(mshfile)
@@ -1370,7 +1437,7 @@ contains
           close(51)
           call crash_exit
        else
-          if(mode == 2 .or. mode == 22 .or. mode == 32) then
+          if(mode == 2 .or. mode == 22 .or. mode == 32 .or. mode == 62) then
              write(51,*) " Conductivity file:                ",trim(sigfile)
           else
              write(51,*) " Starting conductivity file:       ",trim(sigfile)
@@ -1396,7 +1463,7 @@ contains
        open(51,file='e4d.log',status='old',action='write',position='append')
        	
        if(ios .ne. 0) then
-          if(mode == 22 .or. mode == 23) then             
+          if(mode == 22 .or. mode == 23 .or. mode == 63) then             
              write(51,*) "E4D: There was a problem reading the two SIP inverse option file names in e4d.inp: aborting"             
              write(*, *) "E4D: There was a problem reading the two SIP inverse option file names in e4d.inp: aborting"             
           else if (mode==0) then             
@@ -1416,7 +1483,7 @@ contains
           close(51)
           call crash_exit
        else          
-         if(mode == 22 .or. mode == 23) then
+         if(mode == 22 .or. mode == 23 .or. mode == 63) then
              write(51,*) " Inverse options file (amp.):      ",trim(invfile)
              write(51,*) " Inverse options file (phase):     ",trim(iinvfile)
           else
@@ -2055,7 +2122,27 @@ contains
            write(*, *) "E4D: Cannot find the mesh translation file: ",trim(mshfile(1:mnchar))//'trn'
            close(51)
            call crash_exit
-        endif     
+        endif   
+        
+    case(620)
+       open(51,file='e4d.log',status='old',action='write',position='append')
+       write(51,*)
+       write(51,"(A,I8.8,A)") "  Measurement ",indx," uses electrodes that are out of range." 
+       write(51,"(A,I8.8,A)") "  There are ",ne," electrodes."
+       write(51,"(A,I8.8,A,6I10.8)") "  A B M N for measurement ",indx," reads ",ms_conf(indx,:)
+       write(51,*) " Aborting ..."
+       write(51,*)
+       close(51)
+
+       write(*,*)
+       write(*,"(A,I8.8,A)") "  Measurement ",indx," uses electrodes that are out of range." 
+       write(*,"(A,I8.8,A)") "  There are ",ne," electrodes."
+       write(*,"(A,I8.8,A,6I10.8)") "  A B M N for measurement ",indx," reads ",ms_conf(indx,:)
+       write(*,*) " Aborting ..."
+       write(*,*)
+       call crash_exit    
+    
+          
        
     case DEFAULT
 
@@ -3224,6 +3311,105 @@ contains
     end if
   end subroutine read_survey
   !_________________________________________________________________________
+
+!_________________________________________________________________________
+  subroutine read_ms_survey
+    implicit none 
+    logical :: exst
+    integer :: i,j,k, junk
+    real, dimension(:,:), allocatable :: f_currents 
+    real, dimension(4) :: etmp
+    logical :: wdwarn = .true.
+
+   
+    inquire(file=trim(trim(efile)),exist=exst)
+    if(.not. exst) then
+       call check_inp(24,0)
+    else
+       call check_inp(24,1)
+    end if
+
+    open(10,file=efile,status='old',action='read')   
+    read(10,*,IOSTAT=ios) ne;     call check_inp(12,junk)
+    
+    allocate(e_pos(ne,4))
+    do i=1,ne
+       read(10,*,IOSTAT=ios) junk,etmp; call check_inp(13,i)
+       if(junk>ne) call check_inp(14,i)
+       e_pos(junk,1:4)=etmp
+    end do
+    
+    !!Read in the multisource survey
+    read(10,*,IOSTAT=ios) nm;     call check_inp(17,nm)
+    allocate(dobs(nm),ms_conf(nm,6),Wd(nm),ms_currents(nm,2), f_currents(nm,2))
+    if(i_flag) then 
+
+       allocate(dobsi(nm),Wdi(nm))
+
+       do i=1,nm         
+          read(10,*,IOSTAT=ios) junk,ms_conf(i,1:6),f_currents(i,1:2),dobs(i),Wd(i),dobsi(i),Wdi(i); call check_inp(18,i)
+          if ( dobs(i)==0 .or. dobsi(i)==0 ) call check_inp(118,i)
+          if(Wd(i) <= 0 .or. Wdi(i) <= 0) then
+             Wd(i) = 1e15
+             Wdi(i) = 1e15
+             if(wdwarn) call check_inp(19,i)
+             wdwarn = .false.
+          end if
+          
+          do j=1,6
+             if(ms_conf(i,j)>ne .or. ms_conf(i,j)<0) call check_inp(620,i)
+             if(tank_flag .and. ms_conf(i,j)==ne)   call check_inp(27,i)
+          end do
+          
+          !! Scale currents to 1 A from input if this is a multisource measurement
+          if (ms_conf(i,3)==0 .and. ms_conf(i,4)==0) then
+             ms_currents(i,1)=1.0
+             ms_currents(i,2)=0.0
+          else
+			  do k=1,2
+				 ms_currents(i,k)=f_currents(i,k)/sum(f_currents(i,1:2))
+			  end do
+		  end if
+          
+          Wd(i)= 1/Wd(i)
+          Wdi(i) = 1/Wdi(i)          
+       end do
+       close(10)
+   
+    else
+       do i=1,nm
+          read(10,*,IOSTAT=ios) junk,ms_conf(i,1:6),f_currents(i,1:2),dobs(i),Wd(i); call check_inp(18,i)
+          if ( dobs(i)==0 ) call check_inp(118,i)
+          if(Wd(i) <= 0) then
+             Wd(i)=1e15
+             if( wdwarn) call check_inp(19,i)
+             wdwarn = .false.
+          end if
+          
+          do j=1,6
+             if(ms_conf(i,j)>ne .or. ms_conf(i,j)<0) call check_inp(620,i)
+             if(tank_flag .and. ms_conf(i,j)==ne)   call check_inp(27,i)
+          end do
+          
+          !! Scale currents to 1 A from input if this is a multisource measurement
+          if (ms_conf(i,3)==0 .and. ms_conf(i,4)==0) then
+             ms_currents(i,1)=1.0
+             ms_currents(i,2)=0.0
+          else
+			  do k=1,2
+				 ms_currents(i,k)=f_currents(i,k)/sum(f_currents(i,1:2))
+			  end do
+		  end if
+           
+          Wd(i)= 1/Wd(i)
+    	        
+       end do
+       close(10)
+    end if
+  end subroutine read_ms_survey
+  !_________________________________________________________________________
+
+
 
   !_________________________________________________________________________
   subroutine translate_electrodes

@@ -33,16 +33,30 @@ contains
        !if(o_opt==1) then
        open(15,file=dp_file,status='replace',action='write')
        write(15,*) nm
-       if(i_flag) then
-          do i=1,nm
-             write(15,1002) i,s_conf(i,1:4),dobs(i),dpred(i),dobsi(i),dpredi(i)
-          end do
-          
-       else
-          do i=1,nm
-             write(15,1001) i,s_conf(i,1:4),dobs(i),dpred(i)
-          end do
-       end if
+       
+       if (ms_flag==1) then
+		   if(i_flag) then
+			  do i=1,nm
+				 write(15,1004) i,ms_conf(i,1:6),ms_currents(i,1:2), dobs(i),dpred(i),dobsi(i),dpredi(i)
+			  end do
+			  
+		   else
+			  do i=1,nm
+				 write(15,1003) i,ms_conf(i,1:6),ms_currents(i,1:2),dobs(i),dpred(i)
+			  end do
+		   end if
+	   else
+		   if(i_flag) then
+			  do i=1,nm
+				 write(15,1002) i,s_conf(i,1:4),dobs(i),dpred(i),dobsi(i),dpredi(i)
+			  end do
+			  
+		   else
+			  do i=1,nm
+				 write(15,1001) i,s_conf(i,1:4),dobs(i),dpred(i)
+			  end do
+		   end if
+	   end if
        close(15)
     end if
     return
@@ -111,6 +125,8 @@ contains
    
 1001 format(1I8,4I8,2g15.6)
 1002 format(1I8,4I8,4g15.6)
+1003 format(1I8,6I8,4g15.6)
+1004 format(1I8,6I8,6g15.6)
 
   end subroutine output_dpred
   !_______________________________________________________________________________________
@@ -130,14 +146,27 @@ contains
     end do
     write(12,*)
     write(12,*) nm
-    if(i_flag) then
-       do i=1,nm
-          write(12,"(I8,4I10,4G15.5)") i,s_conf(i,1:4),dpred(i),0.05*abs(dpred(i)),dpredi(i),0.05*abs(dpredi(i))
-       end do
+    
+    if (ms_flag==1) then
+		if(i_flag) then
+		   do i=1,nm
+			  write(12,"(I8,6I10,6G15.5)") i,ms_conf(i,1:6),ms_currents(i,1:2),dpred(i),0.05*abs(dpred(i)),dpredi(i),0.05*abs(dpredi(i))
+		   end do
+		else
+		   do i=1,nm
+			  write(12,"(I8,6I10,4G15.5)") i,ms_conf(i,1:6),ms_currents(i,1:2),dpred(i),0.05*abs(dpred(i))+0.01
+		   end do
+		end if
     else
-       do i=1,nm
-          write(12,"(I8,4I10,2G15.5)") i,s_conf(i,1:4),dpred(i),0.05*abs(dpred(i))+0.01
-       end do
+		if(i_flag) then
+		   do i=1,nm
+			  write(12,"(I8,4I10,4G15.5)") i,s_conf(i,1:4),dpred(i),0.05*abs(dpred(i)),dpredi(i),0.05*abs(dpredi(i))
+		   end do
+		else
+		   do i=1,nm
+			  write(12,"(I8,4I10,2G15.5)") i,s_conf(i,1:4),dpred(i),0.05*abs(dpred(i))+0.01
+		   end do
+		end if    
     end if
     close(12)
     
@@ -327,6 +356,10 @@ contains
     real, dimension(nnodes) :: pa,pb,rp,cp
     integer ::  status(MPI_STATUS_SIZE)
 
+	if (ms_flag==1) then
+		call write_ms_pots
+		return
+	end if
    
     inquire(file=trim(outfile),exist=fcheck); if(.not.fcheck) goto 10
   
@@ -399,58 +432,60 @@ contains
        pa=0
        pb=0
        if(ipot(i,1)>nm) goto 100
-       a=s_conf(ipot(i,1),1)
-       b=s_conf(ipot(i,1),2)
-       do j=1,n_rank-1
-          emin=eind(j,1); emax=eind(j,2)
-          if((emin .le. a) .and. (emax .ge. a)) ra = j	
-          if((emin .le. b) .and. (emax .ge. b)) rb = j 
-       end do
-    
-       if(a .ne. 0) then
-          spack(1) = ra
-          spack(2) = a
-          call send_commando(23)
-          call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
-          call MPI_RECV(pa,nnodes,MPI_REAL,ra,0,E4D_COMM,status,ierr)
-       end if
        
-       if(b .ne. 0) then
-          spack(1) = rb
-          spack(2) = b
-          call send_commando(23)
-          call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
-          call MPI_RECV(pb,nnodes,MPI_REAL,rb,0,E4D_COMM,status,ierr)
-       end if
        
-       do j=1,nnodes
-          rp(j)=pa(j)-pb(j)
-       end do
+
+	   a=s_conf(ipot(i,1),1)
+	   b=s_conf(ipot(i,1),2)
+	   do j=1,n_rank-1
+		  emin=eind(j,1); emax=eind(j,2)
+		  if((emin .le. a) .and. (emax .ge. a)) ra = j	
+		  if((emin .le. b) .and. (emax .ge. b)) rb = j 
+	   end do
+	
+	   if(a .ne. 0) then
+		  spack(1) = ra
+		  spack(2) = a
+		  call send_commando(23)
+		  call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+		  call MPI_RECV(pa,nnodes,MPI_REAL,ra,0,E4D_COMM,status,ierr)
+	   end if
+	   
+	   if(b .ne. 0) then
+		  spack(1) = rb
+		  spack(2) = b
+		  call send_commando(23)
+		  call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+		  call MPI_RECV(pb,nnodes,MPI_REAL,rb,0,E4D_COMM,status,ierr)
+	   end if
+	   
+	   do j=1,nnodes
+		  rp(j)=pa(j)-pb(j)
+	   end do
 
 
-       if(i_flag) then
-          pa=0
-          pb=0
-          if(a .ne. 0) then
-             spack(1) = ra
-             spack(2) = a
-             call send_commando(123)
-             call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
-             call MPI_RECV(pa,nnodes,MPI_REAL,ra,0,E4D_COMM,status,ierr)
-          end if
-         
-          if(b .ne. 0) then
-             spack(1) = rb
-             spack(2) = b
-             call send_commando(123)
-             call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
-             call MPI_RECV(pb,nnodes,MPI_REAL,rb,0,E4D_COMM,status,ierr)
-          end if
-          
-          do j=1,nnodes
-             cp(j) = pa(j)-pb(j)
-          end do
-    
+      if(i_flag) then
+		  pa=0
+		  pb=0
+		  if(a .ne. 0) then
+			 spack(1) = ra
+			 spack(2) = a
+			 call send_commando(123)
+			 call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+			 call MPI_RECV(pa,nnodes,MPI_REAL,ra,0,E4D_COMM,status,ierr)
+		  end if
+		 
+		  if(b .ne. 0) then
+			 spack(1) = rb
+			 spack(2) = b
+			 call send_commando(123)
+			 call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+			 call MPI_RECV(pb,nnodes,MPI_REAL,rb,0,E4D_COMM,status,ierr)
+		  end if
+		  
+		  do j=1,nnodes
+			 cp(j) = pa(j)-pb(j)
+		  end do		       
        end if
 
        write(fname,"(A,I0)") "potential.",ipot(i,1)
@@ -550,6 +585,295 @@ contains
 
   end subroutine write_pots
   !_______________________________________________________________________________________
+  
+  !_______________________________________________________________________________________  
+  subroutine write_ms_pots
+    implicit none
+    integer :: dp_flag,pot_flag,npot,o_opt,ist,jflag
+    logical :: fcheck
+    character*80 :: dp_file
+    character*20 :: fname,jformat
+    integer :: i,a1,a2,b,b1,b2,j,emin,emax,ra1,ra2,rb1,rb2
+    integer, dimension(2) :: spack
+    real, dimension(nnodes) :: pa1,pa2,pb1,pb2,rp,cp
+    integer ::  status(MPI_STATUS_SIZE)
+
+   
+    inquire(file=trim(outfile),exist=fcheck); if(.not.fcheck) goto 10
+  
+    call nreport(21)
+    open(15,file=outfile,status='old',action='read')
+    read(15,*,IOSTAT=ist) dp_flag; if(ist.ne.0) goto 11
+    read(15,*,IOSTAT=ist) dp_file; if(ist.ne.0) goto 12
+    read(15,*,IOSTAT=ist) npot   ; if(ist.ne.0) goto 13
+
+    if(npot>0) then
+       allocate(ipot(npot,2))
+       do i=1,npot
+          read(15,*,IOSTAT=ist) ipot(i,1); if(ist.ne.0) goto 14
+       end do
+    end if
+  
+    !!read the jacobian output flag
+    read(15,*,IOSTAT=ist) jflag
+    if(ist .ne.0) then
+       open(51,file='e4d.log',status='old',action='write',position='append')
+       write(51,*) ' There was a problem Jacobian matrix output option: ',i,' in: ',trim(outfile)
+       write(51,*) ' Not printing the Jacobian matrix.'
+       close(51)
+       write(*,*)
+       write(*, *) ' There was a problem Jacobian matrix output option: ',i,' in: ',trim(outfile)
+       write(*, *) ' Not printing the Jacobian matrix.'
+       goto 9
+    end if
+    read(15,*,IOSTAT=ist) jformat
+    if(ist .ne.0) then
+       open(51,file='e4d.log',status='old',action='write',position='append')
+       write(51,*) ' There was a problem Jacobian output format option: ',i,' in: ',trim(outfile)
+       write(51,*) ' Printing in binary format'
+       close(51)
+       write(*,*)
+       write(*, *) ' There was a problem Jacobian matrix output option: ',i,' in: ',trim(outfile)
+       write(*, *) ' Printing in binary format'
+      
+    end if
+  
+    if(jflag==1) then
+       jaco_out_opt = .true.
+       jaco_ascii_opt = .true.
+       open(51,file='e4d.log',status='old',action='write',position='append')
+       write(51,*) ' Printing Jacobian matrix in '
+       write(*, *) ' Printing Jacobian matrix in '
+
+       if(trim(jformat)=='ASCII'.or.trim(jformat)=='ascii') then
+          jaco_ascii_opt = .true.
+          write(51,*) ' ascii format'
+          write(*, *) ' ascii format'
+       else
+          jaco_ascii_opt = .false.
+          write(51,*) ' binary format'
+          write(*, *) ' binary format'
+       end if
+       close(51)
+    else
+       jaco_out_opt = .false.
+        open(51,file='e4d.log',status='old',action='write',position='append')
+       write(51,*) ' Not printing Jacobian matrix'
+       write(*, *) ' Not printing Jacobian matrix'
+       close(51)
+    end if
+
+
+9   continue
+    close(15)
+    do i=1,npot
+       pa1=0
+       pa2=0
+       pb1=0
+       pb2=0
+       if(ipot(i,1)>nm) goto 100
+       
+       
+	   a1=ms_conf(ipot(i,1),1)
+	   b1=ms_conf(ipot(i,1),2)
+
+	   a2=ms_conf(ipot(i,1),3)
+	   b2=ms_conf(ipot(i,1),4)
+	   
+	   do j=1,n_rank-1
+		  emin=eind(j,1); emax=eind(j,2)
+		  if((emin .le. a1) .and. (emax .ge. a1)) ra1 = j	
+		  if((emin .le. b1) .and. (emax .ge. b1)) rb1 = j 
+		  
+		  if((emin .le. a2) .and. (emax .ge. a2)) ra2 = j	
+		  if((emin .le. b2) .and. (emax .ge. b2)) rb2 = j 
+
+	   end do
+	
+	   if(a1 .ne. 0) then
+		  spack(1) = ra1
+		  spack(2) = a1
+		  call send_commando(23)
+		  call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+		  call MPI_RECV(pa1,nnodes,MPI_REAL,ra1,0,E4D_COMM,status,ierr)
+	   end if
+
+	   if(a2 .ne. 0) then
+		  spack(1) = ra2
+		  spack(2) = a2
+		  call send_commando(23)
+		  call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+		  call MPI_RECV(pa2,nnodes,MPI_REAL,ra2,0,E4D_COMM,status,ierr)
+	   end if
+
+	   
+	   if(b1 .ne. 0) then
+		  spack(1) = rb1
+		  spack(2) = b1
+		  call send_commando(23)
+		  call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+		  call MPI_RECV(pb1,nnodes,MPI_REAL,rb1,0,E4D_COMM,status,ierr)
+	   end if
+
+	   if(b2 .ne. 0) then
+		  spack(1) = rb2
+		  spack(2) = b2
+		  call send_commando(23)
+		  call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+		  call MPI_RECV(pb2,nnodes,MPI_REAL,rb2,0,E4D_COMM,status,ierr)
+	   end if
+
+	   
+	   do j=1,nnodes
+		  !rp(j)=ms_currents(j,1)*(pa1(j)-pb1(j)) + ms_currents(j,2)*(pa2(j)-pb2(j))
+		  rp(j)=pa1(j)-pb1(j) + pa2(j)-pb2(j)
+	   end do
+
+
+      if(i_flag) then
+		  pa1=0
+		  pa2=0
+		  pb1=0
+		  pb2=0
+		  if(a1 .ne. 0) then
+			 spack(1) = ra1
+			 spack(2) = a1
+			 call send_commando(123)
+			 call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+			 call MPI_RECV(pa1,nnodes,MPI_REAL,ra1,0,E4D_COMM,status,ierr)
+		  end if
+
+		  if(a2 .ne. 0) then
+			 spack(1) = ra2
+			 spack(2) = a2
+			 call send_commando(123)
+			 call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+			 call MPI_RECV(pa2,nnodes,MPI_REAL,ra2,0,E4D_COMM,status,ierr)
+		  end if
+
+		 
+		  if(b1 .ne. 0) then
+			 spack(1) = rb1
+			 spack(2) = b1
+			 call send_commando(123)
+			 call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+			 call MPI_RECV(pb1,nnodes,MPI_REAL,rb1,0,E4D_COMM,status,ierr)
+		  end if
+
+		  if(b2 .ne. 0) then
+			 spack(1) = rb2
+			 spack(2) = b2
+			 call send_commando(123)
+			 call MPI_BCAST(spack,2,MPI_INTEGER,0,E4D_COMM,ierr)
+			 call MPI_RECV(pb2,nnodes,MPI_REAL,rb2,0,E4D_COMM,status,ierr)
+		  end if
+
+		  
+		  do j=1,nnodes
+			 cp(j) = pa1(j)-pb1(j) + pa2(j)-pb2(j)
+		  end do
+    
+       end if
+
+       write(fname,"(A,I0)") "potential.",ipot(i,1)
+       open(27,file=fname,status='replace',action='write')
+       
+       if(allocated(node_map)) then
+
+          if(i_flag) then
+             write(27,*) size(node_map), 2, ipot(i,1)
+             do j=1,size(node_map)
+                if(node_map(i) .ne. 0) then
+                   write(27,*) rp(node_map(j)),cp(node_map(j))
+                else
+                   write(27,*) -999, -999
+                end if
+             end do
+          else
+             write(27,*) size(node_map), 1, ipot(i,1)
+             do j=1,size(node_map)
+                if(node_map(i) .ne. 0) then
+                   write(27,*) rp(node_map(j))
+                else
+                   write(27,*) -999
+                end if
+             end do
+          end if
+
+       else
+          if(i_flag) then
+             write(27,*) nnodes, 2, ipot(i,1)
+             do j=1,nnodes
+                write(27,*) rp(j),cp(j)
+             end do
+          else
+             write(27,*) nnodes, 1, ipot(i,1)
+             do j=1,nnodes
+                write(27,*) rp(j)
+             end do
+          end if
+
+       end if
+       close(27)
+
+       
+100    continue
+    end do
+    return
+
+   
+10  continue
+      open(51,file='e4d.log',status='old',action='write',position='append')
+      write(51,*) 
+      write(51,*) ' E4D: Cannot find the output options file: ',trim(outfile)
+      close(51)
+      write(*,*) 
+      write(*, *) ' E4D: Cannot find the output options file: ',trim(outfile)
+      return
+      
+11    continue
+      open(51,file='e4d.log',status='old',action='write',position='append')
+      write(51,*) 
+      write(51,*) ' E4D: The was a problem reading the first line in the output file: ',trim(outfile)
+      close(51)
+      write(*,*) 
+      write(*, *) ' E4D: There was a problem reading the first line in the output file: ',trim(outfile)
+      return
+
+12    continue
+      open(51,file='e4d.log',status='old',action='write',position='append')
+      write(51,*) 
+      write(51,*) ' E4D: There was a problem reading the predicted data file name in: ',trim(outfile)
+      close(51)
+      write(*,*) 
+      write(*, *) ' E4D: The was a problem reading the predicted data file in: ',trim(outfile)
+      return
+
+13    continue
+      open(51,file='e4d.log',status='old',action='write',position='append')
+      write(51,*) 
+      write(51,*) ' E4D: There was a problem reading the number of potential fields to write in: ',trim(outfile)
+      close(51)
+      write(*,*) 
+      write(*, *) ' E4D: There was a problem reading the number of potential fields to write in: ',trim(outfile)
+      return
+
+14    continue
+      open(51,file='e4d.log',status='old',action='write',position='append')
+      write(51,*) ' E4D: There was a problem reading potential field index: ',i,' in: ',trim(outfile)
+      close(51)
+      write(*,*)
+      write(*, *) ' E4D: There was a problem reading potential field index: ',i,' in: ',trim(outfile)
+      return
+
+
+
+      
+
+  end subroutine write_ms_pots
+  !_______________________________________________________________________________________
+
+
 
   !_______________________________________________________________________________________
   subroutine write_sigiter

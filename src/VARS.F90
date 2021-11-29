@@ -70,6 +70,7 @@ implicit none
   integer :: nec                                           !!number of external constraints
   integer :: n_inc                                         !!number of negative boundaries in the mesh
   integer :: n_met                                         !!number of metallic inclosures in the mesh
+  integer :: ms_flag                                       !!multisource flag
 
   !Reals
   real :: Cstart,Cend,etm,etm1,etm2,Cbeg,sbt               !!timing variables
@@ -107,6 +108,7 @@ implicit none
   
   !Integer Arrays
   integer, dimension(:,:), allocatable :: s_conf           !!abmn survey configuration
+  integer, dimension(:,:), allocatable :: ms_conf           !!ab(1)ab(2)mn multisource survey configuration
   integer, dimension(:,:), allocatable :: eind             !!electrode assignments
   integer, dimension(:,:),allocatable :: jind              !!measurement assignments (jaco rows)  
   integer, dimension(:,:),allocatable :: tind
@@ -160,6 +162,7 @@ implicit none
   real, dimension(:,:), allocatable :: cg_wts              !!weights for cross gradient joint inversion
   real, dimension(:,:), allocatable :: inv_dist            !!inverse distance matrix for survey optimization
   real, dimension(:,:), allocatable :: source_currents     !!fraction of current on each node in an element containing an electrode
+  real, dimension(:,:), allocatable :: ms_currents         !!mulitsource currents for ab(1) and ab(2) injections
   
   !PETSC 
   PetscInt, dimension(:), allocatable :: d_nnz              !!petsc preallocation vector (diag blocks)

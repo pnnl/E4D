@@ -196,7 +196,8 @@ program main
   
   !Send the slaves some info they  need (see module: master)
    call send_info
-  
+
+    
   !do a multi-forward run if called for
    if(multi_forward) then
 !#ifdef fseq
@@ -315,14 +316,19 @@ program main
    if(mode==2) then 
      !output any requested potential distributions
      call write_pots                                  !see module: output
-     
+
       !build a synthetic survey file based on the 
      !simulated data                                  
      call build_srv                                   !see module: output
     
      !check for Jacobian output
      if(jaco_out_opt .and. .not. im_fmm) then
-        call build_rrseq
+     
+        !if ms_flag==1 then
+			!call build_ms_rrseq      
+        !else
+		call build_rrseq
+		!end if 
         call send_rrseq
         call mjaco
         !call print_jaco                               !see module master

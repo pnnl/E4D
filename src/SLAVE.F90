@@ -319,9 +319,20 @@ module slave
       integer :: i
       
       if(allocated(s_conf)) deallocate(s_conf)
+      if(allocated(ms_conf)) deallocate(ms_conf)
+      if(allocated(ms_currents)) deallocate(ms_currents)
       call MPI_BCAST(nm, 1, MPI_INTEGER, 0,E4D_COMM,ierr)
-      allocate(s_conf(nm,4))
-      call MPI_BCAST(s_conf, 4*nm,MPI_INTEGER,0,E4D_COMM,ierr)
+      call MPI_BCAST(ms_flag, 1, MPI_INTEGER, 0,E4D_COMM,ierr)
+      
+      if (ms_flag==1) then
+		allocate(ms_conf(nm,6))
+		allocate(ms_currents(nm,2))
+		call MPI_BCAST(ms_conf, 6*nm,MPI_INTEGER,0,E4D_COMM,ierr)
+		call MPI_BCAST(ms_currents, 2*nm,MPI_REAL,0,E4D_COMM,ierr)
+	  else
+	    allocate(s_conf(nm,4))
+	    call MPI_BCAST(s_conf, 4*nm,MPI_INTEGER,0,E4D_COMM,ierr)
+      end if
   
     end subroutine receive_info
     !__________________________________________________________________

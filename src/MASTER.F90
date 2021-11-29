@@ -706,8 +706,15 @@ contains
 
     call send_command(7)
     call MPI_BCAST(nm, 1, MPI_INTEGER, 0,E4D_COMM,ierr)
-    call MPI_BCAST(s_conf, 4*nm,MPI_INTEGER,0,E4D_COMM,ierr)
-
+    call MPI_BCAST(ms_flag, 1,MPI_INTEGER,0,E4D_COMM,ierr)
+    
+    if (ms_flag==1) then
+		call MPI_BCAST(ms_conf, 6*nm,MPI_INTEGER,0,E4D_COMM,ierr)
+		call MPI_BCAST(ms_currents, 2*nm,MPI_REAL,0,E4D_COMM,ierr)
+    else
+		call MPI_BCAST(s_conf, 4*nm,MPI_INTEGER,0,E4D_COMM,ierr)
+    end if
+    
   end subroutine send_info
   !____________________________________________________________________
 

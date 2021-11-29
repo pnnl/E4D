@@ -24,20 +24,25 @@ contains
       if(.not.stat) return
       
       !call write_an_header
+      if (ms_flag==1) then
+         call compute_ms_analytic
+         return
+      end if 
     
       if(dp_flag .eq.1 .or. n_pot>1) then
  
          call read_nodes(stat)
          if(.not.stat) call crash_exit
       
-         call read_survey
+
+		 call read_survey
          call translate_electrodes
          call read_conductivity
 
          call get_level
          
          if(dp_flag==1) then
-            call build_an_dpred
+			call build_an_dpred
             if(dp_flag==1) then
                call write_an_dpred
                call write_an_srv
@@ -64,6 +69,55 @@ contains
       return
     end subroutine compute_analytic
     !______________________________________________________________________________
+
+    !______________________________________________________________________________
+    subroutine compute_ms_analytic
+      implicit none
+      logical :: stat
+      integer :: i
+           
+    
+      if(dp_flag .eq.1 .or. n_pot>1) then
+ 
+         call read_nodes(stat)
+         if(.not.stat) call crash_exit
+      
+
+		 call read_ms_survey
+         call translate_electrodes
+         call read_conductivity
+
+         call get_level
+         
+         if(dp_flag==1) then
+			call build_ms_an_dpred
+            if(dp_flag==1) then
+               call write_an_dpred
+               call write_an_srv
+            end if
+         end if
+
+         if(n_pot>0) then
+            do i=1,n_pot
+               if(poti(i) .le. nm) then
+                  call build_ms_pot_an(poti(i))
+                  call write_pot_an(poti(i))
+               end if
+            end do
+         end if
+      end if
+
+      if(allocated(poti)) deallocate(poti)
+      if(allocated(an_pot)) deallocate(an_pot)
+
+      open(51,file='e4d.log',status='old',action='write',position="append")
+      write(51,*)
+      write(51,*) "Computation complete."
+      close(51)
+      return
+    end subroutine compute_ms_analytic
+    !______________________________________________________________________________
+
 
     !______________________________________________________________________________
     subroutine get_ave_sig
@@ -225,6 +279,103 @@ contains
 
     end subroutine build_pot_an
     !______________________________________________________________________________
+
+    !______________________________________________________________________________
+    subroutine build_ms_pot_an(id)
+      implicit none
+      integer :: id
+      integer :: i,ei
+      real :: ixp1,iyp1,izp1,ixn1,iyn1,izn1
+      real :: ixp2,iyp2,izp2,ixn2,iyn2,izn2
+      real, dimension(nnodes) :: r
+      real, parameter :: pi = 3.14159265359
+      
+      if(.not. allocated(an_pot)) allocate(an_pot(nnodes))
+  
+      if(ms_conf(id,1)>0) then
+         ixp1=e_pos(ms_conf(id,1),1)
+         iyp1=e_pos(ms_conf(id,1),2)
+         izp1=e_pos(ms_conf(id,1),3)
+      end if
+      if(ms_conf(id,2)>0) then
+         ixn1=e_pos(ms_conf(id,2),1)
+         iyn1=e_pos(ms_conf(id,2),2)
+         izn1=e_pos(ms_conf(id,2),3)
+      end if
+      if(ms_conf(id,3)>0) then
+         ixp2=e_pos(ms_conf(id,3),1)
+         iyp2=e_pos(ms_conf(id,3),2)
+         izp2=e_pos(ms_conf(id,3),3)
+      end if
+      if(ms_conf(id,4)>0) then
+         ixn2=e_pos(ms_conf(id,4),1)
+         iyn2=e_pos(ms_conf(id,4),2)
+         izn2=e_pos(ms_conf(id,4),3)
+      end if
+      
+      an_pot=0
+      if(ms_conf(id,1)>0) then
+         r=sqrt( (ixp1-nodes(:,1))**2 + (iyp1-nodes(:,2))**2 + (izp1-nodes(:,3))**2)
+         r=r+1e-15
+         an_pot = an_pot + 1/(4*pi*r*s_ave);
+         !an_pot = an_pot + ms_currents(id,1)/(4*pi*r*s_ave);
+
+         izp1=2*se-izp1
+         r=sqrt( (ixp1-nodes(:,1))**2 + (iyp1-nodes(:,2))**2 + (izp1-nodes(:,3))**2)
+         r=r+1e-15
+         an_pot = an_pot + 1/(4*pi*r*s_ave);
+         !an_pot = an_pot + ms_currents(id,1)/(4*pi*r*s_ave);
+      end if
+
+      if(ms_conf(id,2)>0) then
+         r=sqrt( (ixn1-nodes(:,1))**2 + (iyn1-nodes(:,2))**2 + (izn1-nodes(:,3))**2)
+         r=r+1e-15
+
+
+         an_pot = an_pot - 1/(4*pi*r*s_ave);
+         !an_pot = an_pot - ms_currents(id,1)/(4*pi*r*s_ave);
+
+         izn1=2*se-izn1
+         r=sqrt( (ixn1-nodes(:,1))**2 + (iyn1-nodes(:,2))**2 + (izn1-nodes(:,3))**2)
+         r=r+1e-15
+         an_pot = an_pot - 1/(4*pi*r*s_ave);
+         !an_pot = an_pot - ms_currents(id,1)/(4*pi*r*s_ave);
+      end if
+      
+      if(ms_conf(id,3)>0) then
+         r=sqrt( (ixp2-nodes(:,1))**2 + (iyp2-nodes(:,2))**2 + (izp2-nodes(:,3))**2)
+         r=r+1e-15
+         an_pot = an_pot + 1/(4*pi*r*s_ave);
+         !an_pot = an_pot + ms_currents(id,2)/(4*pi*r*s_ave);
+
+         izp2=2*se-izp2
+         r=sqrt( (ixp2-nodes(:,1))**2 + (iyp2-nodes(:,2))**2 + (izp2-nodes(:,3))**2)
+         r=r+1e-15
+         an_pot = an_pot + 1/(4*pi*r*s_ave);
+         !an_pot = an_pot + ms_currents(id,2)/(4*pi*r*s_ave);
+      end if
+
+      if(ms_conf(id,4)>0) then
+         r=sqrt( (ixn2-nodes(:,1))**2 + (iyn2-nodes(:,2))**2 + (izn2-nodes(:,3))**2)
+         r=r+1e-15
+
+
+         an_pot = an_pot - 1/(4*pi*r*s_ave);
+         !an_pot = an_pot - ms_currents(id,2)/(4*pi*r*s_ave);
+
+         izn2=2*se-izn2
+         r=sqrt( (ixn2-nodes(:,1))**2 + (iyn2-nodes(:,2))**2 + (izn2-nodes(:,3))**2)
+         r=r+1e-15
+         an_pot = an_pot - 1/(4*pi*r*s_ave);
+         !an_pot = an_pot - ms_currents(id,2)/(4*pi*r*s_ave);
+      end if
+      
+      
+
+    end subroutine build_ms_pot_an
+    !______________________________________________________________________________
+
+
     !______________________________________________________________________________
     subroutine write_an_dpred
       implicit none
@@ -237,9 +388,16 @@ contains
 
       open(10,file=trim(dp_file),status='replace',action='write')
       write(10,*) nm
-      do i=1,nm
-         write(10,*) i,s_conf(i,1),s_conf(i,2),s_conf(i,3),s_conf(i,4),dobs(i),dpred(i)
-      end do
+      
+      if (ms_flag==1) then
+		  do i=1,nm
+			 write(10,*) i,ms_conf(i,1),ms_conf(i,2),ms_conf(i,3),ms_conf(i,4),ms_conf(i,5),ms_conf(i,6),dobs(i),dpred(i)
+		  end do
+	  else
+		  do i=1,nm
+			 write(10,*) i,s_conf(i,1),s_conf(i,2),s_conf(i,3),s_conf(i,4),dobs(i),dpred(i)
+		  end do
+      end if	  
       close(10)
     end subroutine write_an_dpred
     !______________________________________________________________________________
@@ -262,9 +420,16 @@ contains
       end do
       write(10,*)
       write(10,*) nm
-      do i=1,nm
-         write(10,"(5I7,2g15.6)") i,s_conf(i,1),s_conf(i,2),s_conf(i,3),s_conf(i,4),dpred(i),0.05*abs(dpred(i))
-      end do
+      
+      if (ms_flag==1) then
+		  do i=1,nm
+			 write(10,"(7I7,4g15.6)") i,ms_conf(i,1:6),ms_currents(i,1:2),dpred(i),0.05*abs(dpred(i))
+		  end do
+	  else
+		  do i=1,nm
+			 write(10,"(5I7,2g15.6)") i,s_conf(i,1),s_conf(i,2),s_conf(i,3),s_conf(i,4),dpred(i),0.05*abs(dpred(i))
+		  end do	  
+	  end if 
       close(10)
     end subroutine write_an_srv
     !______________________________________________________________________________
@@ -288,11 +453,50 @@ contains
          call get_gf(gfbn,s_conf(i,2),s_conf(i,4))
 
          gft = (gfam- gfan - (gfbm - gfbn))/(4*pi)
+
          dpred(i) = gft/s_ave
       end do
       
       
     end subroutine build_an_dpred
+    !______________________________________________________________________________
+    
+    
+   !______________________________________________________________________________
+    subroutine build_ms_an_dpred
+      implicit none
+      real :: gfam1,gfan1,gfbm1,gfbn1,gfam2,gfan2,gfbm2,gfbn2,gft,gft1,gft2,d1,d2
+      integer :: i
+      real, parameter :: pi = 3.14159265359
+      
+     
+      if(allocated(dpred)) deallocate(dpred)
+      allocate(dpred(nm))
+      
+      do i=1,nm
+         call get_gf(gfam1,ms_conf(i,1),ms_conf(i,5))
+         call get_gf(gfan1,ms_conf(i,1),ms_conf(i,6))
+         call get_gf(gfbm1,ms_conf(i,2),ms_conf(i,5))
+         call get_gf(gfbn1,ms_conf(i,2),ms_conf(i,6))
+
+         call get_gf(gfam2,ms_conf(i,3),ms_conf(i,5))
+         call get_gf(gfan2,ms_conf(i,3),ms_conf(i,6))
+         call get_gf(gfbm2,ms_conf(i,4),ms_conf(i,5))
+         call get_gf(gfbn2,ms_conf(i,4),ms_conf(i,6))
+
+
+		 gft1=(gfam1- gfan1 - (gfbm1 - gfbn1))/(4*pi)
+		 gft2=(gfam2- gfan2 - (gfbm2 - gfbn2))/(4*pi)
+
+         d1=(gft1/s_ave)*ms_currents(i,1)
+         d2=(gft2/s_ave)*ms_currents(i,2)
+
+         dpred(i) = d1+d2
+
+      end do
+      
+      
+    end subroutine build_ms_an_dpred
     !______________________________________________________________________________
 
     !______________________________________________________________________________

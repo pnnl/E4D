@@ -77,6 +77,11 @@ contains
     integer :: p                      !pole solution index
 
 
+	if (ms_flag==1) then 
+        call assemble_ms_data(flg) 
+	    return
+	end if
+
     !! set the pole solution ownership bounds for this process
     e1=eind(my_rank,1)
     e2=eind(my_rank,2)
@@ -101,6 +106,7 @@ contains
 
     indx=0
     my_dvals=0
+	
 
 
     if(flg==1) then
@@ -210,5 +216,238 @@ contains
 
   end subroutine assemble_data
   !___________________________________________________________
+
+ !___________________________________________________________________
+  subroutine assemble_ms_data(flg)
+
+    implicit none
+    integer :: flg                    !Input variable. 1=real; 2=complex
+    integer :: i,j                    !indexing variable
+    integer :: a1,b1,a2,b2            !current source electrode indexes
+    integer :: m,n                    !potential electrode indexes
+    integer :: e1,e2                  !first and last poles stored by this process
+    integer :: indx                   !current index in my_drows and my_dvals
+    integer :: p                      !pole solution index
+    real    :: tmp					  !holds interim pole solution
+
+
+    !! set the pole solution ownership bounds for this process
+    e1=eind(my_rank,1)
+    e2=eind(my_rank,2)
+
+    !! find the number of measurements using a pole owned by this process
+    !! and allocate my_drows, my_dvals
+    if(allocated(my_drows).and.res_flag) then
+       deallocate(my_drows)
+       deallocate(my_dvals)
+    end if
+    if(.not.allocated(my_drows)) then
+       nmy_drows=0
+       do i=1,nm
+          a1=ms_conf(i,1)
+          b1=ms_conf(i,2)
+          a2=ms_conf(i,3)
+          b2=ms_conf(i,4)
+
+          if((a1>=e1 .and. a1<=e2) .or. (b1>=e1.and. b1<=e2) .or. (a2>=e1.and. a2<=e2).or. (b2>=e1.and. b2<=e2)) then
+             nmy_drows=nmy_drows+1
+          end if
+       end do
+       allocate(my_drows(nmy_drows),my_dvals(nmy_drows))
+    end if
+
+    indx=0
+    my_dvals=0
+	
+
+
+    if(flg==1) then
+       !! Assemble the part of the simulated data owned by this process
+       do i=1,nm
+          !! Set a1,b1,a2, b2, m and n for this measurement
+          a1 = ms_conf(i,1)
+          b1 = ms_conf(i,2)
+          a2 = ms_conf(i,3)
+          b2 = ms_conf(i,4)
+
+          m = ms_conf(i,5)
+          n = ms_conf(i,6)
+
+          if((a1>=e1 .and. a1<=e2) .or. (b1>=e1.and. b1<=e2) .or. (a2>=e1.and. a2<=e2) .or. (b2>=e1.and. b2<=e2)) then
+             !! If this process owns a source or sink electrode pole for this
+             !! measurement, then compute the part of the measurement depending on
+             !! on this pole
+             indx=indx+1
+             my_drows(indx)=i
+
+             do p=e1,e2
+                !! Loop of the poles owned by this process, find the ones used by this
+                !! measurement, and add (or subtract) the simulated potential at the
+                !! potential electrodes (m and n)
+                if(p==a1) then 
+                   if(m.ne.0) then
+                      do j=1,4
+                         tmp=real(poles(source_nodes(m,j),a1-e1+1)*source_currents(m,j))*ms_currents(i,1)
+                         my_dvals(indx)=my_dvals(indx) + tmp
+                      end do
+
+                   end if
+                   if(n.ne.0) then
+                      do j=1,4
+                         tmp=real(poles(source_nodes(n,j),a1-e1+1)*source_currents(n,j))*ms_currents(i,1)
+                         my_dvals(indx)=my_dvals(indx) - tmp
+                      end do
+
+                   end if
+                end if
+                
+                if(p==b1) then
+                   if(m.ne.0) then
+                      do j=1,4
+                         tmp=real(poles(source_nodes(m,j),b1-e1+1)*source_currents(m,j))*ms_currents(i,1)
+                         my_dvals(indx)=my_dvals(indx) - tmp
+                      end do
+
+                   end if
+                   if(n.ne.0) then
+                      do j=1,4
+                         tmp=real(poles(source_nodes(n,j),b1-e1+1)*source_currents(n,j))*ms_currents(i,1)
+                         my_dvals(indx)=my_dvals(indx) + tmp
+                      end do
+
+                   end if
+                end if
+
+                if(p==a2) then 
+                   if(m.ne.0) then
+                      do j=1,4
+                         tmp=real(poles(source_nodes(m,j),a2-e1+1)*source_currents(m,j))*ms_currents(i,2)
+                         my_dvals(indx)=my_dvals(indx) + tmp
+                      end do
+
+                   end if
+                   if(n.ne.0) then
+                      do j=1,4
+                         tmp=real(poles(source_nodes(n,j),a2-e1+1)*source_currents(n,j))*ms_currents(i,2)
+                         my_dvals(indx)=my_dvals(indx) - tmp
+                      end do
+
+                   end if
+                end if
+                
+                if(p==b2) then
+                   if(m.ne.0) then
+                      do j=1,4
+                         tmp=real(poles(source_nodes(m,j),b2-e1+1)*source_currents(m,j))*ms_currents(i,2)
+                         my_dvals(indx)=my_dvals(indx) - tmp
+                      end do
+
+                   end if
+                   if(n.ne.0) then
+                      do j=1,4
+                         tmp=real(poles(source_nodes(n,j),b2-e1+1)*source_currents(n,j))*ms_currents(i,2)
+                         my_dvals(indx)=my_dvals(indx) + tmp
+                      end do
+
+                   end if
+                end if
+
+
+
+             end do
+          end if
+       end do
+    end if
+
+    if(flg==2) then
+       !! Assemble the data for the complex potential (see comments above for details)
+       do i=1,nm
+          !! Set a1,b1,a2, b2, m and n for this measurement
+          a1 = ms_conf(i,1)
+          b1 = ms_conf(i,2)
+          a2 = ms_conf(i,3)
+          b2 = ms_conf(i,4)
+
+          m = ms_conf(i,5)
+          n = ms_conf(i,6)
+
+          if((a1>=e1 .and. a1<=e2) .or. (b1>=e1.and. b1<=e2) .or. (a2>=e1.and. a2<=e2) .or. (b2>=e1.and. b2<=e2)) then
+             indx=indx+1
+             my_drows(indx)=i
+
+             do p=e1,e2
+                
+                if(p==a1) then
+                   if(m.ne.0) then
+                      do j=1,4
+                         tmp=real(polesi(source_nodes(m,j),a1-e1+1)*source_currents(m,j))*ms_currents(i,1)
+                         my_dvals(indx)=my_dvals(indx) + tmp
+                      end do
+                   end if
+                   if(n.ne.0) then
+                      do j=1,4
+                         tmp=real(polesi(source_nodes(n,j),a1-e1+1)*source_currents(n,j))*ms_currents(i,1)
+                         my_dvals(indx)=my_dvals(indx) - tmp
+                      end do
+                   end if
+                end if
+                
+                if(p==b1) then
+                   if(m.ne.0) then
+                      do j=1,4
+                         tmp=real(polesi(source_nodes(m,j),b1-e1+1)*source_currents(m,j))*ms_currents(i,1)
+                         my_dvals(indx)=my_dvals(indx) - tmp
+                      end do
+                   end if
+                   if(n.ne.0) then
+                      do j=1,4
+                         tmp=real(polesi(source_nodes(n,j),b1-e1+1)*source_currents(n,j))*ms_currents(i,1)
+                         my_dvals(indx)=my_dvals(indx) + tmp
+                      end do
+                   end if
+                   
+                end if
+                
+                if(p==a2) then
+                   if(m.ne.0) then
+                      do j=1,4
+                         tmp=real(polesi(source_nodes(m,j),a2-e1+1)*source_currents(m,j))*ms_currents(i,2)
+                         my_dvals(indx)=my_dvals(indx) + tmp
+                      end do
+                   end if
+                   if(n.ne.0) then
+                      do j=1,4
+                         tmp=real(polesi(source_nodes(n,j),a2-e1+1)*source_currents(n,j))*ms_currents(i,2)
+                         my_dvals(indx)=my_dvals(indx) - tmp
+                      end do
+                   end if
+                end if
+                
+                if(p==b2) then
+                   if(m.ne.0) then
+                      do j=1,4
+                         tmp=real(polesi(source_nodes(m,j),b2-e1+1)*source_currents(m,j))*ms_currents(i,2)
+                         my_dvals(indx)=my_dvals(indx) - tmp
+                      end do
+                   end if
+                   if(n.ne.0) then
+                      do j=1,4
+                         tmp=real(polesi(source_nodes(n,j),b2-e1+1)*source_currents(n,j))*ms_currents(i,2)
+                         my_dvals(indx)=my_dvals(indx) + tmp
+                      end do
+                   end if
+                   
+                end if
+                
+                
+             end do
+          end if
+       end do
+    end if
+
+
+  end subroutine assemble_ms_data
+  !___________________________________________________________
+
 
 end module assemble
