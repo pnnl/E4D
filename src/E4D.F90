@@ -324,11 +324,11 @@ program main
      !check for Jacobian output
      if(jaco_out_opt .and. .not. im_fmm) then
      
-        !if ms_flag==1 then
-			!call build_ms_rrseq      
-        !else
-		call build_rrseq
-		!end if 
+        if (ms_flag==1) then
+			call build_ms_rrseq      
+        else
+			call build_rrseq
+		end if 
         call send_rrseq
         call mjaco
         !call print_jaco                               !see module master

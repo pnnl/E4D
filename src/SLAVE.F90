@@ -84,7 +84,11 @@ module slave
 
      case(11)
         call cpu_time(Cstart)
-        call build_jaco
+        if (ms_flag==1) then
+			call build_ms_jaco
+		else
+			call build_jaco
+		end if
         call cpu_time(Cend)
         my_jbt = Cend-Cstart
         goto 100

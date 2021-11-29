@@ -1428,6 +1428,148 @@ contains
   end subroutine build_rrseq
   !__________________________________________________________________________
 
+
+  subroutine build_ms_rrseq
+    implicit none
+    integer :: i,j,ii,jj,count,a,b,m,n,emin,emax,irow
+    real :: ts,te
+    integer, dimension(nm,5) :: players
+    integer, dimension(5) :: lastgo,checkgo
+    integer, dimension(4) :: last_conf
+    logical, dimension(nm) :: dn
+    logical :: found_one
+
+    dn=.false.
+    if(allocated(rr_seq)) deallocate(rr_seq)
+    allocate(rr_seq(nm))
+    call cpu_time(ts)
+    open(27,file='jaco_build_sequence.txt',action='write',status='replace')
+    
+    if(allocated(ss_conf)) deallocate(ss_conf)
+    allocate(ss_conf(nm,4))
+    ss_conf(:,1:2)=ms_conf(:,1:2)
+    ss_conf(:,3:4)=ms_conf(:,5:6)
+
+    do ii=1,nm
+
+       a = ss_conf(ii,1)
+       b = ss_conf(ii,2)
+       m = ss_conf(ii,5)
+       n = ss_conf(ii,6)
+
+       do i=1,n_rank-1
+          emin=eind(i,1); emax=eind(i,2)
+          if((emin .le. a) .and. (emax .ge. a)) lastgo(1) = i	
+          if((emin .le. b) .and. (emax .ge. b)) lastgo(2) = i 
+          if((emin .le. m) .and. (emax .ge. m)) lastgo(3) = i
+          if((emin .le. n) .and. (emax .ge. n)) lastgo(4) = i
+          if((jind(i,1) .le. ii) .and. (jind(i,2) .ge. ii)) lastgo(5) = i
+       end do
+       players(ii,:) = lastgo
+    end do
+    
+
+    pcheck=.true.
+    do i=2,nm
+       do j=1,4
+          if(ss_conf(i,j).ne.ss_conf(i-1,j)) then
+             pcheck(j)=.false.
+          end if
+       end do       
+    end do
+  
+    !_________________________________________________________________________
+    !test implementation
+    irow=0
+    count=0
+    do ii=1,nm
+       irow=irow+1
+       do i=1,n_rank-1
+          if(irow .le. (jind(i,2)-jind(i,1)+1)) then
+             count=count+1
+             rr_seq(count)=jind(i,1)+irow-1
+             write(27,*) count,rr_seq(count),players(jind(i,1)+irow-1,:)
+          end if
+       end do
+       if(count == nm) goto 5
+    end do
+5   continue
+    close(27)
+    call cpu_time(te)
+    sbt=te-ts
+    
+    return
+    !_________________________________________________________________________
+
+    count=1
+    rr_seq(1)=1
+    dn(1)=.true.
+    lastgo=players(1,:)
+    last_conf=ss_conf(1,:)
+
+  
+10  continue
+    found_one = .false.
+    do i=1,nm
+
+       if(dn(i)) goto 100
+       checkgo=players(i,:)
+     
+       do ii=1,5
+          do jj=1,5
+             if(lastgo(5)==checkgo(5)) goto 100
+             if(lastgo(ii)==checkgo(jj)) then
+                if(.not.pcheck(ii) .and. .not. pcheck(jj)) then
+                   if(last_conf(ii) .ne. ss_conf(i,jj) .or. ii.ne.jj) goto 100
+                end if
+             end if
+          end do
+       end do
+    
+       count=count+1
+       rr_seq(count)=i
+       dn(i)=.true.
+       found_one=.true.
+       lastgo = players(i,:)
+       last_conf = ss_conf(i,:)
+       write(27,*) i,count,players(i,:)
+       100 continue
+    end do
+
+    if(count==nm) return
+    if(.not. found_one) then
+       do i=1,nm
+          if(.not.dn(i)) then
+             count=count+1
+             rr_seq(count)=i
+             dn(i) = .true.
+             lastgo = players(i,:)
+             write(27,*) i,count,players(i,:)
+             goto 200
+          end if
+       end do
+200    continue
+    end if
+
+    if(count.ne.nm) goto 10
+
+    !final check 
+    dn=.false.
+    do i=1,nm
+       dn(rr_seq(i)) = .true.
+    end do
+    do i=1,nm
+       if(.not.dn(i)) write(*,*) "MEASUREMENT ",i," NOT IN rr_seq"
+    end do
+
+    call cpu_time(te)
+    sbt=te-ts
+    close(27)
+
+  end subroutine build_ms_rrseq
+  !__________________________________________________________________________
+
+
   !__________________________________________________________________________
   subroutine send_rrseq
     implicit none

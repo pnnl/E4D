@@ -162,7 +162,8 @@ implicit none
   real, dimension(:,:), allocatable :: cg_wts              !!weights for cross gradient joint inversion
   real, dimension(:,:), allocatable :: inv_dist            !!inverse distance matrix for survey optimization
   real, dimension(:,:), allocatable :: source_currents     !!fraction of current on each node in an element containing an electrode
-  real, dimension(:,:), allocatable :: ms_currents         !!mulitsource currents for ab(1) and ab(2) injections
+  real, dimension(:,:), allocatable :: ms_currents         !!multisource currents for ab(1) and ab(2) injections
+  real, dimension(:,:), allocatable :: ss_conf             !!first source and potentials from multisource measurement
   
   !PETSC 
   PetscInt, dimension(:), allocatable :: d_nnz              !!petsc preallocation vector (diag blocks)
