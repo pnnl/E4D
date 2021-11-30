@@ -145,7 +145,11 @@ program main
 
    if(analytic) then
      !compute the analytic solution and exit (see module: v_analytic)
-     call compute_analytic
+     if (ms_flag==1) then
+		call compute_ms_analytic
+	 else
+		call compute_analytic
+	 end if
      call send_command(0)
      call PetscFinalize(perr)
      stop
@@ -298,7 +302,12 @@ program main
      !call nreport(2)                                  !see module: report
      call build_WmII                                  !see module: mod_con
      call send_J_on_off
-     call build_rrseq                                 !see module: master
+     
+     if (ms_flag==1) then
+		call build_ms_rrseq 
+	 else
+		call build_rrseq 
+	 end if                                !see module: master
 
    end if
 

@@ -24,10 +24,6 @@ contains
       if(.not.stat) return
       
       !call write_an_header
-      if (ms_flag==1) then
-         call compute_ms_analytic
-         return
-      end if 
     
       if(dp_flag .eq.1 .or. n_pot>1) then
  
@@ -71,12 +67,16 @@ contains
     !______________________________________________________________________________
 
     !______________________________________________________________________________
+  
     subroutine compute_ms_analytic
       implicit none
       logical :: stat
       integer :: i
+     
+      n_pot=0
+      call get_out_opts(stat)
+      if(.not.stat) return      
            
-    
       if(dp_flag .eq.1 .or. n_pot>1) then
  
          call read_nodes(stat)
