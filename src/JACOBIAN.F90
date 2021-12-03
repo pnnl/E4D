@@ -367,9 +367,9 @@ contains
              a_olds=ms_conf(1,di)
           case(2)
              b_olds=ms_conf(1,di)
-          case(3)
+          case(5)
              m_olds=ms_conf(1,di)
-          case(4)
+          case(6)
              n_olds=ms_conf(1,di)
           end select
        end if
@@ -396,11 +396,11 @@ contains
        a1 = ms_conf(di,1)
        b1 = ms_conf(di,2)
 
-       a2 = ms_conf(di,1)
-       b2 = ms_conf(di,2)
+       a2 = ms_conf(di,3)
+       b2 = ms_conf(di,4)
 
-       m = s_conf(di,3)
-       n = s_conf(di,4)
+       m = ms_conf(di,5)
+       n = ms_conf(di,6)
        
        !!determine which rank has each pole in this measurement
        ra1=0; ra2=0; rb1=0; rb2=0; rm=0; rn=0
@@ -418,7 +418,6 @@ contains
        end do
 
        
-       !! mown = measurmeent own, different than above
        if(mown==my_rank) then          
     
           !!I own this measurement, I'll either recieve poles or use my own

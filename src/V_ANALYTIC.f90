@@ -128,6 +128,11 @@ contains
       real :: mxsig,mnsig,mxphz,mnphz,phzi
       real, parameter :: pi = 3.14159265359
 
+	  if (ms_flag==1) then
+		call get_ms_ave_sig
+		return
+	  end if
+	  
       call read_nodes(stat)
       if(.not.stat) call crash_exit
     
@@ -208,6 +213,108 @@ contains
     end subroutine get_ave_sig
     !______________________________________________________________________________
 
+      !______________________________________________________________________________
+    subroutine get_ms_ave_sig
+      implicit none
+      logical :: stat
+      integer :: i,cc
+      real :: gfam1,gfam2,gfan1,gfan2,gfbm1,gfbm2,gfbn1,gfbn2,ts,ssig,swt,gft1,gft2,phz
+      real :: mxsig,mnsig,mxphz,mnphz,phzi,d1,d2
+      real, parameter :: pi = 3.14159265359
+
+	  
+      call read_nodes(stat)
+      if(.not.stat) call crash_exit
+    
+      call read_elements(stat)
+      if(.not.stat) call crash_exit
+
+      if(.not.allocated(sigma)) then
+         allocate(sigma(nelem))
+         nsig=nelem
+      end if
+
+      if(i_flag .and. .not. allocated(sigmai)) allocate(sigmai(nelem))
+
+      call get_level 
+
+      ssig=0
+      swt=0
+      mnsig=1e30
+      mxsig=0
+      
+      do i=1,nm        
+         call get_gf(gfam1,ms_conf(i,1),ms_conf(i,5))
+         call get_gf(gfan1,ms_conf(i,1),ms_conf(i,6))
+         call get_gf(gfbm1,ms_conf(i,2),ms_conf(i,5))
+         call get_gf(gfbn1,ms_conf(i,2),ms_conf(i,6))
+
+         call get_gf(gfam2,ms_conf(i,3),ms_conf(i,5))
+         call get_gf(gfan2,ms_conf(i,3),ms_conf(i,6))
+         call get_gf(gfbm2,ms_conf(i,4),ms_conf(i,5))
+         call get_gf(gfbn2,ms_conf(i,4),ms_conf(i,6))
+
+
+		 gft1=(gfam1- gfan1 - (gfbm1 - gfbn1))/(4*pi)
+		 gft2=(gfam2- gfan2 - (gfbm2 - gfbn2))/(4*pi)
+
+         d1=gft1*ms_currents(i,1)
+         d2=gft2*ms_currents(i,2)
+                
+         ts=(d1+d2)/dobs(i)
+         if(ts>0) then
+            if(ts>mxsig) mxsig=ts
+            if(ts<mnsig) mnsig=ts
+            ssig=ssig+ts/Wd(i)
+            swt=swt+1/Wd(i)
+         end if
+        
+      end do
+      mean_sig=ssig/swt
+      sigma=mean_sig
+
+
+      if(i_flag) then
+         phz=0
+         mnphz=1e30
+         mxphz=0
+         cc=0
+         do i=1,nm
+            phzi= -dobsi(i)/dobs(i)
+           
+            if(phzi>0) then
+               if(phzi>mxphz) mxphz=phz
+               if(phzi<mnphz) mnphz=phz
+               phz=phz+phzi
+               cc=cc+1
+            end if
+         end do
+         mean_phase=phz/cc
+         sigmai=tan(mean_phase)*sigma
+     
+      end if
+      
+      call write_sigma
+
+      open(51,file='e4d.log',status='old',action='write',position='append'); 
+      write(51,"(A36,g10.5)") "  Minimum apparent conductivity :   ",mnsig
+      write(51,"(A36,g10.5)") "  Maximum apparent conductivity :   ",mxsig
+      write(51,"(A36,g10.5)") "  Using conductivity            :   ",mean_sig
+      close(51)
+      
+      if(i_flag) then
+         open(51,file='e4d.log',status='old',action='write',position='append'); 
+         write(51,"(A36,g10.5)") "  Minimum apparent phase        :   ",mnphz
+         write(51,"(A36,g10.5)") "  Maximum apparent phase        :   ",mxphz
+         write(51,"(A36,g10.5)") "  Using phase                   :   ",mean_phase
+         close(51)
+      end if
+   
+      
+    end subroutine get_ms_ave_sig
+    !______________________________________________________________________________
+
+   
     !______________________________________________________________________________
     subroutine write_pot_an(id)
       implicit none

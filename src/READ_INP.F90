@@ -1483,7 +1483,7 @@ contains
           close(51)
           call crash_exit
        else          
-         if(mode == 22 .or. mode == 23 .or. mode == 63) then
+         if(mode == 22 .or. mode == 23) then
              write(51,*) " Inverse options file (amp.):      ",trim(invfile)
              write(51,*) " Inverse options file (phase):     ",trim(iinvfile)
           else
