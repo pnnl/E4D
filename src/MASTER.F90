@@ -316,6 +316,8 @@ contains
     nmax=0
     ntot=0
     lrep=ts
+    open(25,file='forward_progress.log',action='write',status='replace')
+    close(25)
     do i=1,tne
        call MPI_RECV(pck,2,MPI_REAL,MPI_ANY_SOURCE,1,E4D_COMM,status,ierr)
    
@@ -334,6 +336,13 @@ contains
           write(*,"(A15,F5.2,A11,F6.3,A8)") "  FORWARD RUN: ",100*real(i)/real(tne),"% DONE IN :",(tc-ts)/60," MINUTES"
           write(*,*) "   MIN / MAX / AVE  RUN TIMES (sec.)",tmin,"/",tmax,"/",ttot/i 
           write(*,*) "   MIN / MAX / AVE  ITERATIONS      ",nmin,"/",nmax,"/",ntot/i
+          
+          open(25,file='forward_progress.log',action='write',status='old')
+          write(25,"(A15,F5.2,A11,F6.3,A8)") "  FORWARD RUN: ",100*real(i)/real(tne),"% DONE IN :",(tc-ts)/60," MINUTES"
+          write(25,*) "   MIN / MAX / AVE  RUN TIMES (sec.)",tmin,"/",tmax,"/",ttot/i 
+          write(25,*) "   MIN / MAX / AVE  ITERATIONS      ",nmin,"/",nmax,"/",ntot/i
+          close(25)
+          
           lrep=tc
        end if
       
@@ -365,6 +374,8 @@ contains
     lrep=ts
     ict=0
     converged = .false.
+    open(25,file='forward_progress.log',action='write',status='replace')
+    close(25)
     do while(.not. converged)
        
        !update the counter
@@ -394,7 +405,15 @@ contains
              write(*,"(A15,F5.2,A11,F6.3,A8)") "  FORWARD IRUN: ",100*real(i)/real(tne),"% DONE IN :",(tc-ts)/60," MINUTES"
              write(*,*) "   MIN / MAX / AVE  IRUN TIMES (sec.)",tmin,"/",tmax,"/",ttot/i 
              write(*,*) "   MIN / MAX / AVE  ITERATIONS      ",nmin,"/",nmax,"/",ntot/i
+             
+             open(25,file='forward_progress.log',action='write',status='old')
+ 	     write(25,"(A15,F5.2,A11,F6.3,A8)") "  FORWARD IRUN: ",100*real(i)/real(tne),"% DONE IN :",(tc-ts)/60," MINUTES"
+             write(25,*) "   MIN / MAX / AVE  IRUN TIMES (sec.)",tmin,"/",tmax,"/",ttot/i 
+             write(25,*) "   MIN / MAX / AVE  ITERATIONS      ",nmin,"/",nmax,"/",ntot/i	       
+             close(25)
              lrep=tc
+             
+             
           end if
           
        end do
@@ -607,6 +626,7 @@ contains
     lrep=ts
     lrep2=ts
     ndone=0
+
     do i=1,nm
      
        call MPI_RECV(mown,1,MPI_INTEGER,MPI_ANY_SOURCE,1,E4D_COMM,status,ierr)
@@ -616,7 +636,7 @@ contains
           !write(*,"(A15,F4.1,A11,F5.1,A8)") "BUILDING JACO: ",100*real(i)/real(nm),"% DONE IN :",(tc-ts)/60," minutes" 
           lrep=tc
        end if
-       if((tc-lrep2)/60 > 5) then
+       if((tc-lrep2)/60 > .5) then
           write(*,*) "JACO BUILD ELAPSED TIME: ",(tc-ts)/60," minutes"
           write(*,*) "REPORTING PROGRESS TO FILE: jaco_build_status.txt"
           open(25,file='jaco_build_status.txt',status='replace',action='write');
@@ -627,6 +647,8 @@ contains
              write(25,*) 'Slave ',ii, "has finished ",ndone(ii)," out of ",jind(ii,2)-jind(ii,1)+1,' rows '
           end do
           close(25)
+         
+          
           lrep2=tc
        end if
     end do
