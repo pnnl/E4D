@@ -145,13 +145,10 @@ module report
          close(67)
       end if
 
-      ! 2
+      !2
       if(tag==2) then
          
          write(*,*) " E4D: EXECUTING FORWARD RUN ..."
-         !open(67,file='e4d.log',status='old',position='append')
-         !write(67,*) "Master building model weighting matrix"
-         !close(67)
 
       end if
 
@@ -472,35 +469,35 @@ module report
     subroutine treport(tag)
       implicit none
       integer :: tag
+      character*10 :: time
+      
       if(mode==1) return;
       if(tag == -1) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          write(12,*)"____________________________________________________________________________"
          close(12)
       end if
 
       if(tag==0) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          write(12,*)"____________________________________________________________________________"
          write(12,*) "ITERATION: ",iter 
          close(12)
       end if
 
       if(tag==1) then
-         open(12,file='run_time.txt',status='replace',action='write')
-         write(12,*) "               F3D TIMING LOG    "
+         open(12,file='run_time.log',status='replace',action='write')
+         write(12,*) "               E4D TIMING LOG    "
          write(12,*)
-         if(etm>60.0) then
-            write(12,*) " Setup time: ",etm/60," minutes"
-         else
-            write(12,*) " Setup time: ",etm," seconds"
-         end if
+         write(12,*) " Started at       : ",start_time(1:2),":",start_time(3:4),":",start_time(5:10)
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) " Finished setup at: ",time(1:2),":",time(3:4),":",time(5:10)
          write(12,*) 
          close(12)
       end if
 
       if(tag==2) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          if(etm > 60.0) then
             write(12,*) 'Data assembly time         :',etm/60,' minutes'
          else
@@ -510,7 +507,7 @@ module report
       end if
 
       if(tag==3) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          if(jmin > 60.0) then   
             write(12,*) 'Minimum Jacobian build time: ',jmin/60,' minutes on slave :',sjmin
          else
@@ -527,7 +524,7 @@ module report
       end if
 
       if(tag==4) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          if(etm > 60.0) then
             write(12,*) 'Parallel inversion time    :',etm/60,' minutes'
          else
@@ -537,13 +534,13 @@ module report
       end if
 
       if(tag==5) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          write(12,*) 'A build time at iteration       ',iter,' : ',etm1,' seconds'
          close(12)
       end if
 
       if(tag==6) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          if(rt_min > 60.0) then
             write(12,*) 'Minimum forward run time   : ',rt_min/60,' minutes on slave :',smin
          else
@@ -559,7 +556,7 @@ module report
       end if
       
       if(tag==7) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          if(abmin > 60.0) then
             write(12,*) 'Minimum A-matrix build time: ',abmin/60,' minutes on slave :',sabmin
          else
@@ -575,7 +572,7 @@ module report
       end if
 
       if(tag==8) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          if(kspmin > 60.0) then
             write(12,*) 'Minimum KSP build time     : ',kspmin/60,' minutes on slave :',skmin
          else
@@ -592,32 +589,34 @@ module report
 
       
       if(tag==9) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          write(12,*) "EXECUTING LINE SEARCH FOR BETA"
          close(12)
       end if
       
       if(tag==10) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          write(12,*) "TESTING BETA AT: ",beta
          close(12)
       end if
 
       if(tag==11) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          write(12,*)
          write(12,*)"____________________________________________________________________________"
-         if(etm > 60.0) then
-            write(12,*) 'TOTAL RUN TIME             : ',etm/60,' minutes'
-         else
-            write(12,*) 'TOTAL RUN TIME             : ',etm,' seconds'
-         end if
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) "RUN FINISHED AT                              : ",time(1:2),":",time(3:4),":",time(5:10) 
+         !if(etm > 60.0) then
+         !   write(12,*) 'TOTAL RUN TIME             : ',etm/60,' minutes'
+         !else
+         !   write(12,*) 'TOTAL RUN TIME             : ',etm,' seconds'
+         !end if
          close(12)
       end if
 
 
       if(tag==12) then
-         open(12,file='run_time.txt',status='old',action='write',position='append')
+         open(12,file='run_time.log',status='old',action='write',position='append')
          if(sbt >= 60.0) then
             write(12,*) ' Jaco. sequence build time  :',sbt/60,'minutes'
          else
@@ -626,7 +625,108 @@ module report
          close(12)
       end if
 
+      if(tag==13) then
+         call DATE_AND_TIME(TIME=time)
+         open(12,file='run_time.log',status='old',action='write',position='append')
+         write(12,*) " Starting simulated data gather at           : ",time(1:2),":",time(3:4),":",time(5:10) 
+         close(12)
+      end if
 
+      if(tag==14) then
+         call DATE_AND_TIME(TIME=time)
+         open(12,file='run_time.log',status='old',action='write',position='append')
+         write(12,*) " Finished simulated data gather at           : ",time(1:2),":",time(3:4),":",time(5:10) 
+         close(12)
+      end if
+      
+      if(tag==15) then
+         call DATE_AND_TIME(TIME=time)
+         open(12,file='run_time.log',status='old',action='write',position='append')
+         write(12,*) "STARTING JACOBIAN BUILD AT: ",time(1:2),":",time(3:4),":",time(5:10) 
+         close(12)
+      end if
+
+      if(tag==16) then
+         call DATE_AND_TIME(TIME=time)
+         open(12,file='run_time.log',status='old',action='write',position='append')
+         write(12,*) "FINISHED JACOBIAN BUILD AT: ",time(1:2),":",time(3:4),":",time(5:10) 
+         close(12)
+      end if
+
+      if(tag==17) then
+         open(12,file='run_time.log',action='write',position='append')
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) " Started building forward mapping vectors at : ",time(1:2),":",time(3:4),":",time(5:10)
+         close(12)
+      end if
+      
+     if(tag==18) then
+         open(12,file='run_time.log',action='write',position='append')
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) " Finished building forward mapping vectors at: ",time(1:2),":",time(3:4),":",time(5:10)
+         write(12,*) 
+         close(12)
+      end if
+      
+      if(tag==19) then
+         open(12,file='run_time.log',action='write',position='append')
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) " Started forward run at                      : ",time(1:2),":",time(3:4),":",time(5:10)
+         close(12)
+      end if
+      
+      if(tag==20) then
+         open(12,file='run_time.log',action='write',position='append')
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) " Finished forward run at                     : ",time(1:2),":",time(3:4),":",time(5:10)
+         close(12)
+      end if
+
+      if(tag==21) then
+         open(12,file='run_time.log',action='write',position='append')
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) " Head process building constraint matrix at  : ",time(1:2),":",time(3:4),":",time(5:10)
+         close(12)
+      end if
+      
+      if(tag==22) then
+         open(12,file='run_time.log',action='write',position='append')
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) " Head process finish with constraints at     : ",time(1:2),":",time(3:4),":",time(5:10)
+         close(12)
+      end if
+
+      if(tag==23) then
+         open(12,file='run_time.log',action='write',position='append')
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) " Started building Jacobian at                : ",time(1:2),":",time(3:4),":",time(5:10)
+         close(12)
+      end if
+      
+      if(tag==24) then
+         open(12,file='run_time.log',action='write',position='append')
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) " Finished building Jacobian at               : ",time(1:2),":",time(3:4),":",time(5:10)
+         close(12)
+      end if
+
+      if(tag==25) then
+         open(12,file='run_time.log',action='write',position='append')
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) " Starting inversion at                       : ",time(1:2),":",time(3:4),":",time(5:10)
+         close(12)
+      end if
+
+      if(tag==26) then
+         open(12,file='run_time.log',action='write',position='append')
+         call DATE_AND_TIME(TIME=time)
+         write(12,*) " Finished inversion at                       : ",time(1:2),":",time(3:4),":",time(5:10)
+         close(12)
+      end if
+
+      
+      
+      
 
     end subroutine treport
     

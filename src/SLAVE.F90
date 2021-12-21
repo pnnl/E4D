@@ -164,6 +164,10 @@ module slave
      case(52)
         call send_full_jaco
         goto 100
+
+     case(53)
+        call ssync_E4D_COMM
+        goto 100
    
      case(102) 
         call setup_fruni
@@ -678,18 +682,25 @@ module slave
       implicit none
       integer :: flg,i
       integer :: COMM
+      real, dimension(nm) :: my_vals
 
-       if(im_fmm) then
-          COMM = FMM_COMM
-       else
-          COMM = E4D_COMM
-       end if
-      
-       !write(*,*) !get rid of this later 
+      my_vals = 0
+      if(im_fmm) then
+         COMM = FMM_COMM
+      else
+         COMM = E4D_COMM
+      end if
+       
+      !Changing the code to use MPI_REDUCE for efficiency. The original code is
+      !very inefficient for large problems. (TCJ 12/20/2021)
       call assemble_data(flg)
-      call MPI_SEND(nmy_drows,1,MPI_INTEGER,0,0,COMM, ierr)
-      call MPI_SEND(my_drows,nmy_drows,MPI_INTEGER,0,0,COMM,ierr)
-      call MPI_SEND(my_dvals,nmy_drows,MPI_REAL,0,0,COMM,ierr)
+      do i=1,nmy_drows
+         my_vals(my_drows(i)) = my_dvals(i)
+      end do
+      call MPI_REDUCE(my_vals,my_vals,nm,MPI_REAL,MPI_SUM,0,E4D_COMM,ierr) 
+!!$       call MPI_SEND(nmy_drows,1,MPI_INTEGER,0,0,COMM, ierr)
+!!$       call MPI_SEND(my_drows,nmy_drows,MPI_INTEGER,0,0,COMM,ierr)
+!!$       call MPI_SEND(my_dvals,nmy_drows,MPI_REAL,0,0,COMM,ierr)
     
     end subroutine send_dpred
     !__________________________________________________________________
@@ -1205,4 +1216,13 @@ module slave
        
      end subroutine slave_print_jaco_rows
      !__________________________________________________________________
-end module slave
+
+     !__________________________________________________________________
+     subroutine ssync_E4D_COMM
+       implicit none
+       integer :: merr
+       call MPI_BARRIER(E4D_COMM,merr)
+     end subroutine ssync_E4D_COMM
+     !__________________________________________________________________
+
+   end module slave

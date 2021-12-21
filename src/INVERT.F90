@@ -66,15 +66,12 @@ contains
     end if
 
     if(wopt) then
-       call cpu_time(ce)
-       write(*,"(A,g10.4,A)") "  SENDING DATA NOISE TO SLAVES AT: ",ce-cs," seconds"
        call send_data_noise
     end if
   
 
     !!Build the model part of b
-    call cpu_time(ce)
-    write(*,"(A,g10.4,A)") "  CONSTRUCTING CONSTRAINT RESIDUALS AT: ",ce-cs," seconds"
+ 
     do i=1,ccount
        
        if(invi .and. Wm(i) .eq. 0) then 

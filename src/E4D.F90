@@ -234,16 +234,21 @@ program main
  
   !build the coupling matrix (command 3 for slaves)
   !if this is a complex conductivity forward run then 
-  !setup the complex conductivity coupling matrix also
+   !setup the complex conductivity coupling matrix also
+   call treport(17)
    call send_command(3)
    if(i_flag) call send_command(103)
- 
+   call sync_E4D_COMM
+   call treport(18)
+   
+   
   !execute a forward run
    call nreport(67)
    call nreport(68)
+   call treport(0)
+   call treport(19)
    if(i_flag) then
      call run_forward
-     call nreport(71)
      call run_forwardi
      !do another forward run after the imaginary solution to include
      !the real current arising from the imaginary potential
@@ -251,7 +256,8 @@ program main
    else
      call run_forward
    end if
-
+   call treport(20)
+   
    if(res_flag) then
      !survey optimization subroutines
 #ifdef resmode
@@ -267,12 +273,9 @@ program main
   !Read the inverse options and build the constraint matrix
   !while slaves are solving 
    if(mode==3) then
-     !if(i_flag) then
-     !   invi = .true.
-     !   call get_inv_optsII                           !see module: input
-     !end if
+     call treport(21)
      invi = .false.
-     call get_inv_optsII 
+     call get_inv_optsII                             !see module input
 
      !if fmm is running sycronize with fmm_master to determine
      !what needs to be communicated for a joint inversion
@@ -294,20 +297,21 @@ program main
      !!   betalist(1) = beta
      end if
      
-     !call nreport(2)                                  !see module: report
+     !call nreport(2)                                 !see module: report
      call build_WmII                                  !see module: mod_con
      call send_J_on_off
      call build_rrseq                                 !see module: master
-
+     call treport(22)
    end if
 
   !get the forward run times from slaves and report
-   call treport(0)                                     !see module: report
-   call get_abtimes                                    !see module: master
-   call treport(7)               
-   call get_frtimes                                    !see module: master
-   call treport(6)
- 
+   !call treport(0)                                     !see module: report
+   !call treport(19)
+   !call get_abtimes                                    !see module: master
+   !call treport(7)               
+   !call get_frtimes                                    !see module: master
+   !call treport(6)
+   
   !Assemble the simulated data 
    call get_dpred 
 
@@ -362,8 +366,8 @@ program main
      call treport(0)
      call nreport(72)
      call mjaco
-     call get_jtimes
-     call treport(3)
+     !call get_jtimes
+     !call treport(3)
   
      !allocate the update vector if necessary
      call alloc_sigup
@@ -374,12 +378,13 @@ program main
         call beta_line_search
      else
         !do the inversion
+        call treport(25)
         if(cgmin_flag(1)) then
            call joint_pcgls
         else
            call pcgls
         end if
-        call treport(4)
+        call treport(26)
 
         !update the conductivity
         call update_sigma
@@ -397,8 +402,9 @@ program main
         call write_sigma
         call send_command(5)
         !execute a forward run
+        call treport(19)
         call run_forward
-    
+        call treport(20)
         
         !get and send the slowness update if this is a joint inversion
         if(cgmin_flag(1) .and. cgmin_flag(2)) then
@@ -407,17 +413,20 @@ program main
         end if
      	
         !build the new constraint equations
+        call treport(21)
         call build_WmII
-        call get_abtimes
-        call treport(7)
-        call get_frtimes
-        call treport(6)
+        call treport(22)
+        !call get_abtimes
+        !call treport(7)
+        !call get_frtimes
+        !call treport(6)
 
-        call get_time; etm1=etm
+        !call get_time; etm1=etm
         !assemble the simulated data
         call get_dpred
-        call get_time; etm=etm-etm1
-        call treport(2)
+    
+        !call get_time; etm=etm-etm1
+        !call treport(2)
         !check for convergence
         call check_convergence
  
@@ -457,19 +466,24 @@ program main
      call send_command(3)  
      call write_sigma
      call send_command(5)
+     call treport(19)
      call run_forward 
+     call treport(20)
      
-     call get_abtimes
-     call treport(7)
-     call get_ksptimes
-     call treport(8)
-     call get_frtimes
-     call treport(6)
+     !call get_abtimes
+     !call treport(7)
+     !call get_ksptimes
+     !call treport(8)
+     !call get_frtimes
+     !call treport(6)
   
-     call get_time; etm1=etm
+     !call get_time; etm1=etm
+     call treport(13)
      call get_dpred
-     call get_time; etm=etm-etm1
-     call treport(2)
+     call treport(14)
+     
+     !call get_time; etm=etm-etm1
+     !call treport(2)
   
  
      call check_convergence

@@ -336,15 +336,14 @@ contains
           write(*,"(A15,F5.2,A11,F6.3,A8)") "  FORWARD RUN: ",100*real(i)/real(tne),"% DONE IN :",(tc-ts)/60," MINUTES"
           write(*,*) "   MIN / MAX / AVE  RUN TIMES (sec.)",tmin,"/",tmax,"/",ttot/i 
           write(*,*) "   MIN / MAX / AVE  ITERATIONS      ",nmin,"/",nmax,"/",ntot/i
-          
-          open(25,file='forward_progress.log',action='write',status='old')
-          write(25,"(A15,F5.2,A11,F6.3,A8)") "  FORWARD RUN: ",100*real(i)/real(tne),"% DONE IN :",(tc-ts)/60," MINUTES"
-          write(25,*) "   MIN / MAX / AVE  RUN TIMES (sec.)",tmin,"/",tmax,"/",ttot/i 
-          write(25,*) "   MIN / MAX / AVE  ITERATIONS      ",nmin,"/",nmax,"/",ntot/i
-          close(25)
-          
-          lrep=tc
+          lrep = tc
        end if
+       
+       open(25,file='forward_progress.log',action='write',status='old')
+       write(25,"(A15,F6.2,A11,F6.3,A8)") "  FORWARD RUN: ",100*real(i)/real(tne),"% DONE IN :",(tc-ts)/60," MINUTES"
+       write(25,*) "   MIN / MAX / AVE  RUN TIMES (sec.)",tmin,"/",tmax,"/",ttot/i 
+       write(25,*) "   MIN / MAX / AVE  ITERATIONS      ",nmin,"/",nmax,"/",ntot/i
+       close(25)
       
     end do
     call cpu_time(tc)
@@ -620,40 +619,33 @@ contains
     integer :: di,i,mown,emin,emax,count,ierr,ii
     real :: ts,tc,lrep,lrep2
     integer ::  status(MPI_STATUS_SIZE)
+    character*10 :: time
     
     call cpu_time(ts)
     call send_command(11)
-    lrep=ts
-    lrep2=ts
-    ndone=0
 
-    do i=1,nm
-     
+    call treport(23)
+    open(25,file='jaco_build_progress.log',status='replace',action='write')
+    call DATE_AND_TIME(TIME=time)
+    write(12,*) "Started Jacobian build at                         : ",time(1:2),":",time(3:4),":",time(5:10)
+    close(25)
+  
+    do i=1,nm    
+
        call MPI_RECV(mown,1,MPI_INTEGER,MPI_ANY_SOURCE,1,E4D_COMM,status,ierr)
-       ndone(mown)=ndone(mown)+1;
-       call cpu_time(tc)
-       if((tc-lrep)>30) then
-          !write(*,"(A15,F4.1,A11,F5.1,A8)") "BUILDING JACO: ",100*real(i)/real(nm),"% DONE IN :",(tc-ts)/60," minutes" 
-          lrep=tc
-       end if
-       if((tc-lrep2)/60 > .5) then
-          write(*,*) "JACO BUILD ELAPSED TIME: ",(tc-ts)/60," minutes"
-          write(*,*) "REPORTING PROGRESS TO FILE: jaco_build_status.txt"
-          open(25,file='jaco_build_status.txt',status='replace',action='write');
-          write(25,*)"Elapsed Time: ",(tc-ts)/60," minutes"
-          write(25,*) i,' out of ',nm,' rows complete: ',100*real(i)/real(nm),' % of total'
-          write(25,*) 'Rows finished per slave listed below:'
-          do ii=1,n_rank-1
-             write(25,*) 'Slave ',ii, "has finished ",ndone(ii)," out of ",jind(ii,2)-jind(ii,1)+1,' rows '
-          end do
+
+       if (mod(i*10,nm)==0) then
+          open(25,file='jaco_build_progress.log',status='old',action='write',position='append');
+          call DATE_AND_TIME(TIME=time)
+          write(25,*) " Jacobian ",(i*100/nm),"% finished at: ",time(1:2),":",time(3:4),":",time(5:10)
           close(25)
-         
-          
-          lrep2=tc
        end if
+       
     end do
+
+    call treport(24)
     call cpu_time(tc)
-    write(*,"(A29,F5.1,A8)") " E4D: DONE BUILDING JACO IN:",(tc-ts)/60," minutes"
+    write(*,"(A29,F5.2,A8)") " E4D: DONE BUILDING JACO IN:",(tc-ts)/60.," minutes"
 
   end subroutine mjaco
   !____________________________________________________________________
@@ -764,21 +756,15 @@ contains
        allocate(dpred(nm))
     end if
     dpred = 0
-    rbuff = 0
-    ibuff = 1
-    do i=1,n_rank-1
-       call MPI_RECV(nbuff,1,MPI_INTEGER,i,0,E4D_COMM,status,ierr)
-       call MPI_RECV(ibuff(1:nbuff),nbuff,MPI_INTEGER,i,0,E4D_COMM,status,ierr)
-       call MPI_RECV(rbuff(1:nbuff),nbuff,MPI_REAL,i,0,E4D_COMM,status,ierr)
-       
-       do j=1,nbuff
-          dpred(ibuff(j))=dpred(ibuff(j))+rbuff(j)
-       end do
-          
-    end do
     
-    !end if
-   
+    !changing the code here to use MPI_REDUCE for efficiency. The code below is
+    !inefficient for large problems (TCJ 12/20/21)
+    call treport(13)
+    call MPI_REDUCE(MPI_IN_PLACE,dpred,nm,MPI_REAL,MPI_SUM,0,E4D_COMM,ierr)
+    call sync_E4D_COMM
+    call treport(14)
+
+    
     if(i_flag) then
        !instruct slave to assemble and send the predceted data
        call send_command(108)
@@ -1232,6 +1218,7 @@ contains
   subroutine start_timer
     implicit none
     call cpu_time(Cbeg)
+    call DATE_AND_TIME(TIME=start_time)
   end subroutine start_timer
   !__________________________________________________________________________
 
@@ -2383,6 +2370,15 @@ contains
      
 
    end subroutine check_jaco_row_output
+   !________________________________________________________________________________________________
+
+   !________________________________________________________________________________________________
+   subroutine sync_E4D_COMM
+     implicit none
+     integer :: merr
+     call send_command(53)
+     call MPI_BARRIER(E4D_COMM,merr)
+   end subroutine sync_E4D_COMM
    !________________________________________________________________________________________________
    
    
