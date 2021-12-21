@@ -26,7 +26,7 @@ implicit none
   character*40 :: invfile                                  !!inversion options file
   character*40 :: iinvfile                                  !!inversion options file for phase components
   character*10 :: com_inp                                  !!command line input
-
+  character*10 :: start_time                               !!time the code starts
   character*40 :: tmpstr                                   !!shareable string
   
   !Integers
