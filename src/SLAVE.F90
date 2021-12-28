@@ -693,15 +693,18 @@ module slave
        
       !Changing the code to use MPI_REDUCE for efficiency. The original code is
       !very inefficient for large problems. (TCJ 12/20/2021)
+      !call assemble_data(flg)
+      !do i=1,nmy_drows
+      !   my_vals(my_drows(i)) = my_dvals(i)
+      !end do
+      !call MPI_REDUCE(my_vals,my_vals,nm,MPI_REAL,MPI_SUM,0,E4D_COMM,ierr)
+
+      !original implmentation
       call assemble_data(flg)
-      do i=1,nmy_drows
-         my_vals(my_drows(i)) = my_dvals(i)
-      end do
-      call MPI_REDUCE(my_vals,my_vals,nm,MPI_REAL,MPI_SUM,0,E4D_COMM,ierr) 
-!!$       call MPI_SEND(nmy_drows,1,MPI_INTEGER,0,0,COMM, ierr)
-!!$       call MPI_SEND(my_drows,nmy_drows,MPI_INTEGER,0,0,COMM,ierr)
-!!$       call MPI_SEND(my_dvals,nmy_drows,MPI_REAL,0,0,COMM,ierr)
-    
+      call MPI_SEND(nmy_drows,1,MPI_INTEGER,0,0,COMM, ierr)
+      call MPI_SEND(my_drows,nmy_drows,MPI_INTEGER,0,0,COMM,ierr)
+      call MPI_SEND(my_dvals,nmy_drows,MPI_REAL,0,0,COMM,ierr)
+      
     end subroutine send_dpred
     !__________________________________________________________________
 

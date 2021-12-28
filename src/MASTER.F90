@@ -339,7 +339,7 @@ contains
           lrep = tc
        end if
        
-       open(25,file='forward_progress.log',action='write',status='old')
+       open(25,file='forward_progress.log',action='write',status='old',position='append')
        write(25,"(A15,F6.2,A11,F6.3,A8)") "  FORWARD RUN: ",100*real(i)/real(tne),"% DONE IN :",(tc-ts)/60," MINUTES"
        write(25,*) "   MIN / MAX / AVE  RUN TIMES (sec.)",tmin,"/",tmax,"/",ttot/i 
        write(25,*) "   MIN / MAX / AVE  ITERATIONS      ",nmin,"/",nmax,"/",ntot/i
@@ -746,6 +746,7 @@ contains
     integer, dimension(nm*2) :: ibuff
     real, dimension(nm) :: rbuff
     integer ::  status(MPI_STATUS_SIZE)
+    character*10 :: rtime
   
     !if(opt==1) then
     !instruct slave to assemble and send the prediceted data
@@ -756,13 +757,39 @@ contains
        allocate(dpred(nm))
     end if
     dpred = 0
+    rbuff = 0
+    ibuff = 1
     
+    !original implmentation
+    call treport(13)
+    open(23,file='assemble_data.log',status='replace',action='write')
+    call DATE_AND_TIME(TIME=rtime)
+    write(23,*) "STARTING DATA ASSEMBLY AT: ",rtime(1:2),":",rtime(3:4),":",rtime(5:10)
+    close(23)
+
+    do i=1,n_rank-1
+       call MPI_RECV(nbuff,1,MPI_INTEGER,i,0,E4D_COMM,status,ierr)
+       call MPI_RECV(ibuff(1:nbuff),nbuff,MPI_INTEGER,i,0,E4D_COMM,status,ierr)
+       call MPI_RECV(rbuff(1:nbuff),nbuff,MPI_REAL,i,0,E4D_COMM,status,ierr)
+
+       do j=1,nbuff
+          dpred(ibuff(j)) = dpred(ibuff(j)) + rbuff(j)
+       end do
+       
+       open(23,file='assemble_data.log',status='old',action='write',position='append')
+       call DATE_AND_TIME(TIME=rtime)
+       write(23,*) "  ",100*i/(n_rank-1),"% finished at: ",rtime(1:2),":",rtime(3:4),":",rtime(5:10)
+       close(23)
+
+       
+    end do
+    call treport(14)
     !changing the code here to use MPI_REDUCE for efficiency. The code below is
     !inefficient for large problems (TCJ 12/20/21)
-    call treport(13)
-    call MPI_REDUCE(MPI_IN_PLACE,dpred,nm,MPI_REAL,MPI_SUM,0,E4D_COMM,ierr)
-    call sync_E4D_COMM
-    call treport(14)
+    !call treport(13)
+    !call MPI_REDUCE(MPI_IN_PLACE,dpred,nm,MPI_REAL,MPI_SUM,0,E4D_COMM,ierr)
+    !call sync_E4D_COMM
+    !call treport(14)
 
     
     if(i_flag) then
