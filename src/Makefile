@@ -1,131 +1,97 @@
-PETSC_DIR = ~/codes/petsc
-PETSC_ARCH= arch-linux2-c-opt
+PETSC_DIR  ?= ~/codes/petsc
+PETSC_ARCH ?= arch-linux2-c-opt
+INSTALL_PREFIX=/usr
 
-#PETSC_DIR =/home/john775/codes/petsc_opt/petsc
-#PETSC_ARCH=arch-linux2-c-opt
 f95 = ${PETSC_DIR}/${PETSC_ARCH}/bin/mpif90
-libs =
+libs = ${PETSC_LIB}
 
 
-CFLAGS = ${PETSC_CC_INCLUDES}
-FFLAGS = ${PETSC_FC_INCLUDES}
+CFLAGS= ${PETSC_CC_INCLUDES}
+
+# default configuration options
+ENABLE_OPT=0
+ENABLE_DEBUG=0
+OPT_FLAGS=-O2
+MODE=res
+
+# base compiler flags 
+
+FFLAGS= $(PETSC_FC_INCLUDES)
+
+# evaluate configuration options
+ifeq ($(MODE), res)
+	FFLAGS += -D resmode 
+else ifeq ($(MODE), ini)
+	FFLAGS += -D inimode
+endif
+
+ifeq ($(ENABLE_PETSC7), 1)
+	FFLAGS += -D petsc_7 
+endif 
+
+ifeq ($(ENABLE_OPT), 1)
+	FFLAGS += $(OPT_FLAGS)
+endif
+ifeq ($(ENABLE_DEBUG), 1)
+	FFLAGS += -g
+endif
+
 
 include ${PETSC_DIR}/lib/petsc/conf/variables
 
+sources := $(wildcard *.F90) $(wildcard *.F) $(wildcard *.f90)
+objects := $(sources:%.F90=%.o)
+objects := $(objects:%.f90=%.o)
+objects := $(objects:%.F=%.o)
 
-objects = FMM_VARS.o VARS.o DISTRIBUTOR.o READ_INP.o READ_INP_FMM.o REORDER_MESH.o\
-	FORWARD_FMM.o ASSEMBLE_FMM.o BUILD_AMAP.o JACOBIAN_FMM.o   \
-	JACOBIAN.o mat_inv.o FORWARD.o ASSEMBLE.o BuildMesh.o \
-	DD_OPT_SLAVE.o SLAVE.o SLAVE_FMM.o\
-	BUILD_MODEL_CONSTRAINTS.o OBJ.o\
-	REPORT.o REPORT_FMM.o Output.o Output_FMM.o MASTER.o MASTER_FMM.o  \
-	Multi_Forward.o INVERT.o JOINT_INVERT.o FMM_MAIN.o\
-	DD_OPT.o V_ANALYTIC.o E4D.o
 
-e4d : $(objects)
-	$(f95) $(objects) -o e4d ${PETSC_LIB}
+#Evaluate Configuration Options
 
-E4D.o : E4D.F90
-	$(f95) -c E4D.F90  -D resmode -o E4D.o ${PETSC_FC_INCLUDES}
 
-VARS.o : VARS.F90
-	$(f95)  -c VARS.F90 -o VARS.o ${PETSC_FC_INCLUDES}
+# Release Target (Default)
+release: FFLAGS += $(OPT_FLAGS)
+release: e4d
 
-MASTER.o : MASTER.F90
-	$(f95) -c MASTER.F90 -o MASTER.o ${PETSC_FC_INCLUDES} 
+# Debug Target
+debug: FFLAGS += -g
+debug: e4d
 
-SLAVE.o : SLAVE.F90
-	$(f95) -c SLAVE.F90 -D resmode -o SLAVE.o ${PETSC_FC_INCLUDES} 
+# Executable
 
-READ_INP.o : READ_INP.F90
-	$(f95) -c READ_INP.F90 -D resmode -D sip -o READ_INP.o 
+e4d: $(objects)
+	$(f95) $(objects) -o $@ $(libs)
 
-BUILD_AMAP.o : BUILD_AMAP.F90
-	$(f95) -c BUILD_AMAP.F90 -o BUILD_AMAP.o ${PETSC_FC_INCLUDES}   
+READ_INP.o: private FFLAGS += -D sip
 
-mat_inv.o : mat_inv.F
-	$(f95) -c mat_inv.F -o mat_inv.o ${PETSC_FC_INCLUDES}
+# Generate Dependencies
 
-IMI.o : IMI.F90
-	$(f95) -c IMI.F90 -o IMI.o ${PETSC_FC_INCLUDES}
+dependencies.d: makedepend.py $(sources)
+	python3 ./makedepend.py $(sources)
 
-FORWARD.o : FORWARD.F90
-	$(f95) -c FORWARD.F90 -o FORWARD.o ${PETSC_FC_INCLUDES}
+# Include generated dependencies
+include dependencies.d
 
-Multi_Forward.o : Multi_Forward.F90
-	$(f95) -c Multi_Forward.F90 -o Multi_Forward.o ${PETSC_FC_INCLUDES}
 
-ASSEMBLE.o : ASSEMBLE.F90
-	$(f95) -c ASSEMBLE.F90 -o ASSEMBLE.o ${PETSC_FC_INCLUDES}
 
-Output.o : Output.f90
-	$(f95) -c Output.f90 -o Output.o
+# Generic Compilation Rules
 
-BUILD_MODEL_CONSTRAINTS.o : BUILD_MODEL_CONSTRAINTS.f90
-	$(f95) -c BUILD_MODEL_CONSTRAINTS.f90 -o BUILD_MODEL_CONSTRAINTS.o
+%.o: %.f90
+	$(f95) $(FFLAGS) -c $< -o $@ 
 
-OBJ.o : OBJ.f90
-	$(f95) -c OBJ.f90 -o OBJ.o
+%.o: %.F
+	$(f95) $(FFLAGS) -c $< -o $@ 
 
-REPORT.o : REPORT.f90
-	$(f95) -c REPORT.f90 -o REPORT.o
+%.o: %.F90
+	$(f95) $(FFLAGS) -c $< -o $@ 
 
-JACOBIAN.o : JACOBIAN.F90
-	$(f95) -c JACOBIAN.F90 -o JACOBIAN.o
+# Install target
+install: e4d
+	install e4d $(INSTALL_PREFIX)/bin
 
-INVERT.o : INVERT.F90
-	$(f95) -c INVERT.F90 -o INVERT.o
+# Clean target
+clean: 
+	-rm $(objects)
+	-rm e4d
+	-rm *.mod
+	-rm dependencies.d
 
-JOINT_INVERT.o : JOINT_INVERT.F90
-	 $(f95) -c JOINT_INVERT.F90 -o JOINT_INVERT.o
-
-BuildMesh.o : BuildMesh.f90
-	$(f95) -c BuildMesh.f90 -o BuildMesh.o
-
-V_ANALYTIC.o : V_ANALYTIC.f90
-	$(f95) -c V_ANALYTIC.f90 -o V_ANALYTIC.o 
-
-DD_OPT.o : DD_OPT.F90
-	$(f95) -c DD_OPT.F90 -o DD_OPT.o
-
-DD_OPT_SLAVE.o : DD_OPT_SLAVE.F90
-	$(f95)  -c DD_OPT_SLAVE.F90 -o DD_OPT_SLAVE.o
-
-FMM_VARS.o : FMM_VARS.F90
-	   $(f95)  -c FMM_VARS.F90 -o FMM_VARS.o ${PETSC_INCLUDES}
-
-DISTRIBUTOR.o : DISTRIBUTOR.F90
-	   $(f95)  -c DISTRIBUTOR.F90 -o DISTRIBUTOR.o ${PETSC_INCLUDES}
-
-FMM_MAIN.o : FMM_MAIN.F90
-	   $(f95)  -c FMM_MAIN.F90 -o FMM_MAIN.o ${PETSC_INCLUDES}
-
-FORWARD_FMM.o : FORWARD_FMM.F90
-	   $(f95)  -c FORWARD_FMM.F90 -o FORWARD_FMM.o
-
-MASTER_FMM.o : MASTER_FMM.F90
-	   $(f95)  -c MASTER_FMM.F90 -o MASTER_FMM.o ${PETSC_INCLUDES}
-
-SLAVE_FMM.o : SLAVE_FMM.F90
-	   $(f95)  -c SLAVE_FMM.F90 -o SLAVE_FMM.o ${PETSC_INCLUDES}
-
-ASSEMBLE_FMM.o : ASSEMBLE_FMM.F90
-	$(f95) -c ASSEMBLE_FMM.F90 -o ASSEMBLE_FMM.o ${PETSC_FC_INCLUDES}
-
-Output_FMM.o : Output_FMM.f90
-	$(f95) -c Output_FMM.f90 -o Output_FMM.o
-
-REPORT_FMM.o : REPORT_FMM.f90
-	   $(f95)  -c REPORT_FMM.f90 -o REPORT_FMM.o
-
-READ_INP_FMM.o : READ_INP_FMM.F90
-	   $(f95)  -c READ_INP_FMM.F90 -o READ_INP_FMM.o
-	   
-JACOBIAN_FMM.o : JACOBIAN_FMM.F90
-	$(f95) -c JACOBIAN_FMM.F90 -o JACOBIAN_FMM.o
-
-MULTI_FORWARD.o : Multi_Forward.F90
-	$(f95) -c Multi_Forward.F90 -o MULTI_FORWARD.o
-
-REORDER_MESH.o : REORDER_MESH.f90
-	$(f95) -c REORDER_MESH.f90 -o REORDER_MESH.o
