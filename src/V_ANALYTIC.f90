@@ -120,11 +120,11 @@ contains
          mxphz=0
          cc=0
          do i=1,nm
-            phzi= -dobsi(i)/dobs(i)
+            phzi= -dobsi(i)
            
             if(phzi>0) then
-               if(phzi>mxphz) mxphz=phz
-               if(phzi<mnphz) mnphz=phz
+               if(phzi>mxphz) mxphz=phzi
+               if(phzi<mnphz) mnphz=phzi
                phz=phz+phzi
                cc=cc+1
             end if
